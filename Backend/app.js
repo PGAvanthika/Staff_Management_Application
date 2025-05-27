@@ -2,6 +2,7 @@ const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const authRoute=require("./routes/authRoutes")
 const adminRoute=require('./routes/adminRoute')
 const sql = require('./config/db');
 require('dotenv').config();
@@ -30,6 +31,7 @@ const initDB=async ()=>{
         PASSWORD VARCHAR(30) NOT NULL
         );
         `
+        console.log("connected")
     } catch(err){
         console.log("Error in connecting DB:"+err)
     }
@@ -37,6 +39,11 @@ const initDB=async ()=>{
 initDB()
 
 app.use("/api/admin",adminRoute)
+app.use("/api/auth",authRoute)
+
+app.get("/Adminhome",(req,res)=>{
+    console.log("Welcome to admin homepage!")
+})
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)

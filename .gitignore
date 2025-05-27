@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+# misc2
+client/node_modules/
+client/.cache/
+node_modules/
+.cache/

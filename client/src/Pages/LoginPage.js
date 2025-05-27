@@ -3,16 +3,53 @@ import "./LoginPage.css";
 import loginIllustration from "../Assets/forgot-password.avif";
 import { useNavigate } from "react-router-dom";
 
-
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Assume credentials are valid
-    navigate("/adminhome"); // ✅ redirect to AdminHome
-  };
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+  });
 
   const [showOverlay, setShowOverlay] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setCredentials({
+      ...credentials,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // You can save token in localStorage or state
+        localStorage.setItem("token", data.token);
+        
+        // Based on role, redirect to the correct page
+        if (data.role === "Admin") navigate("/Adminhome");
+        else if (data.role === "team_leader") navigate("/tlhome");
+        else if (data.role === "manager") navigate("/managerhome");
+        else if (data.role === "employee") navigate("/employeehome");
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+  };
 
   return (
     <div className="login-container">
@@ -24,13 +61,26 @@ const LoginPage = () => {
 
       <div className="right-section">
         <h2>Login</h2>
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <div className="input-group">
           <i className="fa fa-user"></i>
-          <input type="text" placeholder="Username" />
+          <input
+            type="email"
+            name="email"
+            placeholder="email"
+            value={credentials.email}
+            onChange={handleChange}
+          />
         </div>
         <div className="input-group">
           <i className="fa fa-lock"></i>
-          <input type="password" placeholder="Password" />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={credentials.password}
+            onChange={handleChange}
+          />
         </div>
         <div className="options">
           <label>
@@ -38,7 +88,9 @@ const LoginPage = () => {
           </label>
           <span onClick={() => setShowOverlay(true)}>Forgot Password?</span>
         </div>
-        <button className="login-btn" onClick={handleLogin}>LOGIN </button>
+        <button className="login-btn" onClick={handleLogin}>
+          LOGIN
+        </button>
       </div>
 
       {showOverlay && (
