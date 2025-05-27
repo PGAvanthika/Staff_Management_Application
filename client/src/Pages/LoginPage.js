@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import "./LoginPage.css";
 import loginIllustration from "../Assets/forgot-password.avif";
+import { useNavigate } from "react-router-dom";
+
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // Assume credentials are valid
+    navigate("/adminhome"); // ✅ redirect to AdminHome
+  };
+
   const [showOverlay, setShowOverlay] = useState(false);
 
   return (
@@ -29,7 +38,7 @@ const LoginPage = () => {
           </label>
           <span onClick={() => setShowOverlay(true)}>Forgot Password?</span>
         </div>
-        <button className="login-btn">LOGIN</button>
+        <button className="login-btn" onClick={handleLogin}>LOGIN </button>
       </div>
 
       {showOverlay && (

@@ -1,0 +1,82 @@
+.user-form {
+    background-color: #d2eaf9;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color:#c3dcfa;
+    border-radius: 8px;
+    padding: 2rem;
+  }
+  
+  /* Each section as a separate flex box */
+  .form-section {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #ccc;
+  }
+  
+  .form-section h2 {
+    text-align: center;
+    margin-bottom: 1.2rem;
+    color: #2e2e2e;
+    font-size: 1.3rem;
+  }
+  
+  .grid-2,
+  .grid-3 {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  input,
+  textarea {
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  
+  textarea {
+    width: 100%;
+    resize: none;
+  }
+  
+  .photo-upload {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .save-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+  
+  .save-btn {
+    padding: 0.8rem 2rem;
+    background: linear-gradient(to right, #97d6a8, #004c2f);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
