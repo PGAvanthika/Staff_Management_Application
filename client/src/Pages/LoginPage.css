@@ -72,30 +72,37 @@
   background: linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(11, 11, 163, 1) 35%, rgba(0, 212, 255, 1) 100%);
 }
 
+
 .input-group {
   display: flex;
   align-items: center;
   margin: 1rem 0;
-  border-bottom: 1px solid #ccc;
-}
-
-.input-group i {
-  margin-right: 10px;
-  color: #888;
+  padding-left: 10px; /* Add left padding to prevent edge clipping */
+  border-bottom: 0.5px solid #ccc; /* Adjusted from 0px */
+  background-color: #8fa0c6; /* Optional: adds contrast for clarity */
+  border-radius: 5px;         /* Optional: smooth rounded edges */
 }
 
 .input-group input {
   border: none;
   outline: none;
   flex-grow: 1;
-  padding: 10px 0;
+  padding: 10px;
+  background: transparent; /* In case a background is needed */
 }
+
+.input-group i {
+  margin-right:15px;
+color: #e2e5ec;
+}
+
+
 
 .options {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  margin: 1rem 0;
+  margin: 2rem 0;
 }
 
 .options span {

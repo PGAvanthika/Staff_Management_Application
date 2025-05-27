@@ -47,13 +47,14 @@
     cursor: pointer;
   }
   
-  
+  /*
   .search-bar {
     display: flex;
     align-items: center;
-    gap: 1rem; /* reduced the gap */
+    gap: 1rem;
     margin-bottom: 1.5rem;
   }
+   */
   
   .search-input-wrapper {
     display: flex;
@@ -79,6 +80,14 @@
     background: transparent;
   }
   
+  .search-bar {
+    position: relative; /* IMPORTANT */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
   .filter-btn,
   .add-user-btn {
     background: #fff;
@@ -100,4 +109,5 @@
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 1.5rem;
   }
+  
   

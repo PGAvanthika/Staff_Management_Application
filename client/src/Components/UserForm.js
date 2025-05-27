@@ -1,8 +1,14 @@
 import React from "react";
 import "./UserForm.css"; // Create a CSS file for custom styles
+import { useNavigate } from "react-router-dom";
+
 
 
 const UserForm = () => {
+  const navigate = useNavigate();
+  const handleSave = () => {
+    navigate("/adminhome"); // ✅ redirect to AdminHome
+  };
   return (
     <div className="user-form">
       <form className="form-container">
@@ -65,7 +71,7 @@ const UserForm = () => {
 
         {/* Save Button */}
         <div className="save-btn-container">
-          <button type="submit" className="save-btn">
+          <button type="submit" className="save-btn" onClick={handleSave}>
             Save
           </button>
         </div>
