@@ -1,28 +1,35 @@
-const cors = require('cors');
 const express = require('express');
+const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const authRoute=require("./routes/authRoutes")
-const adminRoute=require('./routes/adminRoute')
-const sql = require('./config/db');
-const userRoutes = require('./routes/user')
-require('dotenv').config();
+const dotenv = require('dotenv');
+const authRoute = require('./routes/authRoutes');
+const adminRoute = require('./routes/adminRoute');
+const userRoutes = require('./routes/user');
+const sql = require('./config/db'); // Keep DB init here for early errors
 
+dotenv.config();
 
+const app = express();
+const PORT = process.env.PORT
 
-const PORT=process.env.PORT;
-const app=express()
+// Middleware
+app.use(express.json());
 
-app.use(express.json())
-app.use(cors())
-app.use(helmet())
-app.use(morgan("dev"))
+app.use(cors({
+  origin: "http://localhost:3000", 
+  credentials: true               
+}));
 
-app.use('/api/user', userRoutes)
-app.use("/api/admin",adminRoute)
-app.use("/api/auth",authRoute)
+app.use(helmet()); 
+app.use(morgan("dev"));
 
+// Routes
+app.use('/api/auth', authRoute);
+app.use('/api/admin', adminRoute);
+app.use('/api/user', userRoutes);
 
-app.listen(PORT,()=>{
-    console.log(`Server is running on port ${PORT}`)
-})
+// Server Start
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
