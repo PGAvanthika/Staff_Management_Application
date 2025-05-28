@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom";
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Assume credentials are valid
-    navigate("/adminhome"); // ✅ redirect to AdminHome
-  };
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+  });
 
   const [showOverlay, setShowOverlay] = useState(false);
   const [error, setError] = useState("");

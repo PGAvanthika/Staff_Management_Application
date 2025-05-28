@@ -25,6 +25,7 @@ const AdminHome = () => {
     navigate("/UserForm"); // navigate to your desired route
   };
   const handleLogOut = () => {
+    
     navigate("/");
   };
 
