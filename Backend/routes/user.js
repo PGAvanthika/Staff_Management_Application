@@ -1,15 +1,13 @@
 const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
-const sql = require('../config/db'); // Neon query function
+const sql = require('../config/db');
 
 router.post('/save', async (req, res) => {
   const data = req.body;
 
   try {
     await sql`BEGIN`;
-
-    // Hash the default password "password"
     const defaultPassword = 'password';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
@@ -33,12 +31,16 @@ router.post('/save', async (req, res) => {
 
     // Insert into user_contact_info
     await sql`
-      INSERT INTO user_contact_info (
-        id, phone_no, alternate_no, email, address
-      ) VALUES (
-        ${data.id}, ${data.phone}, ${data.alt_phone}, ${data.email}, ${data.address}
-      )
-    `;
+  INSERT INTO user_contact_info (
+    id, phone_no, alternate_no, email, address,
+    emergency_name, emergency_num, emergency_relation, emergency_address
+  ) VALUES (
+    ${data.id}, ${data.phone}, ${data.alt_phone}, ${data.email}, ${data.address},
+    ${data.emergency_contact_name}, ${data.emergency_contact_no},
+    ${data.emergency_relation}, ${data.emergency_address}
+  )
+`;
+
 
     // Insert into user_professional_info
     await sql`
@@ -56,10 +58,32 @@ router.post('/save', async (req, res) => {
 
     res.status(200).json({ message: "User created successfully with default password" });
   } catch (err) {
-    await sql`ROLLBACK`;
-    console.error(err);
-    res.status(500).json({ error: "Failed to save user" });
+    try {
+      await sql`ROLLBACK`;
+    } catch (rollbackError) {
+      console.error('Rollback failed:', rollbackError);
+    }
+
+    console.error('Transaction failed:', err);
+    res.status(500).json({ error: "Failed to save user. Transaction rolled back." });
   }
 });
+
+// In user.js backend route
+router.get('/all', async (req, res) => {
+  try {
+    const users = await sql`
+      SELECT u.id, u.role, p.fname, p.lname
+      FROM users u
+      JOIN user_personal_info p ON u.id = p.id
+    `;
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+
 
 module.exports = router;
