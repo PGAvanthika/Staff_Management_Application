@@ -7,26 +7,56 @@ import axios from "axios";
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("");
+
+  const fetchUsers = async (role = "") => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/user/all", {
+        params: { role: role || undefined }, // include only if role is selected
+      });
+
+      const formatted = response.data.map((user) => ({
+        name: `${user.fname} ${user.lname}`,
+        role: user.role || "No role",
+        imageSrc: user.profilepic || "/images/default-user.jpg",
+      }));
+
+      setUsers(formatted);
+      setFilteredUsers(
+        formatted.filter((u) =>
+          u.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/user/all")
-      .then((res) => {
-        const formattedUsers = res.data.map((user) => ({
-          name: `${user.fname} ${user.lname}`,
-          role: user.role || "No role specified",
-          imageSrc: user.profilepic || "/images/default-user.jpg",
-        }));
-        setUsers(formattedUsers);
-      })
-      .catch((err) => {
-        console.error("Error fetching users:", err);
-      });
+    fetchUsers();
   }, []);
 
-  const handleAddUser = () => {
-    navigate("/UserForm");
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filtered = users.filter((user) =>
+      user.name.toLowerCase().includes(value)
+    );
+    setFilteredUsers(filtered);
   };
+
+  // Handle role dropdown
+  const handleRoleChange = (e) => {
+    const role = e.target.value;
+    setSelectedRole(role);
+    fetchUsers(role); // server call based on role
+  };
+
+  const handleAddUser = () => navigate("/UserForm");
 
   const handleLogOut = async () => {
     try {
@@ -58,14 +88,16 @@ const AdminHome = () => {
       <div className="search-bar">
         <div className="search-input-wrapper">
           <ion-icon name="search-outline" className="search-icon"></ion-icon>
-          <input type="text" placeholder="Search" />
+          <input
+            type="text"
+            placeholder="Search by name"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </div>
 
-        {/* Filter Dropdown (No button) */}
-        <select defaultValue="">
-          <option value="" disabled>
-            Filter by Role
-          </option>
+        <select value={selectedRole} onChange={handleRoleChange}>
+          <option value="">All Roles</option>
           <option value="Developer">Developer</option>
           <option value="Designer">Designer</option>
           <option value="Manager">Manager</option>
@@ -80,10 +112,10 @@ const AdminHome = () => {
       </div>
 
       <div className="user-grid">
-        {users.length === 0 ? (
-          <p>Loading users...</p>
+        {filteredUsers.length === 0 ? (
+          <p>No users found.</p>
         ) : (
-          users.map((user, index) => (
+          filteredUsers.map((user, index) => (
             <UserCard
               key={index}
               name={user.name}
