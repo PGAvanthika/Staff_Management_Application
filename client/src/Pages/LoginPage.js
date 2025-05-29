@@ -89,7 +89,7 @@ const LoginPage = () => {
           </label>
           <span onClick={() => setShowOverlay(true)}>Forgot Password?</span>
         </div>
-        <button className="login-btn" onClick={handleLogin}>
+        <button className="login-btn" onClick={(e) => handleLogin(e)}>
           LOGIN
         </button>
       </div>
