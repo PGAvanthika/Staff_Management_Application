@@ -40,7 +40,7 @@
   }
   
   .grid-3 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 2fr);
   }
   
   input,
@@ -78,5 +78,23 @@
     border: none;
     border-radius: 10px;
     cursor: pointer;
+  }
+  
+  .address-box {
+    grid-column: 1 / -1;   /* span all 3 columns */
+    margin-top: 1rem;      /* push it down slightly */
+    width: 100%;
+  }
+  
+
+  select {
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #706f6f;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
   }
   
