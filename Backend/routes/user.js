@@ -2,8 +2,9 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/db');
+const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
-router.post('/save', async (req, res) => {
+router.post('/save',async (req, res) => {
   const data = req.body;
 
   try {
@@ -70,7 +71,7 @@ router.post('/save', async (req, res) => {
 });
 
 // In user.js backend route
-router.get('/all', async (req, res) => {
+router.get('/all',isLoggedIn,isAdmin,async (req, res) => {
   try {
     const users = await sql`
       SELECT u.id, u.role, p.fname, p.lname

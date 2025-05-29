@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const authRoute = require('./routes/authRoutes');
 const adminRoute = require('./routes/adminRoute');
 const userRoutes = require('./routes/user');
+const cookieParser = require('cookie-parser');
 const sql = require('./config/db'); // Keep DB init here for early errors
 
 dotenv.config();
@@ -15,7 +16,7 @@ const PORT = process.env.PORT
 
 // Middleware
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(cors({
   origin: "http://localhost:3000", 
   credentials: true               
