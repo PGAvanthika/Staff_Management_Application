@@ -22,34 +22,35 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
-    try {
-      const res = await fetch("http://localhost:3001/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
+  try {
+    const res = await fetch("http://localhost:3001/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // 👈 This allows cookies to be stored
+      body: JSON.stringify(credentials),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        // You can save token in localStorage or state
-        localStorage.setItem("token", data.token);
-        
-        // Based on role, redirect to the correct page
-        if (data.role === "Admin") navigate("/Adminhome");
-        else if (data.role === "team_leader") navigate("/tlhome");
-        else if (data.role === "manager") navigate("/managerhome");
-        else if (data.role === "employee") navigate("/employeehome");
-      } else {
-        setError(data.message || "Login failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Server error");
+    if (res.ok) {
+      // No need to save the token manually if you're using cookies
+      // localStorage.setItem("token", data.token);
+
+      if (data.role === "Admin") navigate("/Adminhome");
+      else if (data.role === "team_leader") navigate("/tlhome");
+      else if (data.role === "manager") navigate("/managerhome");
+      else if (data.role === "employee") navigate("/employeehome");
+    } else {
+      setError(data.message || "Login failed");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("Server error");
+  }
+};
+
 
   return (
     <div className="login-container">

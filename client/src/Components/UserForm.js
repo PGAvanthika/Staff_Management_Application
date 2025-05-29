@@ -1,79 +1,141 @@
-import React from "react";
-import "./UserForm.css"; // Create a CSS file for custom styles
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-
+import axios from "axios";
+import "./UserForm.css";
 
 const UserForm = () => {
   const navigate = useNavigate();
-  const handleSave = () => {
-    navigate("/adminhome"); // ✅ redirect to AdminHome
+  const [form, setForm] = useState({
+    id: "",
+    fname: "",
+    lname: "",
+    father_name: "",
+    mother_name: "",
+    dob: "",
+    gender: "",
+    blood_group: "",
+    nationality: "",
+    aadhar: "",
+    pan: "",
+    phone: "",
+    alt_phone: "",
+    email: "",
+    address: "",
+    emergency_contact_name: "",
+    emergency_contact_no: "",
+    emergency_relation: "",
+    emergency_address: "",
+    school: "",
+    school_year: "",
+    college: "",
+    college_year: "",
+    dept: "",
+    role: "",
+    doj: "",
+    experience: ""
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const isValid = () => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(form.phone)) {
+      alert("Invalid phone number");
+      return false;
+    }
+    if (form.alt_phone && !phoneRegex.test(form.alt_phone)) {
+      alert("Invalid alternate phone number");
+      return false;
+    }
+    if (!form.email.includes("@")) {
+      alert("Invalid email address");
+      return false;
+    }
+    if (!form.id || !form.fname || !form.lname || !form.email || !form.role) {
+      alert("Required fields cannot be empty");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!isValid()) return;
+
+    try {
+      const res = await axios.post("http://localhost:3001/api/user/save", form);
+      if (res.status === 200) {
+        alert("User saved successfully!");
+        navigate("/Adminhome");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Failed to save user");
+    }
+  };
+
   return (
     <div className="user-form">
-      <form className="form-container">
-        {/* Personal Information */}
+      <form className="form-container" onSubmit={handleSave}>
+        {/* Personal Info */}
         <section className="form-section">
           <h2>Personal Information</h2>
-          <div className="photo-upload">
-            <input type="file" accept="image/*" />
-          </div>
           <div className="grid-2">
-            <input type="text" placeholder="First name" />
-            <input type="text" placeholder="Last name" />
-            <input type="text" placeholder="Father’s name" />
-            <input type="text" placeholder="Mother’s name" />
-            <input type="date" placeholder="DOB" />
-            <input type="text" placeholder="Gender" />
-            <input type="text" placeholder="Blood group" />
-            <input type="text" placeholder="Nationality" />
-            <input type="text" placeholder="Aadhar number" />
-            <input type="text" placeholder="PAN number" />
+            <input name="id" placeholder="User ID (Required)" onChange={handleChange} required />
+            <input name="fname" placeholder="First name" onChange={handleChange} required />
+            <input name="lname" placeholder="Last name" onChange={handleChange} required />
+            <input name="father_name" placeholder="Father’s name" onChange={handleChange} />
+            <input name="mother_name" placeholder="Mother’s name" onChange={handleChange} />
+            <input name="dob" type="date" onChange={handleChange} />
+            <input name="gender" placeholder="Gender (M/F/O)" onChange={handleChange} />
+            <input name="blood_group" placeholder="Blood group (e.g., A+)" onChange={handleChange} />
+            <input name="nationality" placeholder="Nationality" onChange={handleChange} />
+            <input name="aadhar" placeholder="Aadhar number" onChange={handleChange} />
+            <input name="pan" placeholder="PAN number" onChange={handleChange} />
           </div>
         </section>
 
-        {/* Contact Information */}
+        {/* Contact */}
         <section className="form-section">
           <h2>Contact Information</h2>
           <div className="grid-3">
-            <input type="text" placeholder="Phone number" />
-            <input type="text" placeholder="Alternate phone number" />
-            <input type="email" placeholder="Email" />
+            <input name="phone" placeholder="Phone number (Required)" onChange={handleChange} required />
+            <input name="alt_phone" placeholder="Alternate phone" onChange={handleChange} />
+            <input name="email" type="email" placeholder="Email (Required)" onChange={handleChange} required />
           </div>
-          <textarea placeholder="Address" rows="3"></textarea>
+          <textarea name="address" placeholder="Address" rows="3" onChange={handleChange}></textarea>
         </section>
 
-        {/* Emergency Information */}
+        {/* Emergency */}
         <section className="form-section">
           <h2>Emergency Information</h2>
           <div className="grid-3">
-            <input type="text" placeholder="Contact name" />
-            <input type="text" placeholder="Contact number" />
-            <input type="text" placeholder="Relation" />
+            <input name="emergency_contact_name" placeholder="Contact name" onChange={handleChange} />
+            <input name="emergency_contact_no" placeholder="Contact number" onChange={handleChange} />
+            <input name="emergency_relation" placeholder="Relation" onChange={handleChange} />
           </div>
-          <textarea placeholder="Address" rows="3"></textarea>
+          <textarea name="emergency_address" placeholder="Address" rows="3" onChange={handleChange}></textarea>
         </section>
 
-        {/* Professional Information */}
+        {/* Professional */}
         <section className="form-section">
           <h2>Professional Information</h2>
           <div className="grid-2">
-            <input type="text" placeholder="School" />
-            <input type="text" placeholder="Completion year" />
-            <input type="text" placeholder="College" />
-            <input type="text" placeholder="Completion year" />
-            <input type="text" placeholder="Department" />
-            <input type="text" placeholder="Role" />
-            <input type="date" placeholder="Date of joining" />
-            <input type="text" placeholder="Experience" />
+            <input name="school" placeholder="School" onChange={handleChange} />
+            <input name="school_year" placeholder="Year of Completion" onChange={handleChange} />
+            <input name="college" placeholder="College" onChange={handleChange} />
+            <input name="college_year" placeholder="Year of Completion" onChange={handleChange} />
+            <input name="dept" placeholder="Department" onChange={handleChange} />
+            <input name="role" placeholder="Role (Required)" onChange={handleChange} required />
+            <input name="doj" type="date" onChange={handleChange} />
+            <input name="experience" placeholder="Experience (leave blank if none)" onChange={handleChange} />
           </div>
         </section>
 
-        {/* Save Button */}
         <div className="save-btn-container">
-          <button type="submit" className="save-btn" onClick={handleSave}>
-            Save
-          </button>
+          <button type="submit" className="save-btn">Save</button>
         </div>
       </form>
     </div>

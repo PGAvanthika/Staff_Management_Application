@@ -1,6 +1,5 @@
 import React from "react";
-import "./UserCard.css"; // Separate CSS for styling the card
-//import { Pencil } from "lucide-react"; // Optional: Use any edit icon library
+import "./UserCard.css";
 
 const UserCard = ({ name, role, imageSrc }) => {
   return (
@@ -11,7 +10,7 @@ const UserCard = ({ name, role, imageSrc }) => {
         <p>{role}</p>
       </div>
       <button className="edit-btn">
-      <ion-icon name="pencil-outline"></ion-icon>
+        <ion-icon name="pencil-outline"></ion-icon>
       </button>
     </div>
   );

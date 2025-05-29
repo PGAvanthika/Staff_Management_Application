@@ -1,33 +1,46 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./AdminHome.css";
 import UserCard from "../Components/UserCard";
 import { useNavigate } from "react-router-dom";
-
-const dummyUsers = [
-  {
-    name: "Yuthish",
-    role: "cybersecurity enthusiast",
-    imageSrc: "/images/user1.jpg",
-  },
-  {
-    name: "Avanthika PG",
-    role: "DevOps enthusiast",
-    imageSrc: "/images/user2.jpg",
-  },
-  { name: "Shreya Sri", role: "Team Lead", imageSrc: "/images/user3.jpg" },
-  // Add more dummy users as needed
-];
+import axios from "axios";
 
 const AdminHome = () => {
   const navigate = useNavigate();
+  const [users, setUsers] = useState([]); // store users fetched from backend
+
+  useEffect(() => {
+    // Fetch users from backend API
+    axios.get("http://localhost:3001/api/user/all")  // Adjust URL if needed
+      .then((res) => {
+        // Assuming your backend sends array of users with fields: fname, lname, role, and profile pic url if any
+        const formattedUsers = res.data.map(user => ({
+          name: `${user.fname} ${user.lname}`,
+          role: user.role || "No role specified",
+          imageSrc: user.profilepic || "/images/default-user.jpg" // fallback image
+        }));
+        setUsers(formattedUsers);
+      })
+      .catch((err) => {
+        console.error("Error fetching users:", err);
+      });
+  }, []);
 
   const handleAddUser = () => {
     navigate("/UserForm"); // navigate to your desired route
   };
-  const handleLogOut = () => {
-    
-    navigate("/");
-  };
+
+  const handleLogOut = async () => {
+  try {
+    await fetch("http://localhost:3001/api/auth/logout", {
+      method: "POST",
+      credentials: "include", // ensure cookies are sent
+    });
+    navigate("/"); // redirect after logout
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+
 
   return (
     <div className="admin-home">
@@ -46,26 +59,29 @@ const AdminHome = () => {
 
       <div className="search-bar">
         <div className="search-input-wrapper">
-          <ion-icon name="search-outline" class="search-icon"></ion-icon>
+          <ion-icon name="search-outline" className="search-icon"></ion-icon>
           <input type="text" placeholder="Search" />
         </div>
         <button className="filter-btn">Filter</button>
         <button className="add-user-btn" onClick={handleAddUser}>
-          <ion-icon name="add-outline" class="plus-icon"></ion-icon>
+          <ion-icon name="add-outline" className="plus-icon"></ion-icon>
           Add new user
         </button>
       </div>
-      
 
       <div className="user-grid">
-        {dummyUsers.map((user, index) => (
-          <UserCard
-            key={index}
-            name={user.name}
-            role={user.role}
-            imageSrc={user.imageSrc}
-          />
-        ))}
+        {users.length === 0 ? (
+          <p>Loading users...</p>
+        ) : (
+          users.map((user, index) => (
+            <UserCard
+              key={index}
+              name={user.name}
+              role={user.role}
+              imageSrc={user.imageSrc}
+            />
+          ))
+        )}
       </div>
     </div>
   );
