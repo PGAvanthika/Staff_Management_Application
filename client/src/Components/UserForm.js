@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./UserForm.css";
 
+
 const UserForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -78,22 +79,86 @@ const UserForm = () => {
 
   return (
     <div className="user-form">
+      <ion-icon
+        name="chevron-back-outline"
+        onClick={() => navigate(-1)}
+        style={{ cursor: "pointer", fontSize: "24px" }}
+      >
+        {" "}
+      </ion-icon>
+
       <form className="form-container" onSubmit={handleSave}>
         {/* Personal Info */}
         <section className="form-section">
           <h2>Personal Information</h2>
           <div className="grid-2">
-            <input name="id" placeholder="User ID (Required)" onChange={handleChange} required />
-            <input name="fname" placeholder="First name" onChange={handleChange} required />
-            <input name="lname" placeholder="Last name" onChange={handleChange} required />
-            <input name="father_name" placeholder="Father’s name" onChange={handleChange} />
-            <input name="mother_name" placeholder="Mother’s name" onChange={handleChange} />
-            <input name="dob" type="date" onChange={handleChange} />
-            <input name="gender" placeholder="Gender (M/F/O)" onChange={handleChange} />
-            <input name="blood_group" placeholder="Blood group (e.g., A+)" onChange={handleChange} />
-            <input name="nationality" placeholder="Nationality" onChange={handleChange} />
-            <input name="aadhar" placeholder="Aadhar number" onChange={handleChange} />
-            <input name="pan" placeholder="PAN number" onChange={handleChange} />
+            <input
+              name="id"
+              placeholder="User ID (Required)"
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="fname"
+              placeholder="First name"
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="lname"
+              placeholder="Last name"
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="father_name"
+              placeholder="Father’s name"
+              onChange={handleChange}
+            />
+            <input
+              name="mother_name"
+              placeholder="Mother’s name"
+              onChange={handleChange}
+            />
+            <input
+              name="dob"
+              type="text"
+              placeholder="DOB"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!e.target.value) e.target.type = "text";
+              }}
+              onChange={handleChange}
+            />
+
+            <select name="gender" onChange={handleChange} defaultValue="">
+              <option value="" disabled>
+                Gender
+              </option>
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+              <option value="O">Other (O)</option>
+            </select>
+            <input
+              name="blood_group"
+              placeholder="Blood group (e.g., A+)"
+              onChange={handleChange}
+            />
+            <input
+              name="nationality"
+              placeholder="Nationality"
+              onChange={handleChange}
+            />
+            <input
+              name="aadhar"
+              placeholder="Aadhar number"
+              onChange={handleChange}
+            />
+            <input
+              name="pan"
+              placeholder="PAN number"
+              onChange={handleChange}
+            />
           </div>
         </section>
 
@@ -101,22 +166,61 @@ const UserForm = () => {
         <section className="form-section">
           <h2>Contact Information</h2>
           <div className="grid-3">
-            <input name="phone" placeholder="Phone number (Required)" onChange={handleChange} required />
-            <input name="alt_phone" placeholder="Alternate phone" onChange={handleChange} />
-            <input name="email" type="email" placeholder="Email (Required)" onChange={handleChange} required />
+            <input
+              name="phone"
+              placeholder="Phone number (Required)"
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="alt_phone"
+              placeholder="Alternate phone"
+              onChange={handleChange}
+            />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email (Required)"
+              onChange={handleChange}
+              required
+            />
           </div>
-          <textarea name="address" placeholder="Address" rows="3" onChange={handleChange}></textarea>
+          <textarea
+            name="address"
+            placeholder="Address"
+            rows="3"
+            onChange={handleChange}
+            className="address-box"
+          ></textarea>
         </section>
 
         {/* Emergency */}
         <section className="form-section">
           <h2>Emergency Information</h2>
           <div className="grid-3">
-            <input name="emergency_contact_name" placeholder="Contact name" onChange={handleChange} />
-            <input name="emergency_contact_no" placeholder="Contact number" onChange={handleChange} />
-            <input name="emergency_relation" placeholder="Relation" onChange={handleChange} />
+            <input
+              name="emergency_contact_name"
+              placeholder="Contact name"
+              onChange={handleChange}
+            />
+            <input
+              name="emergency_contact_no"
+              placeholder="Contact number"
+              onChange={handleChange}
+            />
+            <input
+              name="emergency_relation"
+              placeholder="Relation"
+              onChange={handleChange}
+            />
           </div>
-          <textarea name="emergency_address" placeholder="Address" rows="3" onChange={handleChange}></textarea>
+          <textarea
+            name="emergency_address"
+            placeholder="Address"
+            rows="3"
+            onChange={handleChange}
+            className="address-box"
+          ></textarea>
         </section>
 
         {/* Professional */}
@@ -124,18 +228,50 @@ const UserForm = () => {
           <h2>Professional Information</h2>
           <div className="grid-2">
             <input name="school" placeholder="School" onChange={handleChange} />
-            <input name="school_year" placeholder="Year of Completion" onChange={handleChange} />
-            <input name="college" placeholder="College" onChange={handleChange} />
-            <input name="college_year" placeholder="Year of Completion" onChange={handleChange} />
-            <input name="dept" placeholder="Department" onChange={handleChange} />
-            <input name="role" placeholder="Role (Required)" onChange={handleChange} required />
-            <input name="doj" type="date" onChange={handleChange} />
-            <input name="experience" placeholder="Experience (leave blank if none)" onChange={handleChange} />
+            <input
+              name="school_year"
+              placeholder="Year of Completion"
+              onChange={handleChange}
+            />
+            <input
+              name="college"
+              placeholder="College"
+              onChange={handleChange}
+            />
+            <input
+              name="college_year"
+              placeholder="Year of Completion"
+              onChange={handleChange}
+            />
+            <input
+              name="dept"
+              placeholder="Department"
+              onChange={handleChange}
+            />
+            <input
+              name="role"
+              placeholder="Role (Required)"
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              name="doj"
+              type="text"
+              placeholder="Date Of Joining"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!e.target.value) e.target.type = "text";
+              }}
+              onChange={handleChange}
+            />
           </div>
         </section>
 
         <div className="save-btn-container">
-          <button type="submit" className="save-btn">Save</button>
+          <button type="submit" className="save-btn">
+            Save
+          </button>
         </div>
       </form>
     </div>

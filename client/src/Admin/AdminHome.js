@@ -6,17 +6,16 @@ import axios from "axios";
 
 const AdminHome = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]); // store users fetched from backend
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Fetch users from backend API
-    axios.get("http://localhost:3001/api/user/all")  // Adjust URL if needed
+    axios
+      .get("http://localhost:3001/api/user/all")
       .then((res) => {
-        // Assuming your backend sends array of users with fields: fname, lname, role, and profile pic url if any
-        const formattedUsers = res.data.map(user => ({
+        const formattedUsers = res.data.map((user) => ({
           name: `${user.fname} ${user.lname}`,
           role: user.role || "No role specified",
-          imageSrc: user.profilepic || "/images/default-user.jpg" // fallback image
+          imageSrc: user.profilepic || "/images/default-user.jpg",
         }));
         setUsers(formattedUsers);
       })
@@ -26,21 +25,20 @@ const AdminHome = () => {
   }, []);
 
   const handleAddUser = () => {
-    navigate("/UserForm"); // navigate to your desired route
+    navigate("/UserForm");
   };
 
   const handleLogOut = async () => {
-  try {
-    await fetch("http://localhost:3001/api/auth/logout", {
-      method: "POST",
-      credentials: "include", // ensure cookies are sent
-    });
-    navigate("/"); // redirect after logout
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-};
-
+    try {
+      await fetch("http://localhost:3001/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="admin-home">
@@ -62,7 +60,19 @@ const AdminHome = () => {
           <ion-icon name="search-outline" className="search-icon"></ion-icon>
           <input type="text" placeholder="Search" />
         </div>
-        <button className="filter-btn">Filter</button>
+
+        {/* Filter Dropdown (No button) */}
+        <select defaultValue="">
+          <option value="" disabled>
+            Filter by Role
+          </option>
+          <option value="Developer">Developer</option>
+          <option value="Designer">Designer</option>
+          <option value="Manager">Manager</option>
+          <option value="Tester">Tester</option>
+          <option value="Intern">Intern</option>
+        </select>
+
         <button className="add-user-btn" onClick={handleAddUser}>
           <ion-icon name="add-outline" className="plus-icon"></ion-icon>
           Add new user
