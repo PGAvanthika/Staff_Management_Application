@@ -98,6 +98,16 @@ const UserForm = () => {
               onChange={handleChange}
               required
             />
+
+            <select name="gender" onChange={handleChange} defaultValue="">
+              <option value="" disabled>
+                Gender
+              </option>
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+              <option value="O">Other (O)</option>
+            </select>
+
             <input
               name="fname"
               placeholder="First name"
@@ -120,30 +130,13 @@ const UserForm = () => {
               placeholder="Mother’s name"
               onChange={handleChange}
             />
-            <input
-              name="dob"
-              type="text"
-              placeholder="DOB"
-              onFocus={(e) => (e.target.type = "date")}
-              onBlur={(e) => {
-                if (!e.target.value) e.target.type = "text";
-              }}
-              onChange={handleChange}
-            />
 
-            <select name="gender" onChange={handleChange} defaultValue="">
-              <option value="" disabled>
-                Gender
-              </option>
-              <option value="M">Male (M)</option>
-              <option value="F">Female (F)</option>
-              <option value="O">Other (O)</option>
-            </select>
             <input
               name="blood_group"
               placeholder="Blood group (e.g., A+)"
               onChange={handleChange}
             />
+
             <input
               name="nationality"
               placeholder="Nationality"
@@ -159,6 +152,17 @@ const UserForm = () => {
               placeholder="PAN number"
               onChange={handleChange}
             />
+
+            <div className="input-wrapper">
+              <input
+                name="dob"
+                type="date"
+                onChange={handleChange}
+                placeholder="YYYY-MM-DD"
+                pattern="\d{4}-\d{2}-\d{2}"
+              />
+              <label htmlFor="dob">Date Of Birth</label>
+            </div>
           </div>
         </section>
 
@@ -248,23 +252,29 @@ const UserForm = () => {
               placeholder="Department"
               onChange={handleChange}
             />
-            <input
-              name="role"
-              placeholder="Role (Required)"
-              onChange={handleChange}
-              required
-            />
 
-            <input
-              name="doj"
-              type="text"
-              placeholder="Date Of Joining"
-              onFocus={(e) => (e.target.type = "date")}
-              onBlur={(e) => {
-                if (!e.target.value) e.target.type = "text";
-              }}
-              onChange={handleChange}
-            />
+            <select name="Role" onChange={handleChange} defaultValue="">
+              <option value="" disabled>
+                Role
+              </option>
+              <option value="A">Admin </option>
+              <option value="M">Manager </option>
+              <option value="TL">Team Leader </option>
+              <option value="FD">Frontend Developer </option>
+              <option value="FD">Backend Developer </option>
+              <option value="I">Intern </option>
+            </select>
+
+            <div className="input-wrapper">
+              <input
+                name="dob"
+                type="date"
+                onChange={handleChange}
+                placeholder="YYYY-MM-DD"
+                pattern="\d{4}-\d{2}-\d{2}"
+              />
+              <label htmlFor="dob">Date Of joining</label>
+            </div>
           </div>
         </section>
 
