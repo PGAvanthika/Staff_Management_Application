@@ -2,9 +2,9 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/db');
-const { isLoggedIn,isAdmin } = require('../middlewares/authMiddleware');
+const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
-router.post('/save',isLoggedIn,isAdmin,async (req, res) => {
+router.post('/save', async (req, res) => {
   const data = req.body;
 
   try {
@@ -32,16 +32,15 @@ router.post('/save',isLoggedIn,isAdmin,async (req, res) => {
 
     // Insert into user_contact_info
     await sql`
-  INSERT INTO user_contact_info (
-    id, phone_no, alternate_no, email, address,
-    emergency_name, emergency_num, emergency_relation, emergency_address
-  ) VALUES (
-    ${data.id}, ${data.phone}, ${data.alt_phone}, ${data.email}, ${data.address},
-    ${data.emergency_contact_name}, ${data.emergency_contact_no},
-    ${data.emergency_relation}, ${data.emergency_address}
-  )
-`;
-
+      INSERT INTO user_contact_info (
+        id, phone_no, alternate_no, email, address,
+        emergency_name, emergency_num, emergency_relation, emergency_address
+      ) VALUES (
+        ${data.id}, ${data.phone}, ${data.alt_phone}, ${data.email}, ${data.address},
+        ${data.emergency_contact_name}, ${data.emergency_contact_no},
+        ${data.emergency_relation}, ${data.emergency_address}
+      )
+    `;
 
     // Insert into user_professional_info
     await sql`
@@ -70,21 +69,35 @@ router.post('/save',isLoggedIn,isAdmin,async (req, res) => {
   }
 });
 
-// In user.js backend route
-router.get('/all',isLoggedIn,isAdmin,async (req, res) => {
+// Get all users or filter by role if query parameter is provided
+router.get('/all', async (req, res) => {
   try {
-    const users = await sql`
-      SELECT u.id, u.role, p.fname, p.lname
-      FROM users u
-      JOIN user_personal_info p ON u.id = p.id
-    `;
+    const { role } = req.query; // get role filter from query string
+
+    let users;
+
+    if (role) {
+      // Fetch users matching the role
+      users = await sql`
+        SELECT u.id, u.role, p.fname, p.lname
+        FROM users u
+        JOIN user_personal_info p ON u.id = p.id
+        WHERE u.role = ${role}
+      `;
+    } else {
+      // Fetch all users
+      users = await sql`
+        SELECT u.id, u.role, p.fname, p.lname
+        FROM users u
+        JOIN user_personal_info p ON u.id = p.id
+      `;
+    }
+
     res.json(users);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
-
-
 
 module.exports = router;

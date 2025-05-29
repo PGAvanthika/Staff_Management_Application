@@ -7,22 +7,30 @@ import axios from "axios";
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [role, setRole] = useState(""); // 1. Add role state
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/user/all")
-      .then((res) => {
+    const fetchUsers = async () => {
+      try {
+        // 3. Add role as query param only if selected
+        const url = role
+          ? `http://localhost:3001/api/user/all?role=${role}`
+          : "http://localhost:3001/api/user/all";
+
+        const res = await axios.get(url);
         const formattedUsers = res.data.map((user) => ({
           name: `${user.fname} ${user.lname}`,
           role: user.role || "No role specified",
           imageSrc: user.profilepic || "/images/default-user.jpg",
         }));
         setUsers(formattedUsers);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching users:", err);
-      });
-  }, []);
+      }
+    };
+
+    fetchUsers();
+  }, [role]); // 4. Dependency on role to refetch when role changes
 
   const handleAddUser = () => {
     navigate("/UserForm");
@@ -61,11 +69,9 @@ const AdminHome = () => {
           <input type="text" placeholder="Search" />
         </div>
 
-        {/* Filter Dropdown (No button) */}
-        <select defaultValue="">
-          <option value="" disabled>
-            Filter by Role
-          </option>
+        {/* 2. Controlled dropdown */}
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="">Filter by Role</option>
           <option value="Developer">Developer</option>
           <option value="Designer">Designer</option>
           <option value="Manager">Manager</option>
