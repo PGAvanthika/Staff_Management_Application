@@ -2,9 +2,9 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
 const sql = require('../config/db');
-const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
+const { isLoggedIn,isAdmin } = require('../middlewares/authMiddleware');
 
-router.post('/save',async (req, res) => {
+router.post('/save',isLoggedIn,isAdmin,async (req, res) => {
   const data = req.body;
 
   try {

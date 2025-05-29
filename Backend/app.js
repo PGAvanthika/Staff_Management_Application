@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const authRoute = require('./routes/authRoutes');
-const adminRoute = require('./routes/adminRoute');
 const userRoutes = require('./routes/user');
 const cookieParser = require('cookie-parser');
 const sql = require('./config/db'); // Keep DB init here for early errors
@@ -27,7 +26,6 @@ app.use(morgan("dev"));
 
 // Routes
 app.use('/api/auth', authRoute);
-app.use('/api/admin', adminRoute);
 app.use('/api/user', userRoutes);
 
 // Server Start
