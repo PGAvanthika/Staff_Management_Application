@@ -8,7 +8,7 @@ const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleClick = () => {
-    navigate("/UserForm");
+    navigate(`/UserForm/${id}`); // Pass the user ID when navigating
   };
 
   const handleDeleteClick = () => {
