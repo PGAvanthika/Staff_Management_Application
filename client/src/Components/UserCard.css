@@ -84,45 +84,19 @@
   color: #3498db;
 }
 
-.overlay, .user-form-overlay {
+.overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
-}
-
-.user-form-overlay {
-  z-index: 1001; /* Higher than other overlays */
-  overflow-y: auto; /* Allow scrolling if the form is tall */
-  padding: 20px;
-}
-
-.close-overlay-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  z-index: 1002; /* Above the overlay */
-}
-
-.close-overlay-btn:hover {
-  background: #d32f2f;
 }
 
 .modal-box {
@@ -160,3 +134,4 @@
   background-color: #bdc3c7;
   color: #333;
 }
+
