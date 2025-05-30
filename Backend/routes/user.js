@@ -5,7 +5,7 @@ const sql = require('../config/db');
 const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
 // Save user
-router.post('/save', isLoggedIn,isAdmin,async (req, res) => {
+router.post('/save', isLoggedIn, isAdmin, async (req, res) => {
   const data = req.body;
 
   try {
@@ -62,7 +62,7 @@ router.post('/save', isLoggedIn,isAdmin,async (req, res) => {
 });
 
 // Get all users
-router.get('/all',isLoggedIn ,isAdmin,async (req, res) => {
+router.get('/all', isLoggedIn, isAdmin, async (req, res) => {
   try {
     const { role } = req.query;
     let users;
@@ -90,10 +90,13 @@ router.get('/all',isLoggedIn ,isAdmin,async (req, res) => {
 });
 
 // Delete user by ID
-router.delete('/:id', isLoggedIn,isAdmin,async (req, res) => {
+router.delete('/:id', isLoggedIn, isAdmin, async (req, res) => {
   const userId = req.params.id;
 
   try {
+    console.log("Authenticated user:", req.user); // Log the authenticated user
+    console.log("Deleting user ID:", userId);
+
     await sql`BEGIN`;
     await sql`DELETE FROM user_professional_info WHERE id = ${userId}`;
     await sql`DELETE FROM user_contact_info WHERE id = ${userId}`;
