@@ -4,40 +4,42 @@ import axios from "axios";
 import "./UserForm.css";
 
 
-const UserForm = () => {
+const UserForm = ({ readOnly = false, userData = {} }) => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    id: "",
-    fname: "",
-    lname: "",
-    father_name: "",
-    mother_name: "",
-    dob: "",
-    gender: "",
-    blood_group: "",
-    nationality: "",
-    aadhar: "",
-    pan: "",
-    phone: "",
-    alt_phone: "",
-    email: "",
-    address: "",
-    emergency_contact_name: "",
-    emergency_contact_no: "",
-    emergency_relation: "",
-    emergency_address: "",
-    school: "",
-    school_year: "",
-    college: "",
-    college_year: "",
-    dept: "",
-    role: "",
-    doj: "",
-    experience: ""
+    id: userData.id || "",
+    fname: userData.fname || "",
+    lname: userData.lname || "",
+    father_name: userData.father_name || "",
+    mother_name: userData.mother_name || "",
+    dob: userData.dob || "",
+    gender: userData.gender || "",
+    blood_group: userData.blood_group || "",
+    nationality: userData.nationality || "",
+    aadhar: userData.aadhar || "",
+    pan: userData.pan || "",
+    phone: userData.phone || "",
+    alt_phone: userData.alt_phone || "",
+    email: userData.email || "",
+    address: userData.address || "",
+    emergency_contact_name: userData.emergency_contact_name || "",
+    emergency_contact_no: userData.emergency_contact_no || "",
+    emergency_relation: userData.emergency_relation || "",
+    emergency_address: userData.emergency_address || "",
+    school: userData.school || "",
+    school_year: userData.school_year || "",
+    college: userData.college || "",
+    college_year: userData.college_year || "",
+    dept: userData.dept || "",
+    role: userData.role || "",
+    doj: userData.doj || "",
+    experience: userData.experience || ""
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    if (!readOnly) {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
   };
 
   const isValid = () => {
@@ -78,6 +80,9 @@ const UserForm = () => {
   };
 
   return (
+<div className={`user-form ${readOnly ? 'read-only' : 'edit-mode'}`}>
+
+
     <div className="user-form">
       <ion-icon
         name="chevron-back-outline"
@@ -88,6 +93,11 @@ const UserForm = () => {
       </ion-icon>
 
       <form className="form-container" onSubmit={handleSave}>
+        {readOnly && (
+          <div className="read-only-banner">
+            <p>View Only Mode</p>
+          </div>
+        )}
         {/* Personal Info */}
         <section className="form-section">
           <h2>Personal Information</h2>
@@ -98,6 +108,8 @@ const UserForm = () => {
                 type="file"
                 accept="image/*"
                 onChange={handleChange}
+              readOnly={readOnly}
+              value={form.id}
                 name="photo"
               />
             </div>
@@ -108,7 +120,7 @@ const UserForm = () => {
               required
             />
 
-            <select name="gender" onChange={handleChange} defaultValue="">
+            <select name="gender" onChange={handleChange} value={form.gender} disabled={readOnly}>
               <option value="" disabled>
                 Gender
               </option>
@@ -121,45 +133,61 @@ const UserForm = () => {
               name="fname"
               placeholder="First name"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.fname}
               required
             />
             <input
               name="lname"
               placeholder="Last name"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.lname}
               required
             />
             <input
               name="father_name"
               placeholder="Father’s name"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.father_name}
             />
             <input
               name="mother_name"
               placeholder="Mother’s name"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.mother_name}
             />
 
             <input
               name="blood_group"
               placeholder="Blood group (e.g., A+)"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.blood_group}
             />
 
             <input
               name="nationality"
               placeholder="Nationality"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.nationality}
             />
             <input
               name="aadhar"
               placeholder="Aadhar number"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.aadhar}
             />
             <input
               name="pan"
               placeholder="PAN number"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.pan}
             />
 
             <div className="input-wrapper">
@@ -167,6 +195,8 @@ const UserForm = () => {
                 name="dob"
                 type="date"
                 onChange={handleChange}
+                readOnly={readOnly}
+                value={form.dob}
                 placeholder="YYYY-MM-DD"
                 pattern="\d{4}-\d{2}-\d{2}"
               />
@@ -184,18 +214,24 @@ const UserForm = () => {
               name="phone"
               placeholder="Phone number (Required)"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.phone}
               required
             />
             <input
               name="alt_phone"
               placeholder="Alternate phone"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.alt_phone}
             />
             <input
               name="email"
               type="email"
               placeholder="Email (Required)"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.email}
               required
             />
           </div>
@@ -204,6 +240,8 @@ const UserForm = () => {
             placeholder="Address"
             rows="3"
             onChange={handleChange}
+            readOnly={readOnly}
+            value={form.address}
             className="address-box"
           ></textarea>
         </section>
@@ -216,16 +254,22 @@ const UserForm = () => {
               name="emergency_contact_name"
               placeholder="Contact name"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.emergency_contact_name}
             />
             <input
               name="emergency_contact_no"
               placeholder="Contact number"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.emergency_contact_no}
             />
             <input
               name="emergency_relation"
               placeholder="Relation"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.emergency_relation}
             />
           </div>
           <textarea
@@ -233,6 +277,8 @@ const UserForm = () => {
             placeholder="Address"
             rows="3"
             onChange={handleChange}
+            readOnly={readOnly}
+            value={form.emergency_address}
             className="address-box"
           ></textarea>
         </section>
@@ -241,29 +287,37 @@ const UserForm = () => {
         <section className="form-section">
           <h2>Professional Information</h2>
           <div className="grid-2">
-            <input name="school" placeholder="School" onChange={handleChange} />
+            <input name="school" placeholder="School" onChange={handleChange} readOnly={readOnly} value={form.school} />
             <input
               name="school_year"
               placeholder="Year of Completion"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.school_year}
             />
             <input
               name="college"
               placeholder="College"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.college}
             />
             <input
               name="college_year"
               placeholder="Year of Completion"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.college_year}
             />
             <input
               name="dept"
               placeholder="Department"
               onChange={handleChange}
+              readOnly={readOnly}
+              value={form.dept}
             />
 
-            <select name="Role" onChange={handleChange} defaultValue="">
+            <select name="role" onChange={handleChange} value={form.role} disabled={readOnly}>
               <option value="" disabled>
                 Role
               </option>
@@ -277,23 +331,28 @@ const UserForm = () => {
 
             <div className="input-wrapper">
               <input
-                name="dob"
+                name="doj"
                 type="date"
                 onChange={handleChange}
+                readOnly={readOnly}
+                value={form.doj}
                 placeholder="YYYY-MM-DD"
                 pattern="\d{4}-\d{2}-\d{2}"
               />
-              <label htmlFor="dob">Date Of joining</label>
+              <label htmlFor="doj">Date Of joining</label>
             </div>
           </div>
         </section>
 
-        <div className="save-btn-container">
-          <button type="submit" className="save-btn">
-            Save
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="save-btn-container">
+            <button type="submit" className="save-btn">
+              Save
+            </button>
+          </div>
+        )}
       </form>
+    </div>
     </div>
   );
 };

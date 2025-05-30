@@ -1,153 +1,126 @@
+:root {
+  --input-bg: #ddd;
+  --border-color: #ccc;
+  --section-heading: #2e2e2e;
+  --primary-bg: #d2eaf9;
+  --container-bg: #c3dcfa;
+  --label-color: #7d7c7c;
+  --readonly-bg: #e4e4e4;
+  --edit-bg: #fff;
+  --highlight-border: #1056c7;
+  --photo-border: #7ba7d9;
+  --photo-bg: #e7f1fd;
+}
+
 .user-form {
-    background-color: #d2eaf9;
-    padding: 2rem;
-    font-family: Arial, sans-serif;
-  }
-  
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    background-color:#c3dcfa;
-    border-radius: 8px;
-    padding: 2rem;
-  }
-  
-  /* Each section as a separate flex box */
-  .form-section {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #ccc;
-  }
-  
-  .form-section h2 {
-    text-align: center;
-    margin-bottom: 1.2rem;
-    color: #2e2e2e;
-    font-size: 1.3rem;
-  }
-  
-  .grid-2,
-  .grid-3 {
-    display: grid;
-    gap: 1rem;
-  }
-  
-  .grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .grid-3 {
-    grid-template-columns: repeat(3, 2fr);
-  }
-  
-  input,
-  textarea {
-    padding: 0.7rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #ddd;
-    font-weight: bold;
-    font-size: 1rem;
-  }
-  
-  textarea {
-    width: 100%;
-    resize: none;
-  }
-  
-  .photo-upload {
-    margin-top: 2rem;
-    text-align: center;
-  }
-  
-  .save-btn-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 2rem;
-  }
-  
-  .save-btn {
-    padding: 0.8rem 2rem;
-    background: linear-gradient(to right, #97d6a8, #004c2f);
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-  
-  .address-box {
-    grid-column: 1 / -1;   /* span all 3 columns */
-    margin-top: 1rem;      /* push it down slightly */
-    width: 100%;
-  }
-  
+  background-color: var(--primary-bg);
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
 
-  select {
-    padding: 0.7rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #ddd;
-    color: #706f6f;
-    font-family: Arial, sans-serif;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-  
-  .input-wrapper {
-    position: relative;
-    margin-bottom: 1rem;
-  }
-  
-  .input-wrapper input {
-    width: 100%;
-    padding: 1rem 0.75rem 0.5rem 0.75rem;
-    border: 2px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    background-color: #d7d6d6;
-    transition: all 0.2s ease-in-out;
-    outline: none;
-    margin: 0 auto;
-  }
-  
-  .input-wrapper input:focus {
-    border-color: #1056c7;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  .input-wrapper label {
-    position: absolute;
-    left: 14rem;
-    top: 0.8rem;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #7d7c7c;
-    padding: 0 0.25rem;
-    pointer-events: none;
-    transition: all 0.2s ease-in-out;
-    transform-origin: left top;
-  }
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background-color: var(--container-bg);
+  border-radius: 8px;
+  padding: 2rem;
+}
 
-  .photo-upload {
+.form-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+}
+
+.form-section h2 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  color: var(--section-heading);
+  font-size: 1.3rem;
+}
+
+.grid-2,
+.grid-3 {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+input,
+textarea,
+select {
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  font-weight: bold;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: none;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-wrapper input {
+  padding: 1rem 0.75rem 0.5rem 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: #d7d6d6;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.input-wrapper input:focus {
+  border-color: var(--highlight-border);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-wrapper label {
+  position: absolute;
+  left: 1rem;
+  top: 0.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--label-color);
+  padding: 0 0.25rem;
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+  transform-origin: left top;
+}
+
+.photo-upload {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #7ba7d9;
+  border: 2px dashed var(--photo-border);
   padding: 1.5rem;
   border-radius: 12px;
-  background-color: #e7f1fd;
-  grid-column: span 2; /* Ensures it spans full width in grid-2 */
+  background-color: var(--photo-bg);
+  grid-column: span 2;
 }
 
 .photo-upload label {
   font-weight: bold;
-  color: #2e2e2e;
+  color: var(--section-heading);
   margin-bottom: 1rem;
   font-size: 1.1rem;
 }
@@ -158,7 +131,6 @@
   background-color: #dfefff;
   border: 1px solid #b2cde8;
   border-radius: 6px;
-  width: 100%;
   max-width: 300px;
   transition: background-color 0.3s ease;
 }
@@ -166,3 +138,81 @@
 .photo-upload input[type="file"]:hover {
   background-color: #c5e0ff;
 }
+
+.save-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.save-btn {
+  padding: 0.8rem 2rem;
+  background: linear-gradient(to right, #97d6a8, #004c2f);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.address-box {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Read-Only Banner */
+.read-only-banner {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.read-only-banner p {
+  margin: 0;
+  font-weight: bold;
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Remove all read-only and edit-mode specific styling to make all modes look the same */
+.user-form input,
+.user-form textarea,
+.user-form select,
+.user-form.read-only input,
+.user-form.read-only textarea,
+.user-form.read-only select,
+.user-form.edit-mode input,
+.user-form.edit-mode textarea,
+.user-form.edit-mode select {
+  background-color: var(--input-bg);
+  color: #000;
+  border: 1px solid var(--border-color);
+  cursor: text;
+  font-style: normal;
+  font-weight: bold;
+}
+
+.user-form .form-section,
+.user-form.read-only .form-section,
+.user-form.edit-mode .form-section {
+  background-color: #fff;
+  border-color: var(--border-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Special handling for disabled selects in read-only mode */
+.user-form.read-only select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Special handling for readonly inputs */
+.user-form input[readonly],
+.user-form textarea[readonly] {
+  cursor: default;
+}fba758f8

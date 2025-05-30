@@ -9,8 +9,6 @@ import { Link } from "react-router-dom";
 // Then in JSX:
 <Link to="/Logs">View Logs</Link>;
 
-
-
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -38,11 +36,11 @@ const AdminHome = () => {
 
   const handleProfile = () => {
     setShowProfile(true);
-  }
+  };
 
   const handleCloseProfile = () => {
     setShowProfile(false);
-  }
+  };
 
   const handleLogOut = async () => {
     try {
