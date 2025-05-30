@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./UserForm.css";
 
-
 const UserForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -83,9 +82,7 @@ const UserForm = () => {
         name="chevron-back-outline"
         onClick={() => navigate(-1)}
         style={{ cursor: "pointer", fontSize: "24px" }}
-      >
-        {" "}
-      </ion-icon>
+      ></ion-icon>
 
       <form className="form-container" onSubmit={handleSave}>
         {/* Personal Info */}
@@ -98,6 +95,16 @@ const UserForm = () => {
               onChange={handleChange}
               required
             />
+
+            <select name="gender" onChange={handleChange} defaultValue="">
+              <option value="" disabled>
+                Gender
+              </option>
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+              <option value="O">Other (O)</option>
+            </select>
+
             <input
               name="fname"
               placeholder="First name"
@@ -120,25 +127,7 @@ const UserForm = () => {
               placeholder="Mother’s name"
               onChange={handleChange}
             />
-            <input
-              name="dob"
-              type="text"
-              placeholder="DOB"
-              onFocus={(e) => (e.target.type = "date")}
-              onBlur={(e) => {
-                if (!e.target.value) e.target.type = "text";
-              }}
-              onChange={handleChange}
-            />
 
-            <select name="gender" onChange={handleChange} defaultValue="">
-              <option value="" disabled>
-                Gender
-              </option>
-              <option value="M">Male (M)</option>
-              <option value="F">Female (F)</option>
-              <option value="O">Other (O)</option>
-            </select>
             <input
               name="blood_group"
               placeholder="Blood group (e.g., A+)"
@@ -159,6 +148,16 @@ const UserForm = () => {
               placeholder="PAN number"
               onChange={handleChange}
             />
+
+            <div className="input-wrapper">
+              <input
+                name="dob"
+                type="date"
+                onChange={handleChange}
+                required
+              />
+              <label htmlFor="dob">Date Of Birth</label>
+            </div>
           </div>
         </section>
 
@@ -248,23 +247,28 @@ const UserForm = () => {
               placeholder="Department"
               onChange={handleChange}
             />
-            <input
-              name="role"
-              placeholder="Role (Required)"
-              onChange={handleChange}
-              required
-            />
 
-            <input
-              name="doj"
-              type="text"
-              placeholder="Date Of Joining"
-              onFocus={(e) => (e.target.type = "date")}
-              onBlur={(e) => {
-                if (!e.target.value) e.target.type = "text";
-              }}
-              onChange={handleChange}
-            />
+            <select name="role" onChange={handleChange} defaultValue="">
+              <option value="" disabled>
+                Role
+              </option>
+              <option value="Admin">Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Team Lead">Team Lead</option>
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Backend Developer">Backend Developer</option>
+              <option value="Intern">Intern</option>
+            </select>
+
+            <div className="input-wrapper">
+              <input
+                name="doj"
+                type="date"
+                onChange={handleChange}
+                required
+              />
+              <label htmlFor="doj">Date Of Joining</label>
+            </div>
           </div>
         </section>
 

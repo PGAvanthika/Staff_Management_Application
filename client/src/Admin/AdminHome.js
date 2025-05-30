@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react";
 import "./AdminHome.css";
 import UserCard from "../Components/UserCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import Profile from "../Components/Profile";
 
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [showProfile, setShowProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
 
+  // Fetch users from the backend
   const fetchUsers = async (role = "") => {
     try {
       const response = await axios.get("http://localhost:3001/api/user/all", {
-        params: { role: role || undefined }, // include only if role is selected
+        params: { role: role || undefined },
       });
 
       const formatted = response.data.map((user) => ({
+        id: user.id, // ✅ Include ID for deletion
         name: `${user.fname} ${user.lname}`,
         role: user.role || "No role",
         imageSrc: user.profilepic || "/images/default-user.jpg",
@@ -49,15 +53,27 @@ const AdminHome = () => {
     setFilteredUsers(filtered);
   };
 
-  // Handle role dropdown
+  // Handle role filter change
   const handleRoleChange = (e) => {
     const role = e.target.value;
     setSelectedRole(role);
-    fetchUsers(role); // server call based on role
+    fetchUsers(role);
   };
 
+  // Add new user
   const handleAddUser = () => navigate("/UserForm");
 
+  // Show profile
+  const handleProfile = () => {
+    setShowProfile(true);
+  };
+
+  // Close profile
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  };
+
+  // Handle user logout
   const handleLogOut = async () => {
     try {
       await fetch("http://localhost:3001/api/auth/logout", {
@@ -70,15 +86,23 @@ const AdminHome = () => {
     }
   };
 
+  // Handle user deletion from UI
+  const handleUserDeleted = (deletedId) => {
+    setUsers((prev) => prev.filter((u) => u.id !== deletedId));
+    setFilteredUsers((prev) => prev.filter((u) => u.id !== deletedId));
+  };
+
   return (
     <div className="admin-home">
+      {showProfile && <Profile onClose={handleCloseProfile} />}
+
       <header className="top-nav">
-        <button className="profile-btn">
+        <button className="profile-btn" onClick={handleProfile}>
           <ion-icon name="person-circle-outline"></ion-icon>
         </button>
         <nav>
           <a href="#">Home</a>
-          <a href="#">View Logs</a>
+          <Link to="/Logs">View Logs</Link>
         </nav>
         <button className="logout-btn" onClick={handleLogOut}>
           <ion-icon name="power-outline"></ion-icon>
@@ -118,9 +142,11 @@ const AdminHome = () => {
           filteredUsers.map((user, index) => (
             <UserCard
               key={index}
+              id={user.id} // ✅ Required for deletion
               name={user.name}
               role={user.role}
               imageSrc={user.imageSrc}
+              onUserDeleted={handleUserDeleted} // ✅ Callback to update list after delete
             />
           ))
         )}
