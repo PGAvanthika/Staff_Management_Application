@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "./UserCard.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const UserCard = ({ name, role, imageSrc }) => {
+const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -14,9 +15,15 @@ const UserCard = ({ name, role, imageSrc }) => {
     setShowConfirm(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Item deleted"); // Your delete logic here
-    setShowConfirm(false);
+  const confirmDelete = async () => {
+    try {
+      console.log("Deleting user with ID:", id);
+      await axios.delete(`http://localhost:3001/api/user/${id}`);
+      setShowConfirm(false);
+      if (onUserDeleted) onUserDeleted(id);
+    } catch (err) {
+      console.error("Failed to delete user:", err);
+    }
   };
 
   const cancelDelete = () => {
@@ -26,7 +33,7 @@ const UserCard = ({ name, role, imageSrc }) => {
   return (
     <div className="card-container">
       <div className="user-card">
-        <img src={imageSrc} className="user-image"  />
+        <img src={imageSrc} className="user-image" alt="user" />
         <div className="user-info">
           <h3>{name}</h3>
           <p>{role}</p>
