@@ -4,6 +4,7 @@ const router = express.Router();
 const sql = require('../config/db');
 const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
+// Save user
 router.post('/save', async (req, res) => {
   const data = req.body;
 
@@ -12,13 +13,11 @@ router.post('/save', async (req, res) => {
     const defaultPassword = 'password';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
-    // Insert into users table
     await sql`
       INSERT INTO users (id, email, password, role)
       VALUES (${data.id}, ${data.email}, ${hashedPassword}, ${data.role})
     `;
 
-    // Insert into user_personal_info
     await sql`
       INSERT INTO user_personal_info (
         id, fname, lname, father_Name, mother_Name, dob, gender,
@@ -30,7 +29,6 @@ router.post('/save', async (req, res) => {
       )
     `;
 
-    // Insert into user_contact_info
     await sql`
       INSERT INTO user_contact_info (
         id, phone_no, alternate_no, email, address,
@@ -42,7 +40,6 @@ router.post('/save', async (req, res) => {
       )
     `;
 
-    // Insert into user_professional_info
     await sql`
       INSERT INTO user_professional_info (
         id, school, college, dept, college_completion_year, school_completion_year,
@@ -58,26 +55,19 @@ router.post('/save', async (req, res) => {
 
     res.status(200).json({ message: "User created successfully with default password" });
   } catch (err) {
-    try {
-      await sql`ROLLBACK`;
-    } catch (rollbackError) {
-      console.error('Rollback failed:', rollbackError);
-    }
-
+    await sql`ROLLBACK`;
     console.error('Transaction failed:', err);
     res.status(500).json({ error: "Failed to save user. Transaction rolled back." });
   }
 });
 
-// Get all users or filter by role if query parameter is provided
+// Get all users
 router.get('/all', async (req, res) => {
   try {
-    const { role } = req.query; // get role filter from query string
-
+    const { role } = req.query;
     let users;
 
     if (role) {
-      // Fetch users matching the role
       users = await sql`
         SELECT u.id, u.role, p.fname, p.lname
         FROM users u
@@ -85,7 +75,6 @@ router.get('/all', async (req, res) => {
         WHERE u.role = ${role}
       `;
     } else {
-      // Fetch all users
       users = await sql`
         SELECT u.id, u.role, p.fname, p.lname
         FROM users u
@@ -97,6 +86,26 @@ router.get('/all', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// Delete user by ID
+router.delete('/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    await sql`BEGIN`;
+    await sql`DELETE FROM user_professional_info WHERE id = ${userId}`;
+    await sql`DELETE FROM user_contact_info WHERE id = ${userId}`;
+    await sql`DELETE FROM user_personal_info WHERE id = ${userId}`;
+    await sql`DELETE FROM users WHERE id = ${userId}`;
+    await sql`COMMIT`;
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    await sql`ROLLBACK`;
+    console.error('Error deleting user:', err);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 
