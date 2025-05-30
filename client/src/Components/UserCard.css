@@ -1,37 +1,137 @@
+.card-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .user-card {
-  background: rgb(247, 250, 251);
+  background-color: #fff;
   border-radius: 12px;
-  padding: 2rem;
-  position: relative;
+  padding: 20px;
+  width: 250px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  width: 200px;
-  height: 200px;
+  position: relative;
 }
 
 .user-image {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin: 0 auto;
+  display: block;
 }
 
-.user-info h3 {
-  font-size: 1rem;
-  margin: 0;
+/*.user-info {
+  margin-top: 15px;
 }
-
-.user-info p {
-  font-size: 0.8rem;
-  color: gray;
-}
-
-.edit-btn {
+.edit-btn{
   position: absolute;
   bottom: 8px;
-  right: 8px;
+  
   background: none;
   border: none;
   cursor: pointer;
 }
+
+*/
+
+.user-info h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.user-info p {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #777;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.edit-btn,
+.delete-item {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+  transition: color 0.2s;
+}
+
+
+.card-actions {
+  display: flex;
+  gap: 20px; /* This creates the gap between buttons */
+}
+
+
+
+.delete-item:hover {
+  color: #e74c3c;
+}
+
+.edit-btn:hover {
+  color: #3498db;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-box {
+  background-color: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 300px;
+  max-width: 90vw; /* Responsive on smaller screens */
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* space between buttons */
+}
+
+.yes-btn, .no-btn {
+  padding: 8px 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.yes-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.no-btn {
+  background-color: #bdc3c7;
+  color: #333;
+}
+

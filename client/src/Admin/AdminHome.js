@@ -3,10 +3,18 @@ import "./AdminHome.css";
 import UserCard from "../Components/UserCard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Profile from "../Components/Profile";
+import { Link } from "react-router-dom";
+
+// Then in JSX:
+<Link to="/Logs">View Logs</Link>;
+
+
 
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [showProfile, setShowProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
@@ -58,6 +66,14 @@ const AdminHome = () => {
 
   const handleAddUser = () => navigate("/UserForm");
 
+  const handleProfile = () => {
+    setShowProfile(true);
+  }
+
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  }
+
   const handleLogOut = async () => {
     try {
       await fetch("http://localhost:3001/api/auth/logout", {
@@ -72,13 +88,14 @@ const AdminHome = () => {
 
   return (
     <div className="admin-home">
+      {showProfile && <Profile onClose={handleCloseProfile} />}
       <header className="top-nav">
-        <button className="profile-btn">
+        <button className="profile-btn" onClick={handleProfile}>
           <ion-icon name="person-circle-outline"></ion-icon>
         </button>
         <nav>
           <a href="#">Home</a>
-          <a href="#">View Logs</a>
+          <Link to="/Logs">View Logs</Link>
         </nav>
         <button className="logout-btn" onClick={handleLogOut}>
           <ion-icon name="power-outline"></ion-icon>
