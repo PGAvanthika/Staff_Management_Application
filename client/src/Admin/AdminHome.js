@@ -3,6 +3,12 @@ import "./AdminHome.css";
 import UserCard from "../Components/UserCard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
+// Then in JSX:
+<Link to="/Logs">View Logs</Link>;
+
+
 
 const AdminHome = () => {
   const navigate = useNavigate();
@@ -48,7 +54,7 @@ const AdminHome = () => {
         </button>
         <nav>
           <a href="#">Home</a>
-          <a href="#">View Logs</a>
+          <Link to="/Logs">View Logs</Link>
         </nav>
         <button className="logout-btn" onClick={handleLogOut}>
           <ion-icon name="power-outline"></ion-icon>

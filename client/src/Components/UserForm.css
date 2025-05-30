@@ -133,5 +133,36 @@
     transform-origin: left top;
   }
 
-  
-  
+  .photo-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #7ba7d9;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: #e7f1fd;
+  grid-column: span 2; /* Ensures it spans full width in grid-2 */
+}
+
+.photo-upload label {
+  font-weight: bold;
+  color: #2e2e2e;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.photo-upload input[type="file"] {
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: #dfefff;
+  border: 1px solid #b2cde8;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 300px;
+  transition: background-color 0.3s ease;
+}
+
+.photo-upload input[type="file"]:hover {
+  background-color: #c5e0ff;
+}

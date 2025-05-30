@@ -92,6 +92,15 @@ const UserForm = () => {
         <section className="form-section">
           <h2>Personal Information</h2>
           <div className="grid-2">
+            <div className="photo-upload">
+              <label htmlFor="photo">Upload Photo</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleChange}
+                name="photo"
+              />
+            </div>
             <input
               name="id"
               placeholder="User ID (Required)"
@@ -163,6 +172,7 @@ const UserForm = () => {
               />
               <label htmlFor="dob">Date Of Birth</label>
             </div>
+
           </div>
         </section>
 
