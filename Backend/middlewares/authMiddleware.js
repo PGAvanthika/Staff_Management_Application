@@ -1,6 +1,7 @@
 // middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
+// Middleware to verify if the user is logged in and attach user info
 function isLoggedIn(req, res, next) {
     const token =
         req.cookies?.access_token || 
@@ -19,6 +20,7 @@ function isLoggedIn(req, res, next) {
     }
 }
 
+// Role-based middleware
 function isAdmin(req, res, next) {
     if (req.user.role !== "Admin") {
         return res.status(403).json({ redirect: true, message: "Access denied. Admins only." });
@@ -27,21 +29,21 @@ function isAdmin(req, res, next) {
 }
 
 function isManager(req, res, next) {
-    if (req.user.role !== "manager") {
+    if (req.user.role !== "Manager") {
         return res.status(403).json({ redirect: true, message: "Access denied. Managers only." });
     }
     next();
 }
 
 function isTeamLeader(req, res, next) {
-    if (req.user.role !== "team_leader") {
+    if (req.user.role !== "TeamLeader") {
         return res.status(403).json({ redirect: true, message: "Access denied. Team Leaders only." });
     }
     next();
 }
 
 function isEmployee(req, res, next) {
-    if (req.user.role !== "employee") {
+    if (req.user.role !== "Employee") {
         return res.status(403).json({ redirect: true, message: "Access denied. Employees only." });
     }
     next();

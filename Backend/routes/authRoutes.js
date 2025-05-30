@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const { isLoggedIn } = require("../middlewares/authMiddleware");
 
 // Login Route
 router.post("/login", async (req, res) => {
@@ -59,5 +60,15 @@ router.post("/logout", (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
+
+
+// Token Validation Route
+router.get("/validate", isLoggedIn, (req, res) => {
+  res.status(200).json({
+    message: "Token is valid",
+    user: req.user,
+  });
+});
+
 
 module.exports = router;

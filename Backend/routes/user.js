@@ -5,7 +5,7 @@ const sql = require('../config/db');
 const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
 // Save user
-router.post('/save', async (req, res) => {
+router.post('/save', isLoggedIn,isAdmin,async (req, res) => {
   const data = req.body;
 
   try {
@@ -62,7 +62,7 @@ router.post('/save', async (req, res) => {
 });
 
 // Get all users
-router.get('/all', async (req, res) => {
+router.get('/all',isLoggedIn ,isAdmin,async (req, res) => {
   try {
     const { role } = req.query;
     let users;
@@ -90,7 +90,7 @@ router.get('/all', async (req, res) => {
 });
 
 // Delete user by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', isLoggedIn,isAdmin,async (req, res) => {
   const userId = req.params.id;
 
   try {
