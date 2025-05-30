@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./UserForm.css";
 
-
 const UserForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -83,24 +82,13 @@ const UserForm = () => {
         name="chevron-back-outline"
         onClick={() => navigate(-1)}
         style={{ cursor: "pointer", fontSize: "24px" }}
-      >
-        {" "}
-      </ion-icon>
+      ></ion-icon>
 
       <form className="form-container" onSubmit={handleSave}>
         {/* Personal Info */}
         <section className="form-section">
           <h2>Personal Information</h2>
           <div className="grid-2">
-            <div className="photo-upload">
-              <label htmlFor="photo">Upload Photo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleChange}
-                name="photo"
-              />
-            </div>
             <input
               name="id"
               placeholder="User ID (Required)"
@@ -145,7 +133,6 @@ const UserForm = () => {
               placeholder="Blood group (e.g., A+)"
               onChange={handleChange}
             />
-
             <input
               name="nationality"
               placeholder="Nationality"
@@ -167,12 +154,10 @@ const UserForm = () => {
                 name="dob"
                 type="date"
                 onChange={handleChange}
-                placeholder="YYYY-MM-DD"
-                pattern="\d{4}-\d{2}-\d{2}"
+                required
               />
               <label htmlFor="dob">Date Of Birth</label>
             </div>
-
           </div>
         </section>
 
@@ -263,27 +248,26 @@ const UserForm = () => {
               onChange={handleChange}
             />
 
-            <select name="Role" onChange={handleChange} defaultValue="">
+            <select name="role" onChange={handleChange} defaultValue="">
               <option value="" disabled>
                 Role
               </option>
-              <option value="A">Admin </option>
-              <option value="M">Manager </option>
-              <option value="TL">Team Leader </option>
-              <option value="FD">Frontend Developer </option>
-              <option value="FD">Backend Developer </option>
-              <option value="I">Intern </option>
+              <option value="Admin">Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Team Lead">Team Lead</option>
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Backend Developer">Backend Developer</option>
+              <option value="Intern">Intern</option>
             </select>
 
             <div className="input-wrapper">
               <input
-                name="dob"
+                name="doj"
                 type="date"
                 onChange={handleChange}
-                placeholder="YYYY-MM-DD"
-                pattern="\d{4}-\d{2}-\d{2}"
+                required
               />
-              <label htmlFor="dob">Date Of joining</label>
+              <label htmlFor="doj">Date Of Joining</label>
             </div>
           </div>
         </section>
