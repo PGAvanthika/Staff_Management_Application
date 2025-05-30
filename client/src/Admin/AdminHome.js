@@ -3,6 +3,7 @@ import "./AdminHome.css";
 import UserCard from "../Components/UserCard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Profile from "../Components/Profile";
 import { Link } from "react-router-dom";
 
 // Then in JSX:
@@ -13,6 +14,7 @@ import { Link } from "react-router-dom";
 const AdminHome = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     axios
@@ -34,6 +36,14 @@ const AdminHome = () => {
     navigate("/UserForm");
   };
 
+  const handleProfile = () => {
+    setShowProfile(true);
+  }
+
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  }
+
   const handleLogOut = async () => {
     try {
       await fetch("http://localhost:3001/api/auth/logout", {
@@ -48,8 +58,9 @@ const AdminHome = () => {
 
   return (
     <div className="admin-home">
+      {showProfile && <Profile onClose={handleCloseProfile} />}
       <header className="top-nav">
-        <button className="profile-btn">
+        <button className="profile-btn" onClick={handleProfile}>
           <ion-icon name="person-circle-outline"></ion-icon>
         </button>
         <nav>
@@ -104,4 +115,3 @@ const AdminHome = () => {
 };
 
 export default AdminHome;
-
