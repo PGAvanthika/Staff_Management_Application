@@ -4,7 +4,24 @@ const router = express.Router();
 const sql = require('../config/db');
 const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
-// Save user
+// ✅ Activity logger
+const logActivity = async (empId, activity) => {
+  if (!empId) return;
+  const now = new Date();
+  const time = now.toTimeString().split(" ")[0];
+  const date = now.toISOString().split("T")[0];
+
+  try {
+    await sql`
+      INSERT INTO activity_logs (emp_id, activity, time, date)
+      VALUES (${empId}, ${activity}, ${time}, ${date})
+    `;
+  } catch (err) {
+    console.error("Activity log insert failed:", err.message);
+  }
+};
+
+// ✅ Create user
 router.post('/save', isLoggedIn, isAdmin, async (req, res) => {
   const data = req.body;
 
@@ -53,6 +70,8 @@ router.post('/save', isLoggedIn, isAdmin, async (req, res) => {
 
     await sql`COMMIT`;
 
+    await logActivity(req.user.userId, `Created user ${data.id}`);
+
     res.status(200).json({ message: "User created successfully with default password" });
   } catch (err) {
     await sql`ROLLBACK`;
@@ -61,7 +80,7 @@ router.post('/save', isLoggedIn, isAdmin, async (req, res) => {
   }
 });
 
-// Get all users
+// ✅ Get all users
 router.get('/all', isLoggedIn, isAdmin, async (req, res) => {
   try {
     const { role } = req.query;
@@ -89,20 +108,19 @@ router.get('/all', isLoggedIn, isAdmin, async (req, res) => {
   }
 });
 
-// Delete user by ID
+// ✅ Delete user
 router.delete('/:id', isLoggedIn, isAdmin, async (req, res) => {
   const userId = req.params.id;
 
   try {
-    console.log("Authenticated user:", req.user); // Log the authenticated user
-    console.log("Deleting user ID:", userId);
-
     await sql`BEGIN`;
     await sql`DELETE FROM user_professional_info WHERE id = ${userId}`;
     await sql`DELETE FROM user_contact_info WHERE id = ${userId}`;
     await sql`DELETE FROM user_personal_info WHERE id = ${userId}`;
     await sql`DELETE FROM users WHERE id = ${userId}`;
     await sql`COMMIT`;
+
+    await logActivity(req.user.userId, `Deleted user ${userId}`);
 
     res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
@@ -112,12 +130,11 @@ router.delete('/:id', isLoggedIn, isAdmin, async (req, res) => {
   }
 });
 
-// user.js - Get a user by ID for editing
+// ✅ Get user by ID
 router.get('/:id', isLoggedIn, isAdmin, async (req, res) => {
   const userId = req.params.id;
 
   try {
-    // Query to get the user's full information
     const result = await sql`
       SELECT u.id, u.role, p.fname, p.lname, p.father_name, p.mother_name, p.dob,
              p.gender, p.blood_group, p.nationality, p.aadhar, p.pan,
@@ -143,9 +160,7 @@ router.get('/:id', isLoggedIn, isAdmin, async (req, res) => {
   }
 });
 
-// user.js
-
-// Update user
+// ✅ Update user
 router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
   const userId = req.params.id;
   const data = req.body;
@@ -153,7 +168,6 @@ router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
   try {
     await sql`BEGIN`;
 
-    // Update user_personal_info
     await sql`
       UPDATE user_personal_info
       SET fname = ${data.fname}, lname = ${data.lname}, father_name = ${data.father_name},
@@ -163,7 +177,6 @@ router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
       WHERE id = ${userId}
     `;
 
-    // Update user_contact_info
     await sql`
       UPDATE user_contact_info
       SET phone_no = ${data.phone}, alternate_no = ${data.alt_phone}, email = ${data.email},
@@ -173,7 +186,6 @@ router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
       WHERE id = ${userId}
     `;
 
-    // Update user_professional_info
     await sql`
       UPDATE user_professional_info
       SET school = ${data.school}, school_completion_year = ${parseInt(data.school_year)},
@@ -184,6 +196,8 @@ router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
 
     await sql`COMMIT`;
 
+    await logActivity(req.user.userId, `Updated user ${userId}`);
+
     res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
     await sql`ROLLBACK`;
@@ -191,6 +205,5 @@ router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
     res.status(500).json({ error: "Failed to update user. Transaction rolled back." });
   }
 });
-
 
 module.exports = router;
