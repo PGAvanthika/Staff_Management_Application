@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Card } from "react-bootstrap";
 import { Doughnut, Bar, Line } from "react-chartjs-2";
+import { useNavigate } from "react-router-dom";
+import Profile from "../Components/Profile";
+
 import {
   Chart as ChartJS,
   ArcElement,
@@ -26,6 +29,23 @@ ChartJS.register(
 );
 
 const ManagerHome = () => {
+  const navigate = useNavigate();
+  const [showProfile, setShowProfile] = useState(false);
+
+  const handleLogOut = () => {
+    navigate("/");
+  };
+
+  // Show profile overlay
+  const handleProfile = () => {
+    setShowProfile(true);
+  };
+
+  // Close profile overlay
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  };
+
   const doughnutData = {
     labels: ["Completed", "Remaining"],
     datasets: [
@@ -84,7 +104,10 @@ const ManagerHome = () => {
         >
           <ul className="nav flex-column mt-4">
             <li className="mb-3 text-center">
-              <button className="btn btn-outline-primary">
+              <button
+                className="btn btn-outline-primary"
+                onClick={handleProfile} // Show profile overlay when clicked
+              >
                 <ion-icon
                   name="person-circle-outline"
                   style={{ fontSize: "1.8rem" }}
@@ -114,7 +137,7 @@ const ManagerHome = () => {
         <div className="col-lg-10 col-md-9 p-4">
           {/* Logout Button */}
           <div className="d-flex justify-content-end mb-4">
-            <button className="btn btn-light shadow-sm">
+            <button className="btn btn-light shadow-sm" onClick={handleLogOut}>
               <ion-icon
                 name="power-outline"
                 style={{ fontSize: "1.8rem", color: "#dc3545" }}
@@ -187,6 +210,28 @@ const ManagerHome = () => {
           </Card>
         </div>
       </div>
+
+      {/* Profile Overlay */}
+      {showProfile && (
+        <div
+          onClick={handleCloseProfile} // optional: closes when clicking background div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1050,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* Pass onClose prop here */}
+          <Profile onClose={handleCloseProfile} />
+        </div>
+      )}
     </div>
   );
 };
