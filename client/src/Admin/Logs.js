@@ -1,28 +1,60 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Add this import
+// src/pages/Logs.jsx
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const getRecentDates = (days = 4) => {
+  const result = [];
+  const today = new Date();
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    result.push(d.toISOString().split("T")[0]);
+  }
+
+  return result;
+};
+
 const Logs = () => {
-  const navigate = useNavigate(); // ✅ For back button functionality
-
+  const navigate = useNavigate();
+  const [dates] = useState(getRecentDates());
+  const [selectedDate, setSelectedDate] = useState(dates[0]);
   const [selectedTab, setSelectedTab] = useState("login");
-  const [selectedDate, setSelectedDate] = useState("2025-05-30");
 
-  const dates = ["2025-05-30", "2025-05-29", "2025-05-28", "2025-05-27"];
+  const [loginLogs, setLoginLogs] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
 
-  const loginLogs = [
-    { time: "10:17:12 AM", empId: "E123", log: "Login Successful" },
-    { time: "10:20:01 AM", empId: "E124", log: "Login Failed" },
-  ];
+  useEffect(() => {
+    const fetchLogs = async () => {
+      const endpoint =
+        selectedTab === "login"
+          ? `http://localhost:3001/api/login-logs/${selectedDate}`
+          : `http://localhost:3001/api/activity-logs/${selectedDate}`;
 
-  const activityLogs = [
-    { time: "10:25:45 AM", empId: "E123", activity: "Accessed dashboard" },
-    { time: "10:30:00 AM", empId: "E125", activity: "Viewed reports" },
-  ];
+      try {
+        const res = await axios.get(endpoint);
+        if (selectedTab === "login") {
+          setLoginLogs(res.data);
+        } else {
+          setActivityLogs(res.data);
+        }
+      } catch (err) {
+        console.error(`Failed to fetch ${selectedTab} logs:`, err);
+        if (selectedTab === "login") setLoginLogs([]);
+        else setActivityLogs([]);
+      }
+    };
+
+    fetchLogs();
+  }, [selectedDate, selectedTab]);
+
+  const displayedLogs = selectedTab === "login" ? loginLogs : activityLogs;
 
   return (
     <div className="container-fluid p-0">
-      {/* Top navbar with back button and tab selector */}
       <nav className="navbar navbar-dark bg-dark d-flex align-items-center px-3">
         <ion-icon
           name="chevron-back-outline"
@@ -33,17 +65,13 @@ const Logs = () => {
 
         <div className="btn-group mx-auto">
           <button
-            className={`btn btn-outline-info ${
-              selectedTab === "login" ? "active" : ""
-            }`}
+            className={`btn btn-outline-info ${selectedTab === "login" ? "active" : ""}`}
             onClick={() => setSelectedTab("login")}
           >
             Login Logs
           </button>
           <button
-            className={`btn btn-outline-info ${
-              selectedTab === "activity" ? "active" : ""
-            }`}
+            className={`btn btn-outline-info ${selectedTab === "activity" ? "active" : ""}`}
             onClick={() => setSelectedTab("activity")}
           >
             Activity Logs
@@ -57,9 +85,7 @@ const Logs = () => {
             {dates.map((date) => (
               <button
                 key={date}
-                className={`list-group-item list-group-item-action ${
-                  selectedDate === date ? "active" : ""
-                }`}
+                className={`list-group-item list-group-item-action ${selectedDate === date ? "active" : ""}`}
                 onClick={() => setSelectedDate(date)}
               >
                 {date}
@@ -78,14 +104,24 @@ const Logs = () => {
               </tr>
             </thead>
             <tbody>
-              {(selectedTab === "login" ? loginLogs : activityLogs).map(
-                (log, index) => (
+              {displayedLogs.length > 0 ? (
+                displayedLogs.map((log, index) => (
                   <tr key={index}>
                     <td>{log.time}</td>
-                    <td>{log.empId}</td>
-                    <td>{selectedTab === "login" ? log.log : log.activity}</td>
+                    <td>{log.emp_id}</td>
+                    <td>
+                      {selectedTab === "login"
+                        ? `${log.log_type.toUpperCase()} - ${log.status}`
+                        : log.activity}
+                    </td>
                   </tr>
-                )
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="text-center">
+                    No logs found for this date.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

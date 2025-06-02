@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const authRoute = require('./routes/authRoutes');
 const userRoutes = require('./routes/user');
 const cookieParser = require('cookie-parser');
+const logRoutes=require('./routes/logRoutes')
 const sql = require('./config/db'); // Keep DB init here for early errors
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use(morgan("dev"));
 // Routes
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoutes);
+app.use("/api", logRoutes);
 
 // Server Start
 app.listen(PORT, () => {
