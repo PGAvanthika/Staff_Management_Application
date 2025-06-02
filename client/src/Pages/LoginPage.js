@@ -40,7 +40,7 @@ const LoginPage = () => {
 
       if (data.role === "Admin") navigate("/Adminhome");
       else if (data.role === "team_leader") navigate("/tlhome");
-      else if (data.role === "manager") navigate("/managerhome");
+      else if (data.role === "Manager") navigate("/ManagerHome");
       else if (data.role === "employee") navigate("/employeehome");
     } else {
       setError(data.message || "Login failed");

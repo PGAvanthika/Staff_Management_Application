@@ -1,9 +1,11 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 import LoginPage from "./Pages/LoginPage";
 import AdminHome from "./Admin/AdminHome";
 import UserForm from "./Components/UserForm";
 import Logs from "./Admin/Logs"; 
+import ManagerHome from "./Manager/ManagerHome";
 
 function App() {
   return (
@@ -14,6 +16,7 @@ function App() {
         <Route path="/UserForm" element={<UserForm />} /> {/* For creating new user */}
         <Route path="/adminhome" element={<AdminHome />} />
         <Route path="/Logs" element={<Logs />} />
+        <Route path="/ManagerHome" element={<ManagerHome/>} />
       </Routes>
     </div>
   );

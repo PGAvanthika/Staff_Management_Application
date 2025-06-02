@@ -114,11 +114,13 @@
     outline: none;
     margin: 0 auto;
   }
-  
-  .input-wrapper input:focus {
+  /* 
+   .input-wrapper input:focus {
     border-color: #1056c7;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
+  */
+ 
   
   .input-wrapper label {
     position: absolute;
