@@ -269,124 +269,150 @@ const UserForm = () => {
 
   return (
     <div className="user-form">
+      <ion-icon
+        name="chevron-back-outline"
+        onClick={() => navigate(-1)}
+        style={{ cursor: "pointer", fontSize: "24px" }}
+      >
+        {" "}
+      </ion-icon>
       <form className="form-container" onSubmit={handleSave}>
         <section className="form-section">
           <h2>Personal Information</h2>
           <div className="grid-2">
+            <div className="photo-upload">
+              <label htmlFor="photo">Upload Photo</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleChange}
+                name="photo"
+              />
+            </div>
             <div className="input-group">
-              <input 
-                name="id" 
-                value={form.id} 
-                placeholder="User ID (Required)" 
-                onChange={handleChange} 
-                required 
+              <input
+                name="id"
+                value={form.id}
+                placeholder="User ID (Required)"
+                onChange={handleChange}
+                required
                 readOnly={!!id}
                 className={errors.id ? "error" : ""}
               />
               {errors.id && <span className="error-message">{errors.id}</span>}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="fname" 
-                value={form.fname} 
-                placeholder="First name (Required)" 
-                onChange={handleChange} 
-                required 
+              <input
+                name="fname"
+                value={form.fname}
+                placeholder="First name (Required)"
+                onChange={handleChange}
+                required
                 className={errors.fname ? "error" : ""}
               />
-              {errors.fname && <span className="error-message">{errors.fname}</span>}
+              {errors.fname && (
+                <span className="error-message">{errors.fname}</span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="lname" 
-                value={form.lname} 
-                placeholder="Last name (Required)" 
-                onChange={handleChange} 
-                required 
+              <input
+                name="lname"
+                value={form.lname}
+                placeholder="Last name (Required)"
+                onChange={handleChange}
+                required
                 className={errors.lname ? "error" : ""}
               />
-              {errors.lname && <span className="error-message">{errors.lname}</span>}
+              {errors.lname && (
+                <span className="error-message">{errors.lname}</span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="father_name" 
-                value={form.father_name} 
-                placeholder="Father's name" 
-                onChange={handleChange} 
+              <input
+                name="father_name"
+                value={form.father_name}
+                placeholder="Father's name"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="mother_name" 
-                value={form.mother_name} 
-                placeholder="Mother's name" 
-                onChange={handleChange} 
+              <input
+                name="mother_name"
+                value={form.mother_name}
+                placeholder="Mother's name"
+                onChange={handleChange}
               />
             </div>
-            
+
+            <div className="input-wrapper">
+              <input
+                name="dob"
+                type="date"
+                onChange={handleChange}
+                placeholder="YYYY-MM-DD"
+                pattern="\d{4}-\d{2}-\d{2}"
+              />
+              <label htmlFor="dob">Date Of Birth</label>
+            </div>
+
             <div className="input-group">
-              <input 
-                name="dob" 
-                type="date" 
-                value={form.dob} 
-                onChange={handleChange} 
+              <input
+                name="gender"
+                value={form.gender}
+                placeholder="Gender (M/F/O)"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="gender" 
-                value={form.gender} 
-                placeholder="Gender (M/F/O)" 
-                onChange={handleChange} 
+              <input
+                name="blood_group"
+                value={form.blood_group}
+                placeholder="Blood group (e.g., A+)"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="blood_group" 
-                value={form.blood_group} 
-                placeholder="Blood group (e.g., A+)" 
-                onChange={handleChange} 
+              <input
+                name="nationality"
+                value={form.nationality}
+                placeholder="Nationality"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="nationality" 
-                value={form.nationality} 
-                placeholder="Nationality" 
-                onChange={handleChange} 
-              />
-            </div>
-            
-            <div className="input-group">
-              <input 
-                name="aadhar" 
-                value={form.aadhar} 
-                placeholder="Aadhar number (12 digits)" 
+              <input
+                name="aadhar"
+                value={form.aadhar}
+                placeholder="Aadhar number (12 digits)"
                 onChange={handleChange}
                 maxLength="12"
                 className={errors.aadhar ? "error" : ""}
               />
-              {errors.aadhar && <span className="error-message">{errors.aadhar}</span>}
+              {errors.aadhar && (
+                <span className="error-message">{errors.aadhar}</span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="pan" 
-                value={form.pan} 
-                placeholder="PAN number (ABCDE1234F)" 
+              <input
+                name="pan"
+                value={form.pan}
+                placeholder="PAN number (ABCDE1234F)"
                 onChange={handleChange}
                 maxLength="10"
-                style={{ textTransform: 'uppercase' }}
+                style={{ textTransform: "uppercase" }}
                 className={errors.pan ? "error" : ""}
               />
-              {errors.pan && <span className="error-message">{errors.pan}</span>}
+              {errors.pan && (
+                <span className="error-message">{errors.pan}</span>
+              )}
             </div>
           </div>
         </section>
@@ -395,49 +421,55 @@ const UserForm = () => {
           <h2>Contact Information</h2>
           <div className="grid-3">
             <div className="input-group">
-              <input 
-                name="phone" 
-                value={form.phone} 
-                placeholder="Phone number (Required)" 
-                onChange={handleChange} 
+              <input
+                name="phone"
+                value={form.phone}
+                placeholder="Phone number (Required)"
+                onChange={handleChange}
                 required
                 maxLength="10"
                 className={errors.phone ? "error" : ""}
               />
-              {errors.phone && <span className="error-message">{errors.phone}</span>}
+              {errors.phone && (
+                <span className="error-message">{errors.phone}</span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="alt_phone" 
-                value={form.alt_phone} 
-                placeholder="Alternate phone" 
+              <input
+                name="alt_phone"
+                value={form.alt_phone}
+                placeholder="Alternate phone"
                 onChange={handleChange}
                 maxLength="10"
                 className={errors.alt_phone ? "error" : ""}
               />
-              {errors.alt_phone && <span className="error-message">{errors.alt_phone}</span>}
+              {errors.alt_phone && (
+                <span className="error-message">{errors.alt_phone}</span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="email" 
-                value={form.email} 
-                type="email" 
-                placeholder="Email (Required)" 
-                onChange={handleChange} 
+              <input
+                name="email"
+                value={form.email}
+                type="email"
+                placeholder="Email (Required)"
+                onChange={handleChange}
                 required
                 className={errors.email ? "error" : ""}
               />
-              {errors.email && <span className="error-message">{errors.email}</span>}
+              {errors.email && (
+                <span className="error-message">{errors.email}</span>
+              )}
             </div>
           </div>
           <div className="input-group">
-            <textarea 
-              name="address" 
-              value={form.address} 
-              placeholder="Address" 
-              rows="3" 
+            <textarea
+              name="address"
+              value={form.address}
+              placeholder="Address"
+              rows="3"
               onChange={handleChange}
             ></textarea>
           </div>
@@ -447,41 +479,45 @@ const UserForm = () => {
           <h2>Emergency Information</h2>
           <div className="grid-3">
             <div className="input-group">
-              <input 
-                name="emergency_contact_name" 
-                value={form.emergency_contact_name} 
-                placeholder="Contact name" 
-                onChange={handleChange} 
+              <input
+                name="emergency_contact_name"
+                value={form.emergency_contact_name}
+                placeholder="Contact name"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="emergency_contact_no" 
-                value={form.emergency_contact_no} 
-                placeholder="Contact number" 
+              <input
+                name="emergency_contact_no"
+                value={form.emergency_contact_no}
+                placeholder="Contact number"
                 onChange={handleChange}
                 maxLength="10"
                 className={errors.emergency_contact_no ? "error" : ""}
               />
-              {errors.emergency_contact_no && <span className="error-message">{errors.emergency_contact_no}</span>}
+              {errors.emergency_contact_no && (
+                <span className="error-message">
+                  {errors.emergency_contact_no}
+                </span>
+              )}
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="emergency_relation" 
-                value={form.emergency_relation} 
-                placeholder="Relation" 
-                onChange={handleChange} 
+              <input
+                name="emergency_relation"
+                value={form.emergency_relation}
+                placeholder="Relation"
+                onChange={handleChange}
               />
             </div>
           </div>
           <div className="input-group">
-            <textarea 
-              name="emergency_address" 
-              value={form.emergency_address} 
-              placeholder="Address" 
-              rows="3" 
+            <textarea
+              name="emergency_address"
+              value={form.emergency_address}
+              placeholder="Address"
+              rows="3"
               onChange={handleChange}
             ></textarea>
           </div>
@@ -491,84 +527,90 @@ const UserForm = () => {
           <h2>Professional Information</h2>
           <div className="grid-2">
             <div className="input-group">
-              <input 
-                name="school" 
-                value={form.school} 
-                placeholder="School" 
-                onChange={handleChange} 
+              <input
+                name="school"
+                value={form.school}
+                placeholder="School"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="school_year" 
-                value={form.school_year} 
-                placeholder="Year of Completion" 
-                onChange={handleChange} 
+              <input
+                name="school_year"
+                value={form.school_year}
+                placeholder="Year of Completion"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="college" 
-                value={form.college} 
-                placeholder="College" 
-                onChange={handleChange} 
+              <input
+                name="college"
+                value={form.college}
+                placeholder="College"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="college_year" 
-                value={form.college_year} 
-                placeholder="Year of Completion" 
-                onChange={handleChange} 
+              <input
+                name="college_year"
+                value={form.college_year}
+                placeholder="Year of Completion"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="dept" 
-                value={form.dept} 
-                placeholder="Department" 
-                onChange={handleChange} 
+              <input
+                name="dept"
+                value={form.dept}
+                placeholder="Department"
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="role" 
-                value={form.role} 
-                placeholder="Role (Required)" 
-                onChange={handleChange} 
+              <input
+                name="role"
+                value={form.role}
+                placeholder="Role (Required)"
+                onChange={handleChange}
                 required
                 className={errors.role ? "error" : ""}
               />
-              {errors.role && <span className="error-message">{errors.role}</span>}
+              {errors.role && (
+                <span className="error-message">{errors.role}</span>
+              )}
             </div>
-            
-            <div className="input-group">
-              <input 
-                name="doj" 
-                type="date" 
-                value={form.doj} 
-                onChange={handleChange} 
+
+            <div className="input-wrapper">
+              <input
+                name="dob"
+                type="date"
+                onChange={handleChange}
+                placeholder="YYYY-MM-DD"
+                pattern="\d{4}-\d{2}-\d{2}"
               />
+              <label htmlFor="dob">Date Of joining</label>
             </div>
-            
+
             <div className="input-group">
-              <input 
-                name="experience" 
-                value={form.experience} 
-                placeholder="Experience" 
-                onChange={handleChange} 
+              <input
+                name="experience"
+                value={form.experience}
+                placeholder="Experience"
+                onChange={handleChange}
               />
             </div>
           </div>
         </section>
 
         <div className="save-btn-container">
-          <button type="submit" className="save-btn">{id ? "Update" : "Save"}</button>
+          <button type="submit" className="save-btn">
+            {id ? "Update" : "Save"}
+          </button>
         </div>
       </form>
     </div>

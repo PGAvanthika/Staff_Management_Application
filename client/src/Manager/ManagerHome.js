@@ -4,6 +4,7 @@ import { Card } from "react-bootstrap";
 import { Doughnut, Bar, Line } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import Profile from "../Components/Profile";
+import TaskAllocation from "../Components/TaskAllocation";
 
 import {
   Chart as ChartJS,
@@ -115,19 +116,23 @@ const ManagerHome = () => {
               </button>
             </li>
             {[
-              "TASK ALLOCATION",
-              "REVIEW",
-              "TEAM PERFORMANCE",
-              "PAY ROLL SLIP",
-              "DUE EXTENSIONS",
-              "YOUR TASKS",
+              { label: "TASK ALLOCATION", route: "Components/TaskAllocation" },
+              { label: "REVIEW" },
+              { label: "TEAM PERFORMANCE" },
+              { label: "PAY ROLL SLIP" },
+              { label: "DUE EXTENSIONS" },
+              { label: "YOUR TASKS" },
             ].map((item, index) => (
               <li
                 className="nav-item py-2 border-bottom"
                 key={index}
-                style={{ fontWeight: "bold" }}
+                style={{
+                  fontWeight: "bold",
+                  cursor: item.route ? "pointer" : "default",
+                }}
+                onClick={() => item.route && navigate(item.route)}
               >
-                {item}
+                {item.label}
               </li>
             ))}
           </ul>
