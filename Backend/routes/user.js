@@ -5,7 +5,7 @@ const sql = require('../config/db');
 const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
 
 // Save user
-router.post('/save', async (req, res) => {
+router.post('/save', isLoggedIn, isAdmin, async (req, res) => {
   const data = req.body;
 
   try {
@@ -62,7 +62,7 @@ router.post('/save', async (req, res) => {
 });
 
 // Get all users
-router.get('/all', async (req, res) => {
+router.get('/all', isLoggedIn, isAdmin, async (req, res) => {
   try {
     const { role } = req.query;
     let users;
@@ -90,10 +90,13 @@ router.get('/all', async (req, res) => {
 });
 
 // Delete user by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', isLoggedIn, isAdmin, async (req, res) => {
   const userId = req.params.id;
 
   try {
+    console.log("Authenticated user:", req.user); // Log the authenticated user
+    console.log("Deleting user ID:", userId);
+
     await sql`BEGIN`;
     await sql`DELETE FROM user_professional_info WHERE id = ${userId}`;
     await sql`DELETE FROM user_contact_info WHERE id = ${userId}`;
@@ -108,5 +111,86 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
+
+// user.js - Get a user by ID for editing
+router.get('/:id', isLoggedIn, isAdmin, async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Query to get the user's full information
+    const result = await sql`
+      SELECT u.id, u.role, p.fname, p.lname, p.father_name, p.mother_name, p.dob,
+             p.gender, p.blood_group, p.nationality, p.aadhar, p.pan,
+             c.phone_no, c.alternate_no, c.email, c.address, c.emergency_name,
+             c.emergency_num, c.emergency_relation, c.emergency_address,
+             pr.school, pr.school_completion_year, pr.college, pr.college_completion_year,
+             pr.dept, pr.date_of_joining, pr.prev_exp
+      FROM users u
+      JOIN user_personal_info p ON u.id = p.id
+      JOIN user_contact_info c ON u.id = c.id
+      JOIN user_professional_info pr ON u.id = pr.id
+      WHERE u.id = ${userId}
+    `;
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch user data" });
+  }
+});
+
+// user.js
+
+// Update user
+router.put('/update/:id', isLoggedIn, isAdmin, async (req, res) => {
+  const userId = req.params.id;
+  const data = req.body;
+
+  try {
+    await sql`BEGIN`;
+
+    // Update user_personal_info
+    await sql`
+      UPDATE user_personal_info
+      SET fname = ${data.fname}, lname = ${data.lname}, father_name = ${data.father_name},
+          mother_name = ${data.mother_name}, dob = ${data.dob}, gender = ${data.gender},
+          blood_group = ${data.blood_group}, nationality = ${data.nationality},
+          aadhar = ${data.aadhar}, pan = ${data.pan}
+      WHERE id = ${userId}
+    `;
+
+    // Update user_contact_info
+    await sql`
+      UPDATE user_contact_info
+      SET phone_no = ${data.phone}, alternate_no = ${data.alt_phone}, email = ${data.email},
+          address = ${data.address}, emergency_name = ${data.emergency_contact_name},
+          emergency_num = ${data.emergency_contact_no}, emergency_relation = ${data.emergency_relation},
+          emergency_address = ${data.emergency_address}
+      WHERE id = ${userId}
+    `;
+
+    // Update user_professional_info
+    await sql`
+      UPDATE user_professional_info
+      SET school = ${data.school}, school_completion_year = ${parseInt(data.school_year)},
+          college = ${data.college}, college_completion_year = ${parseInt(data.college_year)},
+          dept = ${data.dept}, prev_exp = ${parseInt(data.experience)}, date_of_joining = ${data.doj}
+      WHERE id = ${userId}
+    `;
+
+    await sql`COMMIT`;
+
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (err) {
+    await sql`ROLLBACK`;
+    console.error('Transaction failed:', err);
+    res.status(500).json({ error: "Failed to update user. Transaction rolled back." });
+  }
+});
+
 
 module.exports = router;

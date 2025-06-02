@@ -8,7 +8,7 @@ const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleClick = () => {
-    navigate("/UserForm");
+    navigate(`/UserForm/${id}`); // Pass the user ID when navigating
   };
 
   const handleDeleteClick = () => {
@@ -18,7 +18,10 @@ const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
   const confirmDelete = async () => {
     try {
       console.log("Deleting user with ID:", id);
-      await axios.delete(`http://localhost:3001/api/user/${id}`);
+      // Ensure to send credentials (cookies) along with the request
+      await axios.delete(`http://localhost:3001/api/user/${id}`, {
+        withCredentials: true, // Send cookies (JWT token) along with the request
+      });
       setShowConfirm(false);
       if (onUserDeleted) onUserDeleted(id);
     } catch (err) {
