@@ -352,6 +352,7 @@ const UserForm = () => {
               <input
                 name="dob"
                 type="date"
+                value={form.dob}
                 onChange={handleChange}
                 placeholder="YYYY-MM-DD"
                 pattern="\d{4}-\d{2}-\d{2}"
@@ -587,8 +588,9 @@ const UserForm = () => {
 
             <div className="input-wrapper">
               <input
-                name="dob"
+                name="doj"
                 type="date"
+                value={form.doj}
                 onChange={handleChange}
                 placeholder="YYYY-MM-DD"
                 pattern="\d{4}-\d{2}-\d{2}"
