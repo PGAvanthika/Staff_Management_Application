@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Card } from "react-bootstrap";
 import { Doughnut, Bar, Line } from "react-chartjs-2";
-import { useNavigate } from "react-router-dom";
 import Profile from "../Components/Profile";
 import TaskAllocation from "../Components/TaskAllocation";
 
@@ -30,19 +29,17 @@ ChartJS.register(
 );
 
 const ManagerHome = () => {
-  const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const [currentPage, setCurrentPage] = useState("dashboard");
 
   const handleLogOut = () => {
-    navigate("/");
+    window.location.href = "/";
   };
 
-  // Show profile overlay
   const handleProfile = () => {
     setShowProfile(true);
   };
 
-  // Close profile overlay
   const handleCloseProfile = () => {
     setShowProfile(false);
   };
@@ -96,18 +93,27 @@ const ManagerHome = () => {
   };
 
   return (
-    <div className="container-fluid bg-light min-vh-100 position-relative">
-      <div className="row">
-        {/* Sidebar */}
+    <div className="container-fluid p-0 m-0">
+      <div className="d-flex">
+        {/* Fixed Sidebar */}
         <div
-          className="col-lg-2 col-md-3 p-3 border-end min-vh-100"
-          style={{ backgroundColor: "#abcef5" }}
+          className="p-3 border-end"
+          style={{
+            width: "220px",
+            backgroundColor: "#abcef5",
+            position: "fixed",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: "auto",
+            zIndex: 1000,
+          }}
         >
           <ul className="nav flex-column mt-4">
             <li className="mb-3 text-center">
               <button
                 className="btn btn-outline-primary"
-                onClick={handleProfile} // Show profile overlay when clicked
+                onClick={handleProfile}
               >
                 <ion-icon
                   name="person-circle-outline"
@@ -116,7 +122,8 @@ const ManagerHome = () => {
               </button>
             </li>
             {[
-              { label: "TASK ALLOCATION", route: "Components/TaskAllocation" },
+              { label: "HOME", key :"dashboard" },
+              { label: "TASK ALLOCATION", key: "taskAllocation" },
               { label: "REVIEW" },
               { label: "TEAM PERFORMANCE" },
               { label: "PAY ROLL SLIP" },
@@ -128,9 +135,9 @@ const ManagerHome = () => {
                 key={index}
                 style={{
                   fontWeight: "bold",
-                  cursor: item.route ? "pointer" : "default",
+                  cursor: item.key ? "pointer" : "default",
                 }}
-                onClick={() => item.route && navigate(item.route)}
+                onClick={() => item.key && setCurrentPage(item.key)}
               >
                 {item.label}
               </li>
@@ -138,8 +145,17 @@ const ManagerHome = () => {
           </ul>
         </div>
 
-        {/* Main Content */}
-        <div className="col-lg-10 col-md-9 p-4">
+        {/* Scrollable Main Content */}
+        <div
+          className="p-4"
+          style={{
+            marginLeft: "220px",
+            height: "100vh",
+            overflowY: "auto",
+            width: "100%",
+            backgroundColor: "#f8f9fa",
+          }}
+        >
           {/* Logout Button */}
           <div className="d-flex justify-content-end mb-4">
             <button className="btn btn-light shadow-sm" onClick={handleLogOut}>
@@ -150,76 +166,84 @@ const ManagerHome = () => {
             </button>
           </div>
 
-          {/* Weekly Summary */}
-          <div className="row g-3 mb-4">
-            <div className="col-md-3">
-              <Card className="p-3 text-center shadow-sm">
-                <div>
-                  <strong>28</strong>
-                  <br />
-                  Tasks Completed
+          {/* Content Switcher */}
+          {currentPage === "dashboard" && (
+            <>
+              {/* Weekly Summary */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-3">
+                  <Card className="p-3 text-center shadow-sm">
+                    <div>
+                      <strong>28</strong>
+                      <br />
+                      Tasks Completed
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div className="col-md-3">
-              <Card className="p-3 text-center shadow-sm">
-                <div>
-                  <strong>5</strong>
-                  <br />
-                  Tasks Overdue
+                <div className="col-md-3">
+                  <Card className="p-3 text-center shadow-sm">
+                    <div>
+                      <strong>5</strong>
+                      <br />
+                      Tasks Overdue
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div className="col-md-3">
-              <Card className="p-3 text-center shadow-sm">
-                <div>
-                  <strong>$12.5k</strong>
-                  <br />
-                  Sales
+                <div className="col-md-3">
+                  <Card className="p-3 text-center shadow-sm">
+                    <div>
+                      <strong>$12.5k</strong>
+                      <br />
+                      Sales
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div className="col-md-3">
-              <Card className="p-3 text-center shadow-sm">
-                <div>
-                  <strong>15</strong>
-                  <br />
-                  Meetings
+                <div className="col-md-3">
+                  <Card className="p-3 text-center shadow-sm">
+                    <div>
+                      <strong>15</strong>
+                      <br />
+                      Meetings
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-          </div>
+              </div>
 
-          {/* Performance Charts */}
-          <div className="row g-3 mb-4">
-            <div className="col-md-4">
-              <Card className="text-center shadow-sm p-3">
-                <h5>OVERALL PERFORMANCE</h5>
-                <div className="my-3">
-                  <Doughnut data={doughnutData} />
+              {/* Performance Charts */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-4">
+                  <Card className="text-center shadow-sm p-3">
+                    <h5>OVERALL PERFORMANCE</h5>
+                    <div className="my-3">
+                      <Doughnut data={doughnutData} />
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div className="col-md-8">
+                <div className="col-md-8">
+                  <Card className="shadow-sm p-3">
+                    <h5 className="text-center">DAILY PERFORMANCE</h5>
+                    <Bar data={barData} />
+                  </Card>
+                </div>
+              </div>
+
+              {/* Monthly Graph */}
               <Card className="shadow-sm p-3">
-                <h5 className="text-center">DAILY PERFORMANCE</h5>
-                <Bar data={barData} />
+                <h5 className="text-center mb-3">Monthly Task Trends</h5>
+                <Line data={lineData} />
               </Card>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* Monthly Graph */}
-          <Card className="shadow-sm p-3">
-            <h5 className="text-center mb-3">Monthly Task Trends</h5>
-            <Line data={lineData} />
-          </Card>
+          {currentPage === "taskAllocation" && <TaskAllocation />}
+          {/* Future routes like Review can go here */}
         </div>
       </div>
 
       {/* Profile Overlay */}
       {showProfile && (
         <div
-          onClick={handleCloseProfile} // optional: closes when clicking background div
+          onClick={handleCloseProfile}
           style={{
             position: "fixed",
             top: 0,
@@ -233,7 +257,6 @@ const ManagerHome = () => {
             alignItems: "center",
           }}
         >
-          {/* Pass onClose prop here */}
           <Profile onClose={handleCloseProfile} />
         </div>
       )}
