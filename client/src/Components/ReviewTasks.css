@@ -1,0 +1,25 @@
+.review-container {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .sidebar {
+    min-width: 220px;
+  }
+  
+  .home-icon {
+    font-size: 1.5rem;
+  }
+  
+  .review-icon {
+    font-size: 3rem;
+  }
+  
+  .project-id {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .task-status {
+    border: 2px solid #888;
+  }
+  

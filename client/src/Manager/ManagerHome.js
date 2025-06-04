@@ -4,6 +4,8 @@ import { Card } from "react-bootstrap";
 import { Doughnut, Bar, Line } from "react-chartjs-2";
 import Profile from "../Components/Profile";
 import TaskAllocation from "../Components/TaskAllocation";
+import ReviewTasks from "../Components/ReviewTasks";
+import TeamPerformance from "../Components/TeamPerformance";
 
 import {
   Chart as ChartJS,
@@ -13,9 +15,10 @@ import {
   LinearScale,
   LineElement,
   PointElement,
-  Tooltip,
+  Tooltip,    
   Legend,
 } from "chart.js";
+
 
 ChartJS.register(
   ArcElement,
@@ -122,10 +125,10 @@ const ManagerHome = () => {
               </button>
             </li>
             {[
-              { label: "HOME", key :"dashboard" },
+              { label: "HOME", key: "dashboard" },
               { label: "TASK ALLOCATION", key: "taskAllocation" },
-              { label: "REVIEW" },
-              { label: "TEAM PERFORMANCE" },
+              { label: "REVIEW", key: "ReviewTasks" },
+              { label: "TEAM PERFORMANCE", key: "TeamPerformance" },
               { label: "PAY ROLL SLIP" },
               { label: "DUE EXTENSIONS" },
               { label: "YOUR TASKS" },
@@ -236,6 +239,9 @@ const ManagerHome = () => {
           )}
 
           {currentPage === "taskAllocation" && <TaskAllocation />}
+          {currentPage === "ReviewTasks" && <ReviewTasks />}
+          {currentPage === "TeamPerformance" && <TeamPerformance />}
+
           {/* Future routes like Review can go here */}
         </div>
       </div>
