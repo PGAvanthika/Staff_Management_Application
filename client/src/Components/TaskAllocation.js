@@ -1,9 +1,32 @@
 import React, { useState } from "react";
 import "./TaskAllocation.css";
 import taskIllustration from "../Assets/Taskallocation.png";
+import axios from "axios"; 
 
 function TaskAllocation() {
   const [showOverlay, setShowOverlay] = useState(false);
+  const [projectId, setProjectId] = useState("");
+  const [projectName, setProjectName] = useState("");
+
+  const handleProjectSubmit = async () => {
+  try {
+    await axios.post("http://localhost:3001/api/projects", {
+      project_id: projectId,
+      project_name: projectName,
+    });
+    alert("Project added successfully!");
+    setShowOverlay(false);
+    setProjectId("");
+    setProjectName("");
+  } catch (error) {
+  console.error("Failed to create project:", error.response?.data || error);
+  alert(
+    error.response?.data?.message || " Failed to create project. Try again."
+  );
+}
+
+};
+
 
   return (
     <div className="container-fluid task-page overflow-hidden position-relative">
@@ -16,16 +39,17 @@ function TaskAllocation() {
               type="text"
               className="form-control mb-3"
               placeholder="Project ID"
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
             />
             <input
               type="text"
               className="form-control mb-4"
               placeholder="Project Name"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
             />
-            <button
-              className="custom-button w-100"
-              onClick={() => setShowOverlay(false)}
-            >
+            <button className="custom-button w-100" onClick={handleProjectSubmit}>
               Create
             </button>
           </div>
