@@ -1,23 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const sql = require('../config/db'); // Make sure this is a pg Pool
+const db = require('../config/db');
 
-router.post('/', async (req, res) => {
-  const { project_id, project_name } = req.body;
 
-  if (!project_id || !project_name) {
-    return res.status(400).json({ message: "Project ID and Name required" });
-  }
+// GET /api/projects/:projectId - Check if project exists
+router.get("/:projectId", async (req, res) => {
+  const { projectId } = req.params;
 
   try {
-    await sql.query(
-      "INSERT INTO projects (project_id, project_name) VALUES ($1, $2)",
-      [project_id, project_name]
+    // db.query returns array of rows directly
+    const rows = await db.query(
+      "SELECT project_id FROM projects WHERE project_id = $1",
+      [projectId]
     );
-    res.status(201).json({ message: "Project created successfully" });
-  } catch (err) {
-    console.error("DB Error:", err);
-    res.status(500).json({ message: "Database error" });
+
+    if (!rows || !Array.isArray(rows)) {
+      throw new Error("Invalid response from database");
+    }
+
+    res.json({ exists: rows.length > 0 });
+  } catch (error) {
+    console.error("Project check error:", error);
+    res.status(500).json({
+      message: "Database error while checking project",
+      error: error.message,
+    });
   }
 });
 
