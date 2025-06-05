@@ -1,106 +1,39 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Card } from "react-bootstrap";
-import { Doughnut, Bar, Line } from "react-chartjs-2";
 import Profile from "../Components/Profile";
 import TaskAllocation from "../Components/TaskAllocation";
 import ReviewTasks from "../Components/ReviewTasks";
 import TeamPerformance from "../Components/TeamPerformance";
-
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,    
-  Legend,
-} from "chart.js";
-
-
-ChartJS.register(
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend
-);
+import DashboardUI from "../Components/DashboardUI";
+import ToDo from "./ToDo.js";
 
 const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState("DashboardUI");
 
   const handleLogOut = () => {
     window.location.href = "/";
   };
 
-  const handleProfile = () => {
-    setShowProfile(true);
-  };
+  const handleProfile = () => setShowProfile(true);
+  const handleCloseProfile = () => setShowProfile(false);
 
-  const handleCloseProfile = () => {
-    setShowProfile(false);
-  };
-
-  const doughnutData = {
-    labels: ["Completed", "Remaining"],
-    datasets: [
-      {
-        data: [78, 22],
-        backgroundColor: ["#007bff", "#e9ecef"],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const barData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    datasets: [
-      {
-        label: "Daily Performance",
-        data: [20, 35, 45, 60, 80, 65, 50],
-        backgroundColor: "#6c757d",
-      },
-    ],
-  };
-
-  const lineData = {
-    labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
-    datasets: [
-      {
-        label: "Tasks Completed",
-        data: [10, 20, 30, 40, 50, 60, 70, 85, 75, 80, 70, 65],
-        fill: false,
-        borderColor: "#007bff",
-        tension: 0.3,
-      },
-    ],
-  };
+  const navItems = [
+    { label: "HOME", key: "DashboardUI", icon: "home-outline" },
+    {label: "TASK ALLOCATION",key: "taskAllocation",icon: "clipboard-outline",},
+    { label: "REVIEW", key: "ReviewTasks", icon: "eye-outline" },
+    {label: "TEAM PERFORMANCE",key: "TeamPerformance",icon: "people-outline" },
+    { label: "PAY ROLL SLIP", key: "DashboardUI", icon: "cash-outline" },
+    { label: "DUE EXTENSIONS", icon: "time-outline" },
+    { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
+  ];
 
   return (
     <div className="container-fluid p-0 m-0">
       <div className="d-flex">
-        {/* Fixed Sidebar */}
+        {/* Sidebar */}
         <div
-          className="p-3 border-end"
+          className="p-3 border-end d-flex flex-column justify-content-between"
           style={{
             width: "220px",
             backgroundColor: "#abcef5",
@@ -112,137 +45,75 @@ const ManagerHome = () => {
             zIndex: 1000,
           }}
         >
-          <ul className="nav flex-column mt-4">
-            <li className="mb-3 text-center">
+          <div>
+            <div className="text-center mb-4">
               <button
-                className="btn btn-outline-primary"
+                className="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center"
                 onClick={handleProfile}
+                style={{ height: "50px" }}
               >
                 <ion-icon
                   name="person-circle-outline"
                   style={{ fontSize: "1.8rem" }}
                 ></ion-icon>
               </button>
-            </li>
-            {[
-              { label: "HOME", key: "dashboard" },
-              { label: "TASK ALLOCATION", key: "taskAllocation" },
-              { label: "REVIEW", key: "ReviewTasks" },
-              { label: "TEAM PERFORMANCE", key: "TeamPerformance" },
-              { label: "PAY ROLL SLIP" },
-              { label: "DUE EXTENSIONS" },
-              { label: "YOUR TASKS" },
-            ].map((item, index) => (
-              <li
-                className="nav-item py-2 border-bottom"
-                key={index}
-                style={{
-                  fontWeight: "bold",
-                  cursor: item.key ? "pointer" : "default",
-                }}
-                onClick={() => item.key && setCurrentPage(item.key)}
-              >
-                {item.label}
-              </li>
-            ))}
-          </ul>
+            </div>
+            <ul className="nav flex-column">
+              {navItems.map((item, index) => (
+                <li className="nav-item border-bottom" key={index}>
+                  <button
+                    className="btn btn-link w-100 text-start d-flex align-items-center px-2 py-2"
+                    style={{
+                      textDecoration: "none",
+                      color: "inherit",
+                      fontWeight: "bold",
+                      cursor: item.key ? "pointer" : "default",
+                    }}
+                    onClick={() => item.key && setCurrentPage(item.key)}
+                  >
+                    <ion-icon
+                      name={item.icon}
+                      style={{ fontSize: "1.5rem", marginRight: "10px" }}
+                    ></ion-icon>
+                    {item.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Logout Button at Bottom */}
+          <div className="text-center mt-4">
+            <button
+              className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
+              onClick={handleLogOut}
+              style={{ height: "45px" }}
+            >
+              <ion-icon
+                name="power-outline"
+                style={{ fontSize: "1.5rem", color: "#dc3545" }}
+              ></ion-icon>
+            </button>
+          </div>
         </div>
 
-        {/* Scrollable Main Content */}
+        {/* Main Content */}
         <div
-          className="p-4"
+          className="main-content-wrapper p-4"
           style={{
             marginLeft: "220px",
             height: "100vh",
             overflowY: "auto",
-            width: "100%",
+            overflowX: "hidden",
             backgroundColor: "#f8f9fa",
+            flex: 1,
           }}
         >
-          {/* Logout Button */}
-          <div className="d-flex justify-content-end mb-4">
-            <button className="btn btn-light shadow-sm" onClick={handleLogOut}>
-              <ion-icon
-                name="power-outline"
-                style={{ fontSize: "1.8rem", color: "#dc3545" }}
-              ></ion-icon>
-            </button>
-          </div>
-
-          {/* Content Switcher */}
-          {currentPage === "dashboard" && (
-            <>
-              {/* Weekly Summary */}
-              <div className="row g-3 mb-4">
-                <div className="col-md-3">
-                  <Card className="p-3 text-center shadow-sm">
-                    <div>
-                      <strong>28</strong>
-                      <br />
-                      Tasks Completed
-                    </div>
-                  </Card>
-                </div>
-                <div className="col-md-3">
-                  <Card className="p-3 text-center shadow-sm">
-                    <div>
-                      <strong>5</strong>
-                      <br />
-                      Tasks Overdue
-                    </div>
-                  </Card>
-                </div>
-                <div className="col-md-3">
-                  <Card className="p-3 text-center shadow-sm">
-                    <div>
-                      <strong>$12.5k</strong>
-                      <br />
-                      Sales
-                    </div>
-                  </Card>
-                </div>
-                <div className="col-md-3">
-                  <Card className="p-3 text-center shadow-sm">
-                    <div>
-                      <strong>15</strong>
-                      <br />
-                      Meetings
-                    </div>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Performance Charts */}
-              <div className="row g-3 mb-4">
-                <div className="col-md-4">
-                  <Card className="text-center shadow-sm p-3">
-                    <h5>OVERALL PERFORMANCE</h5>
-                    <div className="my-3">
-                      <Doughnut data={doughnutData} />
-                    </div>
-                  </Card>
-                </div>
-                <div className="col-md-8">
-                  <Card className="shadow-sm p-3">
-                    <h5 className="text-center">DAILY PERFORMANCE</h5>
-                    <Bar data={barData} />
-                  </Card>
-                </div>
-              </div>
-
-              {/* Monthly Graph */}
-              <Card className="shadow-sm p-3">
-                <h5 className="text-center mb-3">Monthly Task Trends</h5>
-                <Line data={lineData} />
-              </Card>
-            </>
-          )}
-
+          {currentPage === "DashboardUI" && <DashboardUI />}
           {currentPage === "taskAllocation" && <TaskAllocation />}
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
-
-          {/* Future routes like Review can go here */}
+          {currentPage === "ToDo" && <ToDo />}
         </div>
       </div>
 

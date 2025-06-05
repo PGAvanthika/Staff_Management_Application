@@ -40,12 +40,13 @@ const ReviewTasks = () => {
 
   return (
     <div className="container-fluid review-container d-flex flex-column flex-md-row vh-100">
-      <div className="sidebar bg-light p-3 border-end">
-        <div className="home-icon mb-3">🏠</div>
+      <div className="sidebar bg-white border-end p-3 d-flex flex-column">
         {projectsData.map((project) => (
           <div
             key={project.id}
-            className="menu-item btn btn-outline-secondary text-start w-100 mb-2"
+            className={`menu-item px-3 py-2 fw-bold text-start ${
+              selectedProject?.id === project.id ? "active" : ""
+            }`}
             onClick={() => setSelectedProject(project)}
           >
             {project.title}

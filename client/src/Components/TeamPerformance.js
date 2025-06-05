@@ -32,7 +32,6 @@ const TeamPerformance = () => {
     <div className="container-fluid vh-100 d-flex p-0">
       {/* Sidebar */}
       <div className="sidebar bg-white border-end p-3 d-flex flex-column">
-        <div className="mb-4 home-icon fs-4">🏠</div>
         {projectNames.map((name) => (
           <div
             key={name}
