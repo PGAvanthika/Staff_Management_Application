@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-
+const { isLoggedIn, isManager } = require('../middlewares/authMiddleware');
 // POST /api/tasks - Create new task
 router.post("/", async (req, res) => {
   try {
