@@ -1,0 +1,100 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 250px; /* Equal to the width of your sidebar */
+    width: calc(100% - 250px); /* Prevent overlay from covering the sidebar */
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  
+  .overlay-content {
+    background-color: #fff;
+    border-radius: 15px;
+    width: 95%;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    position: relative;
+  }
+  
+  .due-extension-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .left-illustration {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .left-illustration img {
+    max-width: 700px;
+    height: auto;
+  }
+  
+  .right-form {
+    flex: 2;
+    background-color: #f5f5f5;
+    border-radius: 15px;
+    min-width: 500px;
+    padding: 20px;
+  }
+  
+  .form-title {
+    font-weight: bold;
+    font-size: 1.8rem;
+  }
+  
+  .form-control {
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 10px 15px;
+  }
+  
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+    font-size: 28px;
+    z-index: 1000;
+  }
+  
+  @media (max-width: 768px) {
+    .overlay-content {
+      flex-direction: column;
+      padding: 20px;
+    }
+  
+    .right-form {
+      width: 100%;
+    }
+  
+    .left-illustration img {
+      max-width: 80%;
+    }
+  
+    .close-icon {
+      top: 10px;
+      right: 10px;
+      left: auto;
+    }
+  }
+  

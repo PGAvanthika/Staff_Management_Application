@@ -6,6 +6,7 @@ import ReviewTasks from "../Components/ReviewTasks";
 import TeamPerformance from "../Components/TeamPerformance";
 import DashboardUI from "../Components/DashboardUI";
 import ToDo from "./ToDo.js";
+import DueApproval from "../Components/DueApproval.js";
 
 const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -24,7 +25,7 @@ const ManagerHome = () => {
     { label: "REVIEW", key: "ReviewTasks", icon: "eye-outline" },
     {label: "TEAM PERFORMANCE",key: "TeamPerformance",icon: "people-outline" },
     { label: "PAY ROLL SLIP", key: "DashboardUI", icon: "cash-outline" },
-    { label: "DUE EXTENSIONS", icon: "time-outline" },
+    { label: "DUE EXTENSIONS",key: "DueApproval", icon: "time-outline" },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
   ];
 
@@ -113,6 +114,7 @@ const ManagerHome = () => {
           {currentPage === "taskAllocation" && <TaskAllocation />}
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
+          {currentPage === "DueApproval" && <DueApproval />}
           {currentPage === "ToDo" && <ToDo />}
         </div>
       </div>
