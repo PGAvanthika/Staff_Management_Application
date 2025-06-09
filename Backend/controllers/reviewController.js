@@ -1,8 +1,10 @@
+// controllers/reviewController.js
 const reviewService = require("../services/reviewService");
 
-exports.getAllProjects = async (req, res) => {
+exports.getProjectsForManager = async (req, res) => {
   try {
-    const projects = await reviewService.fetchAllProjects();
+    const managerId = req.user.id;
+    const projects = await reviewService.fetchProjectsByManager(managerId);
     res.json(projects);
   } catch (err) {
     console.error("Error fetching projects:", err);
@@ -10,11 +12,12 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
-exports.getTasksByProject = async (req, res) => {
+exports.getTasksByProjectForManager = async (req, res) => {
   const { projectId } = req.params;
+  const managerId = req.user.id;
 
   try {
-    const tasks = await reviewService.fetchTasksByProject(projectId);
+    const tasks = await reviewService.fetchTasksByProjectAndManager(projectId, managerId);
     res.json(tasks);
   } catch (err) {
     console.error("Error fetching tasks:", err);
