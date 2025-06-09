@@ -7,10 +7,10 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 
 const authRoute = require('./routes/authRoutes');
-const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/userRoutes');
 const logRoutes = require('./routes/logRoutes');
 const projectRoutes = require('./routes/projectRoutes');
-const taskRoutes = require('./routes/taskRoutes'); // ✅ include this
+const taskRoutes = require('./routes/taskRoutes'); 
 const reviewRoutes = require('./routes/reviewRoutes');
 
 dotenv.config();
@@ -34,6 +34,7 @@ app.use('/api', logRoutes);
 app.use('/api/projects', projectRoutes);  // handles /api/projects
 app.use('/api/tasks', taskRoutes);       // ✅ handles /api/tasks
 app.use('/api/review', reviewRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Start server
 app.listen(PORT, () => {
