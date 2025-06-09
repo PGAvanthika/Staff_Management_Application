@@ -12,9 +12,23 @@ const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [currentPage, setCurrentPage] = useState("DashboardUI");
 
-  const handleLogOut = () => {
-    window.location.href = "/";
-  };
+  const handleLogOut = async () => {
+  try {
+    const response = await fetch('http://localhost:3001/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include', 
+    });
+
+    if (response.ok) {
+      window.location.href = '/';
+    } else {
+      console.error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
+
 
   const handleProfile = () => setShowProfile(true);
   const handleCloseProfile = () => setShowProfile(false);
