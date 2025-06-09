@@ -4,16 +4,17 @@ const db = require("../config/db");
 
 router.get("/projects", async (req, res) => {
   try {
-    // result is already an array of projects, not { rows: [...] }
     const result = await db.query("SELECT * FROM projects ORDER BY created_at DESC");
-
-    // Defensive check: make sure result is an array
-    if (!Array.isArray(result)) {
+    
+    // Handle both possible return formats from your db query method
+    const projectsData = result.rows || result;
+    
+    if (!Array.isArray(projectsData)) {
       console.error("Unexpected query result:", result);
       return res.status(500).json({ error: "Invalid data received from database" });
     }
 
-    const projects = result.map(project => ({
+    const projects = projectsData.map(project => ({
       id: project.project_id,
       title: project.project_name,
     }));
@@ -25,5 +26,29 @@ router.get("/projects", async (req, res) => {
   }
 });
 
+router.get("/projects/:projectId/tasks", async (req, res) => {
+  const { projectId } = req.params;
+  
+  try {
+    const result = await db.query(
+      `SELECT task_id, description, deadline, task_status, assigned_to, assigned_by
+       FROM tasks WHERE project_id = $1 ORDER BY deadline`,
+      [projectId]
+    );
+
+    // Handle both possible return formats from your db query method
+    const tasksData = result.rows || result;
+    
+    if (!Array.isArray(tasksData)) {
+      console.error("Unexpected query result:", result);
+      return res.status(500).json({ error: "Invalid data from database" });
+    }
+    
+    return res.json(tasksData);
+  } catch (err) {
+    console.error("Error fetching tasks:", err);
+    return res.status(500).json({ error: "Failed to fetch tasks" });
+  }
+});
 
 module.exports = router;
