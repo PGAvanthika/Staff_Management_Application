@@ -1,42 +1,65 @@
 const db = require("../config/db");
 
+// Fetch all projects related to a manager
 exports.fetchProjectsByManager = async (managerId) => {
-  const result = await db.query(
-    `SELECT DISTINCT p.project_id, p.project_name, p.created_at
-     FROM projects p
-     JOIN tasks t ON t.project_id = p.project_id
-     WHERE t.assigned_by = $1 OR t.assigned_to = $1
-     ORDER BY p.created_at DESC`,
-    [managerId]
-  );
-  const projectsData = result.rows || result;
+  const query = `
+    SELECT DISTINCT p.project_id, p.project_name, p.created_at
+    FROM projects p
+    JOIN tasks t ON t.project_id = p.project_id
+    WHERE t.assigned_by = $1 OR t.assigned_to = $1
+    ORDER BY p.created_at DESC
+  `;
 
-  if (!Array.isArray(projectsData)) {
-    throw new Error("Invalid data received from database");
+  try {
+    const result = await db.query(query, [managerId]);
+
+    // If result is an array, use it directly
+    if (!Array.isArray(result)) {
+      console.error("Invalid DB response structure:", result);
+      throw new Error("Unexpected DB response format");
+    }
+
+    console.log("Projects fetched for manager", managerId, result);
+
+    return result.map(project => ({
+      id: project.project_id,
+      title: project.project_name,
+      createdAt: project.created_at,
+    }));
+  } catch (error) {
+    console.error("DB query failed:", error.message);
+    throw error;
   }
-
-  return projectsData.map(project => ({
-    id: project.project_id,
-    title: project.project_name,
-    // Optionally include createdAt if you want to use it later:
-    // createdAt: project.created_at,
-  }));
 };
 
+// Fetch tasks for a given project and manager
 exports.fetchTasksByProjectAndManager = async (projectId, managerId) => {
-  const result = await db.query(
-    `SELECT task_id, description, deadline, task_status, assigned_to, assigned_by
-     FROM tasks
-     WHERE project_id = $1 AND (assigned_by = $2 OR assigned_to = $2)
-     ORDER BY deadline`,
-    [projectId, managerId]
-  );
+  const query = `
+    SELECT t.task_id, t.description, t.deadline, t.task_status
+    FROM tasks t
+    WHERE t.project_id = $1
+      AND (t.assigned_by = $2 OR t.assigned_to = $2)
+    ORDER BY t.deadline ASC
+  `;
 
-  const tasksData = result.rows || result;
+  try {
+    const result = await db.query(query, [projectId, managerId]);
 
-  if (!Array.isArray(tasksData)) {
-    throw new Error("Invalid data received from database");
+    if (!Array.isArray(result)) {
+      console.error("Invalid DB response for tasks:", result);
+      throw new Error("Unexpected DB response format");
+    }
+
+    console.log(`Tasks fetched for manager ${managerId} in project ${projectId}:`, result);
+
+    return result.map(task => ({
+      task_id: task.task_id,
+      description: task.description,
+      deadline: task.deadline,
+      task_status: task.task_status,
+    }));
+  } catch (error) {
+    console.error("DB query failed (fetchTasksByProjectAndManager):", error.message);
+    throw error;
   }
-
-  return tasksData;
 };

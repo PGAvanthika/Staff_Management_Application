@@ -1,9 +1,10 @@
-// controllers/reviewController.js
 const reviewService = require("../services/reviewService");
 
 exports.getProjectsForManager = async (req, res) => {
   try {
-    const managerId = req.user.id;
+    const managerId = req.user.userId;
+    console.log("Authenticated Manager ID:", managerId);
+
     const projects = await reviewService.fetchProjectsByManager(managerId);
     res.json(projects);
   } catch (err) {
@@ -14,7 +15,7 @@ exports.getProjectsForManager = async (req, res) => {
 
 exports.getTasksByProjectForManager = async (req, res) => {
   const { projectId } = req.params;
-  const managerId = req.user.id;
+  const managerId = req.user.userId;
 
   try {
     const tasks = await reviewService.fetchTasksByProjectAndManager(projectId, managerId);

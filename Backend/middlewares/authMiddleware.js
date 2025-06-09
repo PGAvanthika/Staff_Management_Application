@@ -1,6 +1,5 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-// Middleware to verify if the user is logged in and attach user info
 function isLoggedIn(req, res, next) {
   const token =
     req.cookies?.access_token ||
@@ -12,6 +11,7 @@ function isLoggedIn(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded JWT payload:", decoded);
     req.user = decoded;
     next();
   } catch (error) {
@@ -19,7 +19,6 @@ function isLoggedIn(req, res, next) {
   }
 }
 
-// Role-based middleware generator: accept one or multiple allowed roles
 function authorizeRoles(...allowedRoles) {
   return (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
@@ -29,18 +28,16 @@ function authorizeRoles(...allowedRoles) {
   };
 }
 
-// Usage examples:
 const isAdmin = authorizeRoles("Admin");
 const isManager = authorizeRoles("Manager");
 const isTeamLeader = authorizeRoles("TeamLeader");
 const isEmployee = authorizeRoles("Employee");
 
-// Export middlewares
 module.exports = {
   isLoggedIn,
   isAdmin,
   isManager,
   isTeamLeader,
   isEmployee,
-  authorizeRoles, // export for flexible usage elsewhere
+  authorizeRoles,
 };

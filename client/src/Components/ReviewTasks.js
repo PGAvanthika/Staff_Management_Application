@@ -19,10 +19,17 @@ const ReviewTasks = () => {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
+  const token = localStorage.getItem("token");
+
   // Fetch projects once
   useEffect(() => {
     setLoadingProjects(true);
-    fetch("http://localhost:3001/api/review/projects")
+    fetch("http://localhost:3001/api/review/projects", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
@@ -41,7 +48,7 @@ const ReviewTasks = () => {
         setProjects([]);
       })
       .finally(() => setLoadingProjects(false));
-  }, []);
+  }, [token]);
 
   // Fetch tasks whenever selectedProject changes
   useEffect(() => {
@@ -51,7 +58,12 @@ const ReviewTasks = () => {
     }
 
     setLoadingTasks(true);
-    fetch(`http://localhost:3001/api/review/projects/${selectedProject.id}/tasks`)
+    fetch(`http://localhost:3001/api/review/projects/${selectedProject.id}/tasks`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
@@ -70,29 +82,27 @@ const ReviewTasks = () => {
         setTasks([]);
       })
       .finally(() => setLoadingTasks(false));
-  }, [selectedProject]);
+  }, [selectedProject, token]);
 
-  // Transform task status to match your statusColors mapping
   const getTaskStatus = (status) => {
-    // Map database status values to your UI status keys
     const statusMap = {
-      'assigned': 'assigned',
-      'in_progress': 'in-progress',
-      'in-progress': 'in-progress',
-      'completed': 'completed',
-      'submit_successful': 'submit-successful',
-      'submit-successful': 'submit-successful',
-      'overdue': 'overdue',
-      'unapproved': 'unapproved'
+      assigned: "assigned",
+      "in_progress": "in-progress",
+      "in-progress": "in-progress",
+      completed: "completed",
+      "submit_successful": "submit-successful",
+      "submit-successful": "submit-successful",
+      overdue: "overdue",
+      unapproved: "unapproved",
     };
-    return statusMap[status] || 'assigned';
+    return statusMap[status] || "assigned";
   };
 
   return (
     <div className="container-fluid review-container d-flex flex-column flex-md-row vh-100">
       <div className="sidebar bg-white border-end p-3 d-flex flex-column">
         <h5 className="mb-3 text-primary">Projects</h5>
-        
+
         {loadingProjects ? (
           <div className="text-center text-muted">
             <div className="spinner-border spinner-border-sm me-2" role="status"></div>
@@ -118,89 +128,37 @@ const ReviewTasks = () => {
         )}
       </div>
 
-      <div className="main flex-grow-1 d-flex flex-column p-0 bg-white">
-        {!selectedProject ? (
-          <div className="d-flex justify-content-center align-items-center flex-grow-1 text-center text-primary">
-            <div>
-              <div className="review-icon display-3 mb-3">💬</div>
-              <h2>It's Review Time</h2>
-              <p>Let's Optimize Your Vision.</p>
-            </div>
-          </div>
-        ) : (
-          <div
-            className="project-view p-4 w-100 h-100 flex-grow-1"
-            style={{ backgroundColor: "#d4dfff", minHeight: "100%" }}
-          >
-            <h1 className="fw-bold">{selectedProject.title}</h1>
-            <div className="project-id badge bg-secondary mb-3">
-              {selectedProject.id}
-            </div>
+      <div className="flex-fill p-3 overflow-auto">
+        <h5 className="text-primary mb-3">
+          {selectedProject ? `Tasks for ${selectedProject.title}` : "Select a project"}
+        </h5>
 
-            {loadingTasks ? (
-              <div className="text-center text-muted">
-                <div className="spinner-border me-2" role="status"></div>
-                Loading tasks...
-              </div>
-            ) : tasksError ? (
-              <div className="alert alert-danger" role="alert">
-                {tasksError}
-              </div>
-            ) : tasks.length > 0 ? (
-              tasks.map((task) => (
-                <div key={task.task_id} className="task-card card mb-3 shadow-sm">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <div className="d-flex align-items-center">
-                        <div className="task-icon me-3 fs-4">📋</div>
-                        <div>
-                          <strong>{task.task_id}</strong>
-                          <p className="mb-1">{task.description}</p>
-                        </div>
-                      </div>
-                      <div
-                        className="task-status rounded-circle border"
-                        style={{
-                          backgroundColor: statusColors[getTaskStatus(task.task_status)],
-                          width: "20px",
-                          height: "20px",
-                        }}
-                        title={`Status: ${task.task_status}`}
-                      ></div>
-                    </div>
-                    
-                    {/* Additional task details */}
-                    <div className="task-details mt-2 text-muted small">
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Status:</strong> {task.task_status}
-                        </div>
-                        <div className="col-md-6">
-                          <strong>Deadline:</strong>{" "}
-                          {task.deadline ? new Date(task.deadline).toLocaleDateString() : "N/A"}
-                        </div>
-                      </div>
-                      <div className="row mt-1">
-                        <div className="col-md-6">
-                          <strong>Assigned To:</strong> {task.assigned_to || "N/A"}
-                        </div>
-                        <div className="col-md-6">
-                          <strong>Assigned By:</strong> {task.assigned_by || "N/A"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-muted">
-                <div className="display-4 mb-3">📝</div>
-                <h4>No tasks found</h4>
-                <p>This project doesn't have any tasks yet.</p>
-              </div>
-            )}
+        {loadingTasks ? (
+          <div className="text-center text-muted">
+            <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+            Loading tasks...
           </div>
-        )}
+        ) : tasksError ? (
+          <p className="text-danger">{tasksError}</p>
+        ) : tasks.length > 0 ? (
+          <div className="list-group">
+            {tasks.map((task) => (
+              <div
+                key={task.task_id}
+                className="list-group-item mb-2 border rounded"
+                style={{
+                  backgroundColor: statusColors[getTaskStatus(task.task_status)],
+                }}
+              >
+                <h6 className="fw-bold">Task ID: {task.task_id}</h6>
+                <p className="mb-1">{task.description}</p>
+                <small className="text-muted">Deadline: {task.deadline}</small>
+              </div>
+            ))}
+          </div>
+        ) : selectedProject ? (
+          <p className="text-muted">No tasks available for this project.</p>
+        ) : null}
       </div>
     </div>
   );
