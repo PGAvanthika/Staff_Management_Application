@@ -7,6 +7,7 @@ function isLoggedIn(req, res, next) {
         req.cookies?.access_token || 
         (req.headers.authorization && req.headers.authorization.split(" ")[1]);
 
+
     if (!token) {
         return res.status(401).json({ redirect: true, message: "Not logged in" });
     }
@@ -19,6 +20,7 @@ function isLoggedIn(req, res, next) {
         return res.status(403).json({ redirect: true, message: "Invalid or expired token" });
     }
 }
+
 
 // Role-based middleware
 function isAdmin(req, res, next) {

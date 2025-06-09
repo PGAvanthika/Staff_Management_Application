@@ -17,12 +17,13 @@ exports.loginUser = async (req, res) => {
     );
 
     res.cookie("access_token", token, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
-      path: "/",
-      maxAge: 3600000, // 1 hour
+        httpOnly: true,
+        sameSite: "Lax",  // or 'None' with secure: true in production HTTPS
+        secure: false,    // set to true if using HTTPS in production
+        path: "/",
+        maxAge: 3600000,
     });
+
 
     await authService.logLoginAttempt(user.id, "login", "success");
 

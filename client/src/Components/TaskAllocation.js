@@ -20,10 +20,14 @@ function TaskAllocation() {
 
   const handleProjectSubmit = async () => {
     try {
-      await axios.post("http://localhost:3001/api/projects", {
-        project_id: projectId,
-        project_name: projectName,
-      });
+      await axios.post(
+        "http://localhost:3001/api/projects",
+        {
+          project_id: projectId,
+          project_name: projectName,
+        },
+        { withCredentials: true }
+      );
       alert("Project added successfully!");
       setShowOverlay(false);
       setProjectId("");
@@ -43,7 +47,10 @@ function TaskAllocation() {
   // Function to check if project exists
   const checkProjectExists = async (projectId) => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/projects/${projectId}`);
+      const response = await axios.get(
+        `http://localhost:3001/api/projects/${projectId}`,
+        { withCredentials: true }
+      );
       return response.data.exists; // Assuming the API returns { exists: true/false }
     } catch (error) {
       console.error("Error checking project:", error);
@@ -53,8 +60,14 @@ function TaskAllocation() {
 
   const handleTaskSubmit = async () => {
     // Validate required fields
-    if (!formData.task_id || !formData.project_id || !formData.assigned_to || 
-        !formData.assigned_by || !formData.description || !formData.deadline) {
+    if (
+      !formData.task_id ||
+      !formData.project_id ||
+      !formData.assigned_to ||
+      !formData.assigned_by ||
+      !formData.description ||
+      !formData.deadline
+    ) {
       alert("Please fill in all required fields");
       return;
     }
@@ -71,27 +84,33 @@ function TaskAllocation() {
     try {
       // First check if project exists
       const projectExists = await checkProjectExists(formData.project_id);
-      
+
       if (!projectExists) {
-        alert(`Error: Project with ID '${formData.project_id}' does not exist. Please check the project ID or create the project first.`);
+        alert(
+          `Error: Project with ID '${formData.project_id}' does not exist. Please check the project ID or create the project first.`
+        );
         setIsSubmitting(false);
         return;
       }
 
       // If project exists, create the task
       console.log("Form Data Submitted:", formData);
-      await axios.post("http://localhost:3001/api/tasks", {
-        task_id: formData.task_id,
-        project_id: formData.project_id,
-        assigned_to: formData.assigned_to,
-        assigned_by: formData.assigned_by,
-        description: formData.description,
-        deadline: formData.deadline,
-        task_status: "assigned", // Default status as per your schema
-      });
-      
+      await axios.post(
+        "http://localhost:3001/api/tasks",
+        {
+          task_id: formData.task_id,
+          project_id: formData.project_id,
+          assigned_to: formData.assigned_to,
+          assigned_by: formData.assigned_by,
+          description: formData.description,
+          deadline: formData.deadline,
+          task_status: "assigned", // Default status as per your schema
+        },
+        { withCredentials: true }
+      );
+
       alert("Task created successfully!");
-      
+
       // Reset form after successful submission
       setFormData({
         task_id: "",
@@ -101,17 +120,21 @@ function TaskAllocation() {
         description: "",
         deadline: "",
       });
-      
     } catch (error) {
       console.error("Task creation failed:", error.response?.data || error);
-      
+
       // Handle specific error messages
       if (error.response?.status === 409) {
         alert("Error: Task ID already exists. Please use a different Task ID.");
       } else if (error.response?.status === 400) {
-        alert(error.response?.data?.message || "Invalid data provided. Please check your inputs.");
+        alert(
+          error.response?.data?.message ||
+            "Invalid data provided. Please check your inputs."
+        );
       } else {
-        alert(error.response?.data?.message || "Task creation failed. Please try again.");
+        alert(
+          error.response?.data?.message || "Task creation failed. Please try again."
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -149,7 +172,7 @@ function TaskAllocation() {
       {/* Add New Project Button */}
       <div className="position-absolute top-0 start-0 p-3">
         <button className="custom-button" onClick={() => setShowOverlay(true)}>
-           Add New Project
+          Add New Project
         </button>
       </div>
 
@@ -207,8 +230,8 @@ function TaskAllocation() {
 
             <div className="d-flex justify-content-between mt-4">
               <button className="custom-button w-50 me-2">Schedule</button>
-              <button 
-                className="custom-button w-50" 
+              <button
+                className="custom-button w-50"
                 onClick={handleTaskSubmit}
                 disabled={isSubmitting}
               >
