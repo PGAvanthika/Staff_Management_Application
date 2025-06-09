@@ -1,0 +1,36 @@
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    min-width: 200px;
+  }
+  
+  .menu-item {
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .menu-item:hover,
+  .menu-item.active {
+    background-color: #e6f0ff;
+  }
+  
+  /* Main Content */
+  .bg-custom {
+    background-color: #d4dfff;
+  }
+  
+  /* Staff Card */
+  .staff-card {
+    border-radius: 10px;
+  }
+  
+  .staff-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #000;
+    background-color: #ccc;
+  }
+  
