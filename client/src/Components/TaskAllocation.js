@@ -35,7 +35,7 @@ function TaskAllocation() {
       {/* Add New Project Button */}
       <div className="position-absolute top-0 start-0 p-3">
         <button className="custom-button" onClick={() => setShowOverlay(true)}>
-          + Add New Project
+           Add New Project
         </button>
       </div>
 

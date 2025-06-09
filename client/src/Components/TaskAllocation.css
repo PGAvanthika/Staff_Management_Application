@@ -79,7 +79,7 @@
   
   /* BUTTON STYLE */
   .custom-button {
-    background: linear-gradient(to right, #1a07eb, #4888ed);
+    background: linear-gradient(to right, #3c658e, #4888ed);
     color: white;
     font-weight: bold;
     border: none;
@@ -89,7 +89,7 @@
   }
   
   .custom-button:hover {
-    background: linear-gradient(to right, #4888ed, #1a07eb);
+    background: linear-gradient(to right, #4888ed, #3c658e);
   }
   
   /* OVERLAY */

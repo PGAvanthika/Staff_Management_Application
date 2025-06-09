@@ -21,11 +21,18 @@ const ManagerHome = () => {
 
   const navItems = [
     { label: "HOME", key: "DashboardUI", icon: "home-outline" },
-    {label: "TASK ALLOCATION",key: "taskAllocation",icon: "clipboard-outline",},
+    {
+      label: "TASK ALLOCATION",
+      key: "taskAllocation",
+      icon: "clipboard-outline",
+    },
     { label: "REVIEW", key: "ReviewTasks", icon: "eye-outline" },
-    {label: "TEAM PERFORMANCE",key: "TeamPerformance",icon: "people-outline" },
-    { label: "PAY ROLL SLIP", key: "DashboardUI", icon: "cash-outline" },
-    { label: "DUE EXTENSIONS",key: "DueApproval", icon: "time-outline" },
+    {
+      label: "TEAM PERFORMANCE",
+      key: "TeamPerformance",
+      icon: "people-outline",
+    },
+    { label: "DUE EXTENSIONS", key: "DueApproval", icon: "time-outline" },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
   ];
 
