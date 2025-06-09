@@ -11,6 +11,7 @@ const userRoutes = require('./routes/user');
 const logRoutes = require('./routes/logRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes'); // ✅ include this
+const reviewRoutes = require('./routes/reviewRoutes');
 
 dotenv.config();
 app.use(express.json());
@@ -32,6 +33,7 @@ app.use('/api/user', userRoutes);
 app.use('/api', logRoutes);
 app.use('/api/projects', projectRoutes);  // handles /api/projects
 app.use('/api/tasks', taskRoutes);       // ✅ handles /api/tasks
+app.use('/api/review', reviewRoutes);
 
 // Start server
 app.listen(PORT, () => {
