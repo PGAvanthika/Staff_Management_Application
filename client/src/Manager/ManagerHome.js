@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Profile from "../Components/Profile";
 import TaskAllocation from "../Components/TaskAllocation";
@@ -7,28 +7,47 @@ import TeamPerformance from "../Components/TeamPerformance";
 import DashboardUI from "../Components/DashboardUI";
 import ToDo from "./ToDo.js";
 import DueApproval from "../Components/DueApproval.js";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [currentPage, setCurrentPage] = useState("DashboardUI");
+  const navigate = useNavigate();
+
+  // Role-based access control
+  useEffect(() => {
+    axios.get("http://localhost:3001/api/auth/validate", { withCredentials: true })
+      .then(res => {
+        if (!res.data.user || res.data.user.role !== "Manager") {
+          alert("Access denied. Please log in as Manager.");
+          navigate("/");
+        }
+      })
+      .catch(() => {
+        alert("Please log in to continue.");
+        navigate("/");
+      });
+  }, [navigate]);
 
   const handleLogOut = async () => {
-  try {
-    const response = await fetch('http://localhost:3001/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include', 
-    });
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', 
+      });
 
-    if (response.ok) {
+      if (response.ok || response.status === 401) {
+        // If logout is successful or user is already unauthorized, redirect to login
+        window.location.href = '/';
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      // On network or other error, still redirect to login
       window.location.href = '/';
-    } else {
-      console.error('Logout failed');
     }
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-};
-
+  };
 
   const handleProfile = () => setShowProfile(true);
   const handleCloseProfile = () => setShowProfile(false);

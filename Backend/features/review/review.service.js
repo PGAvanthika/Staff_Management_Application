@@ -1,4 +1,4 @@
-const db = require("../config/db");
+const sql = require('../../config/db');
 
 // Fetch all projects related to a manager
 exports.fetchProjectsByManager = async (managerId) => {
@@ -11,15 +11,13 @@ exports.fetchProjectsByManager = async (managerId) => {
   `;
 
   try {
-    const result = await db.query(query, [managerId]);
+    const result = await sql.query(query, [managerId]);
 
     // If result is an array, use it directly
     if (!Array.isArray(result)) {
-      console.error("Invalid DB response structure:", result);
       throw new Error("Unexpected DB response format");
     }
 
-    console.log("Projects fetched for manager", managerId, result);
 
     return result.map(project => ({
       id: project.project_id,
@@ -27,7 +25,6 @@ exports.fetchProjectsByManager = async (managerId) => {
       createdAt: project.created_at,
     }));
   } catch (error) {
-    console.error("DB query failed:", error.message);
     throw error;
   }
 };
@@ -43,14 +40,12 @@ exports.fetchTasksByProjectAndManager = async (projectId, managerId) => {
   `;
 
   try {
-    const result = await db.query(query, [projectId, managerId]);
+    const result = await sql.query(query, [projectId, managerId]);
 
     if (!Array.isArray(result)) {
-      console.error("Invalid DB response for tasks:", result);
       throw new Error("Unexpected DB response format");
     }
 
-    console.log(`Tasks fetched for manager ${managerId} in project ${projectId}:`, result);
 
     return result.map(task => ({
       task_id: task.task_id,
@@ -59,7 +54,6 @@ exports.fetchTasksByProjectAndManager = async (projectId, managerId) => {
       task_status: task.task_status,
     }));
   } catch (error) {
-    console.error("DB query failed (fetchTasksByProjectAndManager):", error.message);
     throw error;
   }
 };

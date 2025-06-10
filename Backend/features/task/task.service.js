@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const sql = require('../../config/db');
 
 exports.createTask = async (data) => {
   const {
@@ -20,14 +20,14 @@ exports.createTask = async (data) => {
     throw new Error('Deadline must be in YYYY-MM-DD format');
   }
 
-  const existingTask = await db.query('SELECT task_id FROM tasks WHERE task_id = $1', [task_id]);
+  const existingTask = await sql.query('SELECT task_id FROM tasks WHERE task_id = $1', [task_id]);
   if (existingTask.length > 0) {
     const error = new Error('Task with this ID already exists');
     error.code = 'DUPLICATE';
     throw error;
   }
 
-  const projectResult = await db.query(
+  const projectResult = await sql.query(
     "SELECT project_id FROM projects WHERE project_id = $1",
     [project_id]
   );
@@ -35,7 +35,7 @@ exports.createTask = async (data) => {
     throw new Error(`Project with ID '${project_id}' does not exist`);
   }
 
-  const result = await db.query(
+  const result = await sql.query(
     `INSERT INTO tasks 
       (task_id, project_id, assigned_to, assigned_by, description, deadline, task_status)
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,

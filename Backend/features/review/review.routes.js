@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { isLoggedIn, isManager } = require("../middlewares/authMiddleware");
-const reviewController = require("../controllers/reviewController");
+const { isLoggedIn, isManager } = require("../../middlewares/authMiddleware");
+const reviewController = require("./review.controller");
 
 // Get all projects assigned by or assigned to the logged-in manager
 router.get("/projects", isLoggedIn, isManager, reviewController.getProjectsForManager);

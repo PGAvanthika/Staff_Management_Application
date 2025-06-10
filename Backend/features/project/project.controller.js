@@ -1,4 +1,6 @@
-const projectService = require('../services/projectService');
+const logActivity = require('../../utils/activityLogger');
+const sql = require('../../config/db');
+const projectService = require('./project.service');
 
 exports.createProject = async (req, res) => {
   const { project_id, project_name } = req.body;

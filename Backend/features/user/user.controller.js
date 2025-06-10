@@ -1,5 +1,5 @@
-const logActivity = require('../utils/activityLogger');
-const userService = require('../services/userServices');
+const logActivity = require('../../utils/activityLogger');
+const userService = require('./user.service');
 
 exports.createUser = async (req, res) => {
   const data = req.body;

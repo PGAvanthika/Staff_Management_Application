@@ -1,4 +1,4 @@
-const logService = require("../services/logService");
+const logService = require('./log.service');
 
 exports.getLoginLogDates = async (req, res) => {
   try {

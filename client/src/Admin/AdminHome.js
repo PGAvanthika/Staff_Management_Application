@@ -13,37 +13,51 @@ const AdminHome = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
 
+  // Role-based access control
+  useEffect(() => {
+    axios.get("http://localhost:3001/api/auth/validate", { withCredentials: true })
+      .then(res => {
+        if (!res.data.user || res.data.user.role !== "Admin") {
+          alert("Access denied. Please log in as Admin.");
+          navigate("/");
+        }
+      })
+      .catch(() => {
+        alert("Please log in to continue.");
+        navigate("/");
+      });
+  }, [navigate]);
+
   // Fetch users from the backend
   const fetchUsers = async (role = "") => {
-  try {
-    const response = await axios.get("http://localhost:3001/api/user/all", {
-      params: { role: role || undefined },
-      withCredentials: true,
-    });
+    try {
+      const response = await axios.get("http://localhost:3001/api/user/all", {
+        params: { role: role || undefined },
+        withCredentials: true,
+      });
 
-    const formatted = response.data.map((user) => ({
-      id: user.id,
-      name: `${user.fname} ${user.lname}`,
-      role: user.role || "No role",
-      imageSrc: user.profilepic || "/images/default-user.jpg",
-    }));
+      const formatted = response.data.map((user) => ({
+        id: user.id,
+        name: `${user.fname} ${user.lname}`,
+        role: user.role || "No role",
+        imageSrc: user.profilepic || "/images/default-user.jpg",
+      }));
 
-    setUsers(formatted);
-    setFilteredUsers(
-      formatted.filter((u) =>
-        u.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      alert("Session expired or unauthorized access. Please log in again.");
-      await handleLogOut();
-    } else {
-      console.error("Failed to fetch users:", error);
+      setUsers(formatted);
+      setFilteredUsers(
+        formatted.filter((u) =>
+          u.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        alert("Session expired or unauthorized access. Please log in again.");
+        await handleLogOut();
+      } else {
+        console.error("Failed to fetch users:", error);
+      }
     }
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchUsers();

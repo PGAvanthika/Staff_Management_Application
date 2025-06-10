@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const sql = require('../config/db');
+const sql = require('../../config/db');
 
 const createUser = async (data) => {
   const defaultPassword = 'password';

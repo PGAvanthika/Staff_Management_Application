@@ -1,7 +1,7 @@
-const db = require("../config/db");
+const sql = require('../../config/db');
 
 exports.fetchLoginLogDates = async () => {
-  const result = await db`
+  const result = await sql`
     SELECT DISTINCT date 
     FROM login_logs
     ORDER BY date DESC
@@ -10,7 +10,7 @@ exports.fetchLoginLogDates = async () => {
 };
 
 exports.fetchLoginLogsByDate = async (date) => {
-  const result = await db`
+  const result = await sql`
     SELECT emp_id, log_type, status, time
     FROM login_logs
     WHERE date = ${date}
@@ -20,7 +20,7 @@ exports.fetchLoginLogsByDate = async (date) => {
 };
 
 exports.fetchActivityLogDates = async () => {
-  const result = await db`
+  const result = await sql`
     SELECT DISTINCT date 
     FROM activity_logs
     ORDER BY date DESC
@@ -29,7 +29,7 @@ exports.fetchActivityLogDates = async () => {
 };
 
 exports.fetchActivityLogsByDate = async (date) => {
-  const result = await db`
+  const result = await sql`
     SELECT emp_id, activity, time
     FROM activity_logs
     WHERE date = ${date}

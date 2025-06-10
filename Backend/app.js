@@ -6,12 +6,13 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 
-const authRoute = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const logRoutes = require('./routes/logRoutes');
-const projectRoutes = require('./routes/projectRoutes');
-const taskRoutes = require('./routes/taskRoutes'); 
-const reviewRoutes = require('./routes/reviewRoutes');
+const authRoute = require('./features/auth/auth.routes');
+const userRoutes = require('./features/user/user.routes');
+const logRoutes = require('./features/log/log.routes');
+const projectRoutes = require('./features/project/project.routes');
+const taskRoutes = require('./features/task/task.routes'); 
+const reviewRoutes = require('./features/review/review.routes');
+const dueRoutes = require('./features/due/due.routes');
 
 dotenv.config();
 app.use(express.json());
@@ -35,6 +36,7 @@ app.use('/api/projects', projectRoutes);  // handles /api/projects
 app.use('/api/tasks', taskRoutes);       // ✅ handles /api/tasks
 app.use('/api/review', reviewRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/dues', dueRoutes);
 
 // Start server
 app.listen(PORT, () => {

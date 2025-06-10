@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { isLoggedIn, isAdmin } = require('../middlewares/authMiddleware');
-const userController = require('../controllers/userController');
+const { isLoggedIn, isAdmin } = require('../../middlewares/authMiddleware');
+const userController = require('./user.controller');
 
 router.post('/save', isLoggedIn, isAdmin, userController.createUser);
 router.get('/all', isLoggedIn, isAdmin, userController.getAllUsers);

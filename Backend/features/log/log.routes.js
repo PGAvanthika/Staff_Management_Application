@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const logController = require("../controllers/logController");
+const { isLoggedIn, isAdmin } = require('../../middlewares/authMiddleware');
+const logController = require('./log.controller');
 
 // Login Logs
 router.get("/login-logs/dates", logController.getLoginLogDates);

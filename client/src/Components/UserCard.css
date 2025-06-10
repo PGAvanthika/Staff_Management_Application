@@ -1,25 +1,29 @@
 .card-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+  margin-top: 0.5rem;
+  height: 100%;
 }
 
 .user-card {
   background-color: #fff;
   border-radius: 12px;
-  padding: 20px;
-  width: 250px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px 8px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .user-image {
-  width: 120px;
-  height: 120px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
   border-radius: 50%;
-  margin: 0 auto;
+  margin: 0 auto 4px auto;
   display: block;
 }
 
@@ -39,13 +43,14 @@
 
 .user-info h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1rem;
   color: #333;
+  font-weight: 600;
 }
 
 .user-info p {
-  margin-top: 5px;
-  font-size: 14px;
+  margin-top: 2px;
+  font-size: 0.85rem;
   color: #777;
 }
 
@@ -53,7 +58,7 @@
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 8px;
 }
 
 .edit-btn,
@@ -63,18 +68,15 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 1.1rem;
   color: #666;
   transition: color 0.2s;
 }
-
 
 .card-actions {
   display: flex;
   gap: 20px; /* This creates the gap between buttons */
 }
-
-
 
 .delete-item:hover {
   color: #e74c3c;

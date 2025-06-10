@@ -1,7 +1,7 @@
-const db = require('../config/db');
+const sql = require('../../config/db');
 
 exports.createProject = async (project_id, project_name) => {
-  const existing = await db.query("SELECT * FROM projects WHERE project_id = $1", [project_id]);
+  const existing = await sql.query("SELECT * FROM projects WHERE project_id = $1", [project_id]);
 
   if (existing.length > 0) {
     const err = new Error("Project already exists");
@@ -9,7 +9,7 @@ exports.createProject = async (project_id, project_name) => {
     throw err;
   }
 
-  const result = await db.query(
+  const result = await sql.query(
     "INSERT INTO projects (project_id, project_name) VALUES ($1, $2) RETURNING *",
     [project_id, project_name]
   );
@@ -18,7 +18,7 @@ exports.createProject = async (project_id, project_name) => {
 };
 
 exports.checkIfExists = async (projectId) => {
-  const rows = await db.query(
+  const rows = await sql.query(
     "SELECT project_id FROM projects WHERE project_id = $1",
     [projectId]
   );

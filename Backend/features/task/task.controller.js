@@ -1,4 +1,4 @@
-const taskService = require('../services/taskService');
+const taskService = require('./task.service');
 
 exports.createTask = async (req, res) => {
   try {
