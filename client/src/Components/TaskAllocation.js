@@ -123,7 +123,20 @@ function TaskAllocation() {
       {/* Overlay */}
       {showOverlay && (
         <div className="overlay d-flex justify-content-center align-items-center">
-          <div className="overlay-box p-4 shadow">
+          <div className="overlay-box p-4 shadow position-relative">
+            {/* Close Icon */}
+            <ion-icon
+              name="close-outline"
+              style={{
+                position: "absolute",
+                top: "15px",
+                right: "15px",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+              }}
+              onClick={() => setShowOverlay(false)}
+            ></ion-icon>
+
             <h4 className="mb-4 text-center">New Project</h4>
             <input
               type="text"
@@ -139,7 +152,10 @@ function TaskAllocation() {
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
             />
-            <button className="custom-button w-100" onClick={handleProjectSubmit}>
+            <button
+              className="custom-button w-100"
+              onClick={handleProjectSubmit}
+            >
               Create
             </button>
           </div>
@@ -149,7 +165,7 @@ function TaskAllocation() {
       {/* Add New Project Button */}
       <div className="position-absolute top-0 start-0 p-3">
         <button className="custom-button" onClick={() => setShowOverlay(true)}>
-           Add New Project
+          Add New Project
         </button>
       </div>
 
@@ -172,14 +188,42 @@ function TaskAllocation() {
             <h4 className="form-title mb-4">TASK ALLOCATION</h4>
 
             {[
-              { icon: "document-text-outline", name: "task_id", placeholder: "Task ID *" },
-              { icon: "document-outline", name: "project_id", placeholder: "Project ID *" },
-              { icon: "person-outline", name: "assigned_to", placeholder: "Assigned To (ID) *" },
-              { icon: "newspaper-outline", name: "assigned_by", placeholder: "Assigned By (ID) *" },
-              { icon: "list-outline", name: "description", placeholder: "Description *", isTextarea: true },
-              { icon: "hourglass-outline", name: "deadline", placeholder: "Deadline (YYYY-MM-DD) *" },
+              {
+                icon: "document-text-outline",
+                name: "task_id",
+                placeholder: "Task ID *",
+              },
+              {
+                icon: "document-outline",
+                name: "project_id",
+                placeholder: "Project ID *",
+              },
+              {
+                icon: "person-outline",
+                name: "assigned_to",
+                placeholder: "Assigned To (ID) *",
+              },
+              {
+                icon: "newspaper-outline",
+                name: "assigned_by",
+                placeholder: "Assigned By (ID) *",
+              },
+              {
+                icon: "list-outline",
+                name: "description",
+                placeholder: "Description *",
+                isTextarea: true,
+              },
+              {
+                icon: "hourglass-outline",
+                name: "deadline",
+                placeholder: "Deadline (YYYY-MM-DD) *",
+              },
             ].map(({ icon, name, placeholder, isTextarea }, i) => (
-              <div className="form-group mb-3 d-flex align-items-center" key={i}>
+              <div
+                className="form-group mb-3 d-flex align-items-center"
+                key={i}
+              >
                 <ion-icon name={icon}></ion-icon>
                 {isTextarea ? (
                   <textarea
@@ -207,8 +251,8 @@ function TaskAllocation() {
 
             <div className="d-flex justify-content-between mt-4">
               <button className="custom-button w-50 me-2">Schedule</button>
-              <button 
-                className="custom-button w-50" 
+              <button
+                className="custom-button w-50"
                 onClick={handleTaskSubmit}
                 disabled={isSubmitting}
               >
