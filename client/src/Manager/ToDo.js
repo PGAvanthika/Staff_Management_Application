@@ -322,12 +322,6 @@ function ToDo() {
       <div className="upcoming-tasks">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="mb-0">Upcoming Tasks</h3>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowAddModal(true)}
-          >
-            + Add Task
-          </button>
         </div>
         {Object.entries(groupedTasks)
           .sort(([a], [b]) => new Date(a) - new Date(b))
@@ -364,12 +358,6 @@ function ToDo() {
               day: "numeric",
             })}
           </h3>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowAddModal(true)}
-          >
-            + Add Task
-          </button>
         </div>
         {todayTasks.length === 0 ? (
           <div className="text-center py-5 text-muted">
@@ -392,67 +380,70 @@ function ToDo() {
 
     const days = [];
     const current = new Date(startDate);
+          for (let i = 0; i < 42; i++) {
+            const dateClone = new Date(current); // Create a true copy
+            const tasksForDay = getTasksForDate(dateClone);
+            const isCurrentMonth = dateClone.getMonth() === month;
+            const isToday =
+              dateClone.toDateString() === new Date().toDateString();
+            const isSelected =
+              dateClone.toDateString() === selectedDate.toDateString();
 
-    for (let i = 0; i < 42; i++) {
-      const tasksForDay = getTasksForDate(current);
-      const isCurrentMonth = current.getMonth() === month;
-      const isToday = current.toDateString() === new Date().toDateString();
-      const isSelected = current.toDateString() === selectedDate.toDateString();
+            days.push(
+              <div
+                key={i}
+                className={`calendar-day ${
+                  isCurrentMonth ? "current-month" : "other-month"
+                } ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}`}
+                onClick={() => setSelectedDate(dateClone)}
+              >
+                <div className="day-number">{dateClone.getDate()}</div>
+                {tasksForDay.length > 0 && (
+                  <div className="task-indicators">
+                    {tasksForDay.slice(0, 4).map((task, idx) => {
+                      const listColor =
+                        userLists.find((l) => l.name === task.list)?.color ||
+                        "secondary";
+                      return (
+                        <div
+                          key={idx}
+                          className={`task-indicator bg-${listColor}`}
+                          title={`${task.title} - ${task.time}`}
+                        ></div>
+                      );
+                    })}
+                    {tasksForDay.length > 4 && (
+                      <div className="task-indicator-more">
+                        +{tasksForDay.length - 4}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {tasksForDay.length > 0 && (
+                  <div className="task-preview">
+                    {tasksForDay.slice(0, 2).map((task, idx) => (
+                      <div key={idx} className="task-preview-item">
+                        <span
+                          className={`task-dot bg-${
+                            userLists.find((l) => l.name === task.list)
+                              ?.color || "secondary"
+                          }`}
+                        ></span>
+                        <span className="task-text">{task.title}</span>
+                      </div>
+                    ))}
+                    {tasksForDay.length > 2 && (
+                      <div className="task-preview-more">
+                        +{tasksForDay.length - 2} more
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
 
-      days.push(
-        <div
-          key={i}
-          className={`calendar-day ${
-            isCurrentMonth ? "current-month" : "other-month"
-          } ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}`}
-          onClick={() => setSelectedDate(new Date(current))}
-        >
-          <div className="day-number">{current.getDate()}</div>
-          {tasksForDay.length > 0 && (
-            <div className="task-indicators">
-              {tasksForDay.slice(0, 4).map((task, idx) => {
-                const listColor =
-                  userLists.find((l) => l.name === task.list)?.color ||
-                  "secondary";
-                return (
-                  <div
-                    key={idx}
-                    className={`task-indicator bg-${listColor}`}
-                    title={`${task.title} - ${task.time}`}
-                  ></div>
-                );
-              })}
-              {tasksForDay.length > 4 && (
-                <div className="task-indicator-more">
-                  +{tasksForDay.length - 4}
-                </div>
-              )}
-            </div>
-          )}
-          {tasksForDay.length > 0 && (
-            <div className="task-preview">
-              {tasksForDay.slice(0, 2).map((task, idx) => (
-                <div key={idx} className="task-preview-item">
-                  <span
-                    className={`task-dot bg-${
-                      userLists.find((l) => l.name === task.list)?.color ||
-                      "secondary"
-                    }`}
-                  ></span>
-                  <span className="task-text">{task.title}</span>
-                </div>
-              ))}
-              {tasksForDay.length > 2 && (
-                <div className="task-preview-more">
-                  +{tasksForDay.length - 2} more
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      );
-      current.setDate(current.getDate() + 1);
-    }
+          current.setDate(current.getDate() + 1); // advance the original date
+}
 
     const tasksForSelectedDate = getTasksForDate(selectedDate);
 
@@ -462,7 +453,10 @@ function ToDo() {
           <div className="d-flex align-items-center gap-3">
             <button
               className="btn btn-outline-primary"
-              onClick={() => setSelectedDate(new Date(year, month - 1, 1))}
+              onClick={() => {
+                const newDate = new Date(year, month - 1, 1);
+                setSelectedDate(newDate);
+              }}
             >
               ‹
             </button>
@@ -474,7 +468,10 @@ function ToDo() {
             </h3>
             <button
               className="btn btn-outline-primary"
-              onClick={() => setSelectedDate(new Date(year, month + 1, 1))}
+              onClick={() => {
+                const newDate = new Date(year, month + 1, 1);
+                setSelectedDate(newDate);
+              }}
             >
               ›
             </button>
@@ -538,7 +535,10 @@ function ToDo() {
   };
 
   const renderStickyWall = () => (
-    <div className="container-fluid">
+    <div
+      className="container-fluid"
+      style={{ overflowY: "auto", height: "calc(100vh - 60px)" }}
+    >
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3>Sticky Wall</h3>
         <button
@@ -560,8 +560,9 @@ function ToDo() {
                 <div
                   className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
                   onClick={() => handleEditNote(note)}
+                  style={{ height: "250px" }}
                 >
-                  <div className="card-body">
+                  <div className="card-body d-flex flex-column">
                     <div className="d-flex align-items-start justify-content-between mb-2">
                       <h5
                         className="card-title mb-0"
@@ -580,7 +581,10 @@ function ToDo() {
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
-                    <div className="card-text mb-3">
+                    <div
+                      className="card-text mb-3 flex-grow-1"
+                      style={{ overflowY: "auto" }}
+                    >
                       {note.content.map((c, idx) => (
                         <div key={idx} className="small text-muted">
                           {c}
@@ -621,17 +625,19 @@ function ToDo() {
           width: "250px",
           minHeight: "100vh",
           backgroundColor: "#007bff",
+          position: "sticky",
+          top: 0,
         }}
       >
-        <h5 className="mb-4">📋 Todo App</h5>
+        <h5 className="mb-4">YOUR TASKS</h5>
 
         <h6 className="mb-3">Views</h6>
         <ul className="nav flex-column mb-4">
           {[
-            { key: "calendar", icon: "📅", label: "Calendar" },
-            { key: "today", icon: "📆", label: "Today" },
-            { key: "upcoming", icon: "🗓️", label: "Upcoming" },
-            { key: "sticky-wall", icon: "🧷", label: "Sticky Wall" },
+            { key: "calendar", label: "Calendar" },
+            { key: "today", label: "Today" },
+            { key: "upcoming", label: "Upcoming" },
+            { key: "sticky-wall", label: "Sticky Wall" },
           ].map(({ key, icon, label }) => (
             <li key={key} className="nav-item">
               <button
@@ -734,7 +740,7 @@ function ToDo() {
                     placeholder="Enter task description"
                     value={newNote.content}
                     onChange={(e) =>
-                      setNewNote({ ...newNote, color: e.target.value })
+                      setNewNote({ ...newNote, content: e.target.value })
                     }
                   ></textarea>
                 </div>
@@ -860,11 +866,11 @@ function ToDo() {
                       setNewList({ ...newList, color: e.target.value })
                     }
                   >
-                    <option value="info">Blue</option>
-                    <option value="danger">Red</option>
-                    <option value="success">Green</option>
-                    <option value="warning">Yellow</option>
-                    <option value="secondary">Gray</option>
+                    <option value="blue">Blue</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="gray">Gray</option>
                   </select>
                 </div>
               </div>
