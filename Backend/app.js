@@ -1,44 +1,46 @@
 const express = require('express');
-const app = express(); 
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');
+const { addStatusColumn } = require('./features/due/due.migration');
 
-const authRoute = require('./features/auth/auth.routes');
-const userRoutes = require('./features/user/user.routes');
-const logRoutes = require('./features/log/log.routes');
-const projectRoutes = require('./features/project/project.routes');
-const taskRoutes = require('./features/task/task.routes'); 
-const reviewRoutes = require('./features/review/review.routes');
-const dueRoutes = require('./features/due/due.routes');
+const app = express();
 
-dotenv.config();
-app.use(express.json());
-
-const PORT = process.env.PORT || 3001;
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:3000', // Frontend URL
+  credentials: true, // Allow credentials
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware
-app.use(cookieParser());
-app.use(cors({
-  origin: "http://localhost:3000", 
-  credentials: true
-}));
-app.use(helmet()); 
-app.use(morgan("dev"));
+app.use(express.json());
+
+// Run migrations
+addStatusColumn().catch(() => {});
 
 // Routes
-app.use('/api/auth', authRoute);
-app.use('/api/user', userRoutes);
-app.use('/api', logRoutes);
-app.use('/api/projects', projectRoutes);  // handles /api/projects
-app.use('/api/tasks', taskRoutes);       // ✅ handles /api/tasks
-app.use('/api/review', reviewRoutes);
+const authRoutes = require('./features/auth/auth.routes');
+const userRoutes = require('./features/user/user.routes');
+const projectRoutes = require('./features/project/project.routes');
+const taskRoutes = require('./features/task/task.routes');
+const reviewRoutes = require('./features/review/review.routes');
+const logRoutes = require('./features/log/log.routes');
+const dueRoutes = require('./features/due/due.routes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/logs', logRoutes);
 app.use('/api/dues', dueRoutes);
 
-// Start server
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

@@ -9,6 +9,7 @@ import ToDo from "./ToDo.js";
 import DueApproval from "../Components/DueApproval.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import ManagerDueExtensions from '../Components/ManagerDueExtensions';
 
 const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -156,6 +157,7 @@ const ManagerHome = () => {
           {currentPage === "TeamPerformance" && <TeamPerformance />}
           {currentPage === "DueApproval" && <DueApproval />}
           {currentPage === "ToDo" && <ToDo />}
+          <ManagerDueExtensions />
         </div>
       </div>
 

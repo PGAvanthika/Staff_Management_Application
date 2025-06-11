@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import "./LoginPage.css";
 import loginIllustration from "../Assets/forgot-password.avif";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [credentials, setCredentials] = useState({
     email: "",
@@ -22,35 +24,53 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
-  try {
-    const res = await fetch("http://localhost:3001/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // 👈 This allows cookies to be stored
-      body: JSON.stringify(credentials),
-    });
+    try {
+      console.log('Attempting login with credentials:', credentials);
+      
+      const res = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(credentials),
+      });
 
-    const data = await res.json();
+      console.log('Login response status:', res.status);
+      
+      const data = await res.json();
+      console.log('Login response data:', data);
 
-    if (res.ok) {
-      // No need to save the token manually if you're using cookies
-      // localStorage.setItem("token", data.token);
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
 
-      if (data.role === "Admin") navigate("/Adminhome");
-      else if (data.role === "team_leader") navigate("/tlhome");
-      else if (data.role === "Manager") navigate("/ManagerHome");
-      else if (data.role === "employee") navigate("/employeehome");
-    } else {
-      setError(data.message || "Login failed");
+      // Store user data in auth context
+      login(data.user);
+      console.log('User data stored in auth context:', data.user);
+
+      // Navigate based on role
+      switch (data.user.role) {
+        case "Admin":
+          navigate("/adminhome");
+          break;
+        case "team_leader":
+          navigate("/tlhome");
+          break;
+        case "Manager":
+          navigate("/ManagerHome");
+          break;
+        case "employee":
+          navigate("/employeehome");
+          break;
+        default:
+          throw new Error("Unknown role");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "Server error");
     }
-  } catch (err) {
-    console.error(err);
-    setError("Server error");
-  }
-};
-
+  };
 
   return (
     <div className="login-container">

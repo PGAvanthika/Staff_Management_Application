@@ -3,12 +3,14 @@ import "./UserCard.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
+const UserCard = ({ user, onUserDeleted }) => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
+  if (!user) return null;
+
   const handleClick = () => {
-    navigate(`/UserForm/${id}`); // Pass the user ID when navigating
+    navigate(`/UserForm/${user.id}`); // Pass the user ID when navigating
   };
 
   const handleDeleteClick = () => {
@@ -17,13 +19,13 @@ const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
 
   const confirmDelete = async () => {
     try {
-      console.log("Deleting user with ID:", id);
+      console.log("Deleting user with ID:", user.id);
       // Ensure to send credentials (cookies) along with the request
-      await axios.delete(`http://localhost:3001/api/user/${id}`, {
+      await axios.delete(`http://localhost:3001/api/user/${user.id}`, {
         withCredentials: true, // Send cookies (JWT token) along with the request
       });
       setShowConfirm(false);
-      if (onUserDeleted) onUserDeleted(id);
+      if (onUserDeleted) onUserDeleted(user.id);
     } catch (err) {
       console.error("Failed to delete user:", err);
     }
@@ -36,10 +38,15 @@ const UserCard = ({ id, name, role, imageSrc, onUserDeleted }) => {
   return (
     <div className="card-container">
       <div className="user-card">
-        <img src={imageSrc} className="user-image" alt="user" />
-        <div className="user-info">
-          <h3>{name}</h3>
-          <p>{role}</p>
+        <div className="user-card-header">
+          <span className="user-card-name">{user.name || user.fullName || user.email}</span>
+        </div>
+        <div className="user-card-body">
+          <div><strong>Email:</strong> {user.email}</div>
+          <div><strong>Role:</strong> {user.role}</div>
+          {user.emp_id && <div><strong>Employee ID:</strong> {user.emp_id}</div>}
+          {user.project_id && <div><strong>Project ID:</strong> {user.project_id}</div>}
+          {/* Add more fields as needed */}
         </div>
         <div className="card-actions">
           <button className="delete-item" onClick={handleDeleteClick}>

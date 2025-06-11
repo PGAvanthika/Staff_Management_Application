@@ -4,33 +4,46 @@ const jwt = require("jsonwebtoken");
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password)
+  if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required." });
+  }
 
   try {
     const user = await authService.verifyUser(email, password);
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role, email: user.email },
+      { 
+        userId: user.id, 
+        role: user.role, 
+        email: user.email 
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
+    // Set cookie with proper domain and path
     res.cookie("access_token", token, {
-        httpOnly: true,
-        sameSite: "Lax",  // or 'None' with secure: true in production HTTPS
-        secure: false,    // set to true if using HTTPS in production
-        path: "/",
-        maxAge: 3600000,
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: 'lax',
+      path: '/',
+      domain: 'localhost',
+      maxAge: 3600000 // 1 hour
     });
 
-
+    // Log successful login
     await authService.logLoginAttempt(user.id, "login", "success");
 
-    return res.status(200).json({ message: "Login successful", role: user.role });
+    // Send response with user data
+    return res.status(200).json({ 
+      message: "Login successful", 
+      user: {
+        id: user.id,
+        role: user.role,
+        email: user.email
+      }
+    });
   } catch (err) {
-    console.error("Login error:", err.message);
-
     if (err.code === "INVALID_CREDENTIALS") {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -41,21 +54,36 @@ exports.loginUser = async (req, res) => {
 
 exports.logoutUser = async (req, res) => {
   try {
-    await authService.logLoginAttempt(req.user?.userId, "logout", "success");
+    if (req.user?.userId) {
+      await authService.logLoginAttempt(req.user.userId, "logout", "success");
+    }
   } catch (err) {
     console.error("Logout log error:", err.message);
   }
 
+  // Clear cookie with same settings
   res.clearCookie("access_token", {
     httpOnly: true,
-    sameSite: "Lax",
     secure: false,
-    path: "/",
+    sameSite: 'lax',
+    path: '/',
+    domain: 'localhost'
   });
 
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
 exports.validateToken = (req, res) => {
-  return res.status(200).json({ message: "Token is valid", user: req.user });
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  return res.status(200).json({ 
+    message: "Token is valid", 
+    user: {
+      id: req.user.userId,
+      role: req.user.role,
+      email: req.user.email
+    }
+  });
 };

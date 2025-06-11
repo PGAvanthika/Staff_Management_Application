@@ -24,7 +24,7 @@ const ReviewTasks = () => {
   // Fetch projects once
   useEffect(() => {
     setLoadingProjects(true);
-    fetch("http://localhost:3001/api/review/projects", {
+    fetch("http://localhost:3001/api/reviews/projects", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -58,7 +58,7 @@ const ReviewTasks = () => {
     }
 
     setLoadingTasks(true);
-    fetch(`http://localhost:3001/api/review/projects/${selectedProject.id}/tasks`, {
+    fetch(`http://localhost:3001/api/reviews/projects/${selectedProject.id}/tasks`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

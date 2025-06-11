@@ -3,19 +3,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./DueExtensionForm.css";
 import DueIllstration from "../Assets/deadline_img-removebg-preview.png";
 
-const DueExtensionForm = ({ onClose }) => {
+const DueExtensionForm = ({ due, onClose, onAction }) => {
   const modalRef = useRef();
-  const [form, setForm] = useState({
-    emp_id: "",
-    tl_id: "",
-    project_id: "",
-    task_id: "",
-    to_manager: "",
-    no_of_days: "",
-    reason: ""
-  });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null); // 'approved' or 'rejected'
 
   // Close modal if clicked outside
   useEffect(() => {
@@ -37,32 +30,34 @@ const DueExtensionForm = ({ onClose }) => {
     };
   }, [onClose]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleAction = async (status) => {
     setMessage("");
     setError("");
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/api/dues", {
-        method: "POST",
+      const res = await fetch(`http://localhost:3001/api/dues/${due.due_id}/status`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-        credentials: "include"
+        credentials: "include",
+        body: JSON.stringify({ status })
       });
+      const data = await res.json();
       if (res.ok) {
-        setMessage("Due extension request submitted successfully!");
-        setForm({ emp_id: "", tl_id: "", project_id: "", task_id: "", to_manager: "", no_of_days: "", reason: "" });
+        setMessage(`Request ${status === 'approved' ? 'approved' : 'rejected'} successfully!`);
+        if (onAction) onAction();
       } else {
-        const data = await res.json();
-        setError(data.error || "Failed to submit request");
+        setError(data.error || `Failed to ${status}`);
       }
     } catch (err) {
       setError("Server error");
+    } finally {
+      setLoading(false);
+      setConfirmAction(null);
     }
   };
+
+  if (!due) return null;
+  const isProcessed = due.status !== 'pending';
 
   return (
     <div className="overlay">
@@ -86,39 +81,82 @@ const DueExtensionForm = ({ onClose }) => {
         {/* Right Form */}
         <div className="right-form shadow p-5 flex-grow-1 w-100">
           <h3 className="form-title text-primary text-center mb-4">
-            DUE EXTENSION
+            DUE EXTENSION DETAILS
           </h3>
           {message && <div className="alert alert-success">{message}</div>}
           {error && <div className="alert alert-danger">{error}</div>}
-          <form onSubmit={handleSubmit}>
+          <form>
             <div className="form-group mb-3">
-              <input className="form-control" name="emp_id" value={form.emp_id} onChange={handleChange} placeholder="Employee ID" required />
+              <input className="form-control" value={due.emp_id} readOnly placeholder="Employee ID" />
             </div>
             <div className="form-group mb-3">
-              <input className="form-control" name="tl_id" value={form.tl_id} onChange={handleChange} placeholder="TL ID" required />
+              <input className="form-control" value={due.tl_id} readOnly placeholder="TL ID" />
             </div>
             <div className="form-group mb-3">
-              <input className="form-control" name="project_id" value={form.project_id} onChange={handleChange} placeholder="Project ID" required />
+              <input className="form-control" value={due.project_id} readOnly placeholder="Project ID" />
             </div>
             <div className="form-group mb-3">
-              <input className="form-control" name="task_id" value={form.task_id} onChange={handleChange} placeholder="Task ID" required />
+              <input className="form-control" value={due.task_id} readOnly placeholder="Task ID" />
             </div>
             <div className="form-group mb-3">
-              <input className="form-control" name="to_manager" value={form.to_manager} onChange={handleChange} placeholder="To Manager" required />
+              <input className="form-control" value={due.to_manager} readOnly placeholder="To Manager" />
             </div>
             <div className="form-group mb-3">
-              <input type="number" className="form-control" name="no_of_days" value={form.no_of_days} onChange={handleChange} placeholder="No. of Days" required />
+              <input type="number" className="form-control" value={due.no_of_days} readOnly placeholder="No. of Days" />
+            </div>
+            <div className="form-group mb-3">
+              <input className="form-control" value={due.status} readOnly placeholder="Status" />
+            </div>
+            <div className="form-group mb-3">
+              <input className="form-control" value={due.current_deadline ? new Date(due.current_deadline).toLocaleDateString() : ''} readOnly placeholder="Current Deadline" />
             </div>
             <div className="form-group mb-4">
-              <textarea className="form-control" name="reason" value={form.reason} onChange={handleChange} placeholder="REASON" rows={3} required></textarea>
+              <textarea className="form-control" value={due.reason} readOnly placeholder="REASON" rows={3}></textarea>
             </div>
-            <div className="d-flex justify-content-center">
-              <button className="btn btn-primary px-4" type="submit">
-                Submit
+            <div className="d-flex justify-content-center gap-3">
+              <button
+                type="button"
+                className="btn btn-success px-4"
+                disabled={loading || isProcessed}
+                onClick={() => setConfirmAction('approved')}
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger px-4"
+                disabled={loading || isProcessed}
+                onClick={() => setConfirmAction('rejected')}
+              >
+                Disapprove
               </button>
             </div>
           </form>
         </div>
+        {/* Confirmation Dialog */}
+        {confirmAction && (
+          <div className="confirmation-dialog">
+            <div className="confirmation-content">
+              <p>Are you sure you want to <b>{confirmAction}</b> this due extension?</p>
+              <div className="d-flex justify-content-center gap-3 mt-3">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => handleAction(confirmAction)}
+                  disabled={loading}
+                >
+                  Yes
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmAction(null)}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
