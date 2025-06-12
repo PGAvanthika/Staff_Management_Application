@@ -28,3 +28,16 @@ exports.createTask = async (req, res) => {
     });
   }
 };
+
+exports.updateTask = async (req, res) => {
+  try {
+    const updatedTask = await taskService.updateTask(req.params.id, req.body);
+    if (!updatedTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    res.json({ message: 'Task updated successfully', task: updatedTask });
+  } catch (error) {
+    console.error('=== TASK UPDATE ERROR ===', error);
+    res.status(500).json({ message: 'Database error while updating task', error: error.message });
+  }
+};

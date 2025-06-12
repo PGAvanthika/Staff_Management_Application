@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function ToDo() {
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState("sticky-wall");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddListModal, setShowAddListModal] = useState(false);
@@ -11,59 +14,17 @@ function ToDo() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedList, setSelectedList] = useState(null);
 
-  const [userLists, setUserLists] = useState(() => {
-    const savedLists = localStorage.getItem("userLists");
-    return savedLists
-      ? JSON.parse(savedLists)
-      : [
-          { name: "Personal", color: "danger" },
-          { name: "Work", color: "info" },
-        ];
-  });
-
-  const [stickyNotes, setStickyNotes] = useState(() => {
-    const savedNotes = JSON.stringify([
-      {
-        id: 1,
-        title: "Social Media",
-        content: ["- Plan social content", "- Build content calendar"],
-        list: "Work",
-        dueDate: "2025-06-09",
-        time: "09:00",
-        duration: 60,
-        completed: false,
-      },
-      {
-        id: 2,
-        title: "Email Tests",
-        content: ["- Subject lines", "- Sender"],
-        list: "Personal",
-        dueDate: "2025-06-09",
-        time: "12:00",
-        duration: 30,
-        completed: false,
-      },
-      {
-        id: 3,
-        title: "Team Meeting",
-        content: ["- Review project status", "- Plan next sprint"],
-        list: "Work",
-        dueDate: "2025-06-10",
-        time: "14:00",
-        duration: 90,
-        completed: false,
-      },
-    ]);
-    return JSON.parse(savedNotes);
-  });
+  // Fetch lists and notes from backend
+  const [userLists, setUserLists] = useState([]);
+  const [stickyNotes, setStickyNotes] = useState([]);
 
   const [newNote, setNewNote] = useState({
     title: "",
     content: "",
-    list: "Personal",
-    dueDate: "",
-    time: "09:00",
-    duration: 30,
+    list_id: "",
+    due_date: "",
+    due_time: "09:00",
+    duration_minutes: 30,
     completed: false,
   });
 
@@ -77,30 +38,109 @@ function ToDo() {
     color: "secondary",
   });
 
-  // Persist userLists to localStorage whenever it changes
+  // Fetch lists and notes on mount
   useEffect(() => {
-    localStorage.setItem("userLists", JSON.stringify(userLists));
-  }, [userLists]);
+    if (!user) return;
+    fetchLists();
+    fetchNotes();
+  }, [user]);
 
-  const handleAddNote = () => {
-    if (newNote.title.trim()) {
-      const note = {
+  const fetchLists = async () => {
+    try {
+      const res = await axios.get("http://localhost:3001/api/lists", { withCredentials: true });
+      setUserLists(res.data);
+    } catch (err) {
+      setUserLists([]);
+    }
+  };
+
+  const fetchNotes = async () => {
+    try {
+      const res = await axios.get("http://localhost:3001/api/notes", { withCredentials: true });
+      setStickyNotes(res.data);
+    } catch (err) {
+      setStickyNotes([]);
+    }
+  };
+
+  // Add, edit, delete list
+  const handleAddList = async () => {
+    if (newList.name.trim()) {
+      await axios.post("http://localhost:3001/api/lists", newList, { withCredentials: true });
+      setNewList({ name: "", color: "secondary" });
+      setShowAddListModal(false);
+      fetchLists();
+    }
+  };
+
+  const handleEditList = (list) => {
+    setEditingList(list);
+    setEditList({ name: list.name, color: list.color });
+    setShowEditListModal(true);
+  };
+
+  const handleUpdateList = async () => {
+    if (editingList && editList.name.trim()) {
+      await axios.put(`http://localhost:3001/api/lists/${editingList.id}`, editList, { withCredentials: true });
+      setEditingList(null);
+      setEditList({ name: "", color: "secondary" });
+      setShowEditListModal(false);
+      fetchLists();
+    }
+  };
+
+  const handleDeleteList = async (id) => {
+    await axios.delete(`http://localhost:3001/api/lists/${id}`, { withCredentials: true });
+    fetchLists();
+  };
+
+  // Add, edit, delete note
+  const handleAddNote = async () => {
+    console.log('handleAddNote called');
+    console.log('Current newNote state:', newNote);
+    console.log('Available userLists:', userLists);
+    console.log('Selected list_id:', newNote.list_id);
+    if (newNote.title.trim() && newNote.list_id) {
+      // Convert dd-mm-yyyy to yyyy-mm-dd if needed
+      let due_date = newNote.due_date;
+      if (due_date && /^\d{2}-\d{2}-\d{4}$/.test(due_date)) {
+        const [dd, mm, yyyy] = due_date.split('-');
+        due_date = `${yyyy}-${mm}-${dd}`;
+      } else if (due_date && due_date.length > 10) {
+        // If due_date is in ISO format, extract the date part
+        due_date = due_date.split('T')[0];
+      }
+      // Ensure content is an array
+      let contentArr = newNote.content;
+      if (typeof contentArr === "string") {
+        contentArr = contentArr.split('\n').map(line => line.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
+      const payload = {
         ...newNote,
-        id: Date.now(),
-        content: newNote.content.split("\n").filter((line) => line.trim()),
-        completed: false,
+        due_date,
+        content: contentArr,
+        user_id: user?.id,
       };
-      setStickyNotes([...stickyNotes, note]);
-      setNewNote({
-        title: "",
-        content: "",
-        list: "Personal",
-        dueDate: "",
-        time: "09:00",
-        duration: 30,
-        completed: false,
-      });
-      setShowAddModal(false);
+      console.log('Prepared payload for POST:', payload);
+      try {
+        const response = await axios.post("http://localhost:3001/api/notes", payload, { withCredentials: true });
+        console.log('Note creation response:', response.data);
+        setNewNote({ title: "", content: "", list_id: "", due_date: "", due_time: "09:00", duration_minutes: 30, completed: false });
+        setShowAddModal(false);
+        fetchNotes();
+        console.log('Note added and notes re-fetched.');
+      } catch (error) {
+        console.error('Error creating note:', error);
+        if (error.response) {
+          console.error('Error response data:', error.response.data);
+          console.error('Error response status:', error.response.status);
+          console.error('Error response headers:', error.response.headers);
+        }
+        alert('Failed to create note. Please try again.');
+      }
+    } else {
+      console.warn('Add Note validation failed. Title or list_id missing.');
     }
   };
 
@@ -108,47 +148,47 @@ function ToDo() {
     setEditingNote(note);
     setNewNote({
       title: note.title,
-      content: note.content.join("\n"),
-      list: note.list,
-      dueDate: note.dueDate,
-      time: note.time,
-      duration: note.duration,
+      content: Array.isArray(note.content) ? note.content.join("\n") : note.content,
+      list_id: note.list_id,
+      due_date: note.due_date,
+      due_time: note.due_time,
+      duration_minutes: note.duration_minutes,
       completed: note.completed,
     });
     setShowAddModal(true);
   };
 
-  const handleUpdateNote = () => {
-    if (editingNote && newNote.title.trim()) {
-      setStickyNotes(
-        stickyNotes.map((note) =>
-          note.id === editingNote.id
-            ? {
-                ...note,
-                ...newNote,
-                content: newNote.content
-                  .split("\n")
-                  .filter((line) => line.trim()),
-              }
-            : note
-        )
-      );
+  const handleUpdateNote = async () => {
+    if (editingNote && newNote.title.trim() && newNote.list_id) {
+      // Convert dd-mm-yyyy to yyyy-mm-dd if needed
+      let due_date = newNote.due_date;
+      if (due_date && /^\d{2}-\d{2}-\d{4}$/.test(due_date)) {
+        const [dd, mm, yyyy] = due_date.split('-');
+        due_date = `${yyyy}-${mm}-${dd}`;
+      } else if (due_date && due_date.length > 10) {
+        // If due_date is in ISO format, extract the date part
+        due_date = due_date.split('T')[0];
+      }
+      // Convert content to array if it's a string
+      const payload = {
+        ...newNote,
+        due_date,
+        content: Array.isArray(newNote.content)
+          ? newNote.content
+          : newNote.content.split('\n').map(line => line.trim()).filter(Boolean),
+        user_id: user?.id || editingNote.user_id, // ensure user_id is present
+      };
+      await axios.put(`http://localhost:3001/api/notes/${editingNote.id}`, payload, { withCredentials: true });
       setEditingNote(null);
-      setNewNote({
-        title: "",
-        content: "",
-        list: "Personal",
-        dueDate: "",
-        time: "09:00",
-        duration: 30,
-        completed: false,
-      });
+      setNewNote({ title: "", content: "", list_id: "", due_date: "", due_time: "09:00", duration_minutes: 30, completed: false });
       setShowAddModal(false);
+      fetchNotes();
     }
   };
 
-  const handleDeleteNote = (id) => {
-    setStickyNotes(stickyNotes.filter((note) => note.id !== id));
+  const handleDeleteNote = async (id) => {
+    await axios.delete(`http://localhost:3001/api/notes/${id}`, { withCredentials: true });
+    fetchNotes();
   };
 
   const handleToggleComplete = (id) => {
@@ -157,53 +197,6 @@ function ToDo() {
         note.id === id ? { ...note, completed: !note.completed } : note
       )
     );
-  };
-
-  const handleAddList = () => {
-    if (newList.name.trim()) {
-      setUserLists([
-        ...userLists,
-        { name: newList.name, color: newList.color },
-      ]);
-      setNewList({ name: "", color: "secondary" });
-      setShowAddListModal(false);
-    }
-  };
-
-  const handleEditList = (list) => {
-    setEditingList(list);
-    setEditList({
-      name: list.name,
-      color: list.color,
-    });
-    setShowEditListModal(true);
-  };
-
-  const handleUpdateList = () => {
-    if (editingList && editList.name.trim()) {
-      const oldName = editingList.name;
-      const newName = editList.name;
-
-      // Update the list name and color in userLists
-      setUserLists(
-        userLists.map((list) =>
-          list.name === oldName
-            ? { name: newName, color: editList.color }
-            : list
-        )
-      );
-
-      // Update all sticky notes with the old list name to the new list name
-      setStickyNotes(
-        stickyNotes.map((note) =>
-          note.list === oldName ? { ...note, list: newName } : note
-        )
-      );
-
-      setEditingList(null);
-      setEditList({ name: "", color: "secondary" });
-      setShowEditListModal(false);
-    }
   };
 
   const getTasksForDate = (date) => {
@@ -551,10 +544,20 @@ function ToDo() {
 
       <div className="row g-4">
         {stickyNotes
-          .filter((note) => !selectedList || note.list === selectedList)
+          .filter((note) => !selectedList || note.list_id === selectedList)
           .map((note) => {
-            const listColor =
-              userLists.find((l) => l.name === note.list)?.color || "secondary";
+            const list = userLists.find((l) => l.id === note.list_id);
+            const listColor = list?.color || "secondary";
+            const listName = list?.name || "No List";
+            let contentArr = note.content;
+            if (typeof contentArr === "string") {
+              try {
+                contentArr = JSON.parse(contentArr);
+              } catch {
+                contentArr = [contentArr];
+              }
+            }
+            if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
             return (
               <div key={note.id} className="col-lg-4 col-md-6">
                 <div
@@ -567,9 +570,7 @@ function ToDo() {
                       <h5
                         className="card-title mb-0"
                         style={{
-                          textDecoration: note.completed
-                            ? "line-through"
-                            : "none",
+                          textDecoration: note.completed ? "line-through" : "none",
                         }}
                       >
                         {note.title}
@@ -585,7 +586,7 @@ function ToDo() {
                       className="card-text mb-3 flex-grow-1"
                       style={{ overflowY: "auto" }}
                     >
-                      {note.content.map((c, idx) => (
+                      {contentArr.map((c, idx) => (
                         <div key={idx} className="small text-muted">
                           {c}
                         </div>
@@ -594,8 +595,10 @@ function ToDo() {
                     <div className="d-flex justify-content-between align-items-center">
                       <small className="text-muted">
                         <span className={`badge bg-${listColor} me-2`}></span>
-                        {note.list}
-                        {note.dueDate && ` • ${note.dueDate} at ${note.time}`}
+                        {listName}
+                        {note.due_date && ` • ${note.due_date}`}
+                        {note.due_time && ` at ${note.due_time}`}
+                        {note.duration_minutes && ` • ${note.duration_minutes} min`}
                       </small>
                       <button
                         className="btn btn-sm btn-outline-danger"
@@ -658,12 +661,12 @@ function ToDo() {
             <li key={index} className="nav-item d-flex align-items-center mb-2">
               <button
                 className={`nav-link text-white border-0 bg-transparent flex-grow-1 text-start ${
-                  selectedList === list.name
-                    ? "bg-primary bg-opacity-50 rounded"
+                  selectedList === list.id
+                    ? "bg-info bg-opacity-25 text-primary fw-bold border border-primary rounded"
                     : ""
                 }`}
                 onClick={() =>
-                  setSelectedList(selectedList === list.name ? null : list.name)
+                  setSelectedList(selectedList === list.id ? null : list.id)
                 }
               >
                 <span className={`color-tag bg-${list.color} me-2`}></span>
@@ -751,9 +754,9 @@ function ToDo() {
                     <input
                       className="form-control"
                       type="date"
-                      value={newNote.dueDate}
+                      value={newNote.due_date}
                       onChange={(e) =>
-                        setNewNote({ ...newNote, dueDate: e.target.value })
+                        setNewNote({ ...newNote, due_date: e.target.value })
                       }
                     />
                   </div>
@@ -762,9 +765,9 @@ function ToDo() {
                     <input
                       className="form-control"
                       type="time"
-                      value={newNote.time}
+                      value={newNote.due_time}
                       onChange={(e) =>
-                        setNewNote({ ...newNote, time: e.target.value })
+                        setNewNote({ ...newNote, due_time: e.target.value })
                       }
                     />
                   </div>
@@ -777,11 +780,11 @@ function ToDo() {
                       className="form-control"
                       type="number"
                       placeholder="30"
-                      value={newNote.duration}
+                      value={newNote.duration_minutes}
                       onChange={(e) =>
                         setNewNote({
                           ...newNote,
-                          duration: Number(e.target.value),
+                          duration_minutes: Number(e.target.value),
                         })
                       }
                     />
@@ -790,13 +793,13 @@ function ToDo() {
                     <label className="form-label">List</label>
                     <select
                       className="form-select"
-                      value={newNote.list}
+                      value={newNote.list_id}
                       onChange={(e) =>
-                        setNewNote({ ...newNote, list: e.target.value })
+                        setNewNote({ ...newNote, list_id: e.target.value })
                       }
                     >
                       {userLists.map((list) => (
-                        <option key={list.name} value={list.name}>
+                        <option key={list.id} value={list.id}>
                           {list.name}
                         </option>
                       ))}

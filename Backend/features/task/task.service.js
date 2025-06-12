@@ -35,11 +35,76 @@ exports.createTask = async (data) => {
     throw new Error(`Project with ID '${project_id}' does not exist`);
   }
 
+  const assignedToUser = await sql.query(
+    "SELECT role FROM users WHERE id = $1",
+    [assigned_to]
+  );
+  if (assignedToUser.length === 0) {
+    throw new Error('Assigned to user does not exist');
+  }
+  if (!['team_leader', 'employee'].includes(assignedToUser[0].role)) {
+    throw new Error('Task can only be assigned to team leaders or employees');
+  }
+
+  const assignedByUser = await sql.query(
+    "SELECT role FROM users WHERE id = $1",
+    [assigned_by]
+  );
+  if (assignedByUser.length === 0) {
+    throw new Error('Assigned by user does not exist');
+  }
+  if (assignedByUser[0].role !== 'Manager') {
+    throw new Error('Only managers can assign tasks');
+  }
+
   const result = await sql.query(
     `INSERT INTO tasks 
       (task_id, project_id, assigned_to, assigned_by, description, deadline, task_status)
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [task_id, project_id, assigned_to, assigned_by, description, deadline, task_status]
+  );
+
+  return result[0];
+};
+
+exports.updateTask = async (task_id, data) => {
+  const {
+    project_id,
+    assigned_to,
+    assigned_by,
+    description,
+    deadline,
+    task_status = "assigned",
+  } = data;
+
+  if (!task_id || !project_id || !assigned_to || !assigned_by || !description || !deadline) {
+    throw new Error('All fields are required: task_id, project_id, assigned_to, assigned_by, description, deadline');
+  }
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(deadline)) {
+    throw new Error('Deadline must be in YYYY-MM-DD format');
+  }
+
+  // Check if task exists
+  const existingTask = await sql.query('SELECT * FROM tasks WHERE task_id = $1', [task_id]);
+  if (existingTask.length === 0) {
+    return null;
+  }
+
+  // Optionally, validate project_id, assigned_to, assigned_by as in createTask
+
+  const result = await sql.query(
+    `UPDATE tasks SET
+      project_id = $1,
+      assigned_to = $2,
+      assigned_by = $3,
+      description = $4,
+      deadline = $5,
+      task_status = $6
+    WHERE task_id = $7
+    RETURNING *`,
+    [project_id, assigned_to, assigned_by, description, deadline, task_status, task_id]
   );
 
   return result[0];

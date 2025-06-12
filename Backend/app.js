@@ -26,6 +26,8 @@ const taskRoutes = require('./features/task/task.routes');
 const reviewRoutes = require('./features/review/review.routes');
 const logRoutes = require('./features/log/log.routes');
 const dueRoutes = require('./features/due/due.routes');
+const listsRoutes = require('./features/lists/lists.routes');
+const notesRoutes = require('./features/notes/notes.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -34,6 +36,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/dues', dueRoutes);
+app.use('/api/lists', listsRoutes);
+app.use('/api/notes', notesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -6,4 +6,7 @@ const taskController = require('./task.controller');
 // POST /api/tasks
 router.post("/", isLoggedIn, taskController.createTask);
 
+// PUT /api/tasks/:id
+router.put('/:id', isLoggedIn, taskController.updateTask);
+
 module.exports = router;

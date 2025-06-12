@@ -1,22 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./TaskAllocation.css";
 import taskIllustration from "../Assets/Taskallocation.png";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function TaskAllocation() {
+  const { user } = useAuth();
   const [showOverlay, setShowOverlay] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [projectName, setProjectName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     task_id: "",
     project_id: "",
     assigned_to: "",
-    assigned_by: "",
+    assigned_by: user?.id || "", // Auto-fill with logged-in manager's ID
     description: "",
     deadline: "",
   });
+
+  // Fetch users with team_leader and employee roles
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/user/all", {
+          withCredentials: true
+        });
+        // Filter users to only include team_leader and employee roles
+        const filteredUsers = response.data.filter(user => 
+          user.role === "team_leader" || user.role === "employee"
+        );
+        setUsers(filteredUsers);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        setError("Failed to load users. Please try again.");
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleProjectSubmit = async () => {
     try {
@@ -51,7 +75,7 @@ function TaskAllocation() {
         `http://localhost:3001/api/projects/${projectId}`,
         { withCredentials: true }
       );
-      return response.data.exists; // Assuming the API returns { exists: true/false }
+      return response.data.exists;
     } catch (error) {
       console.error("Error checking project:", error);
       return false;
@@ -104,7 +128,7 @@ function TaskAllocation() {
           assigned_by: formData.assigned_by,
           description: formData.description,
           deadline: formData.deadline,
-          task_status: "assigned", // Default status as per your schema
+          task_status: "assigned",
         },
         { withCredentials: true }
       );
@@ -116,14 +140,13 @@ function TaskAllocation() {
         task_id: "",
         project_id: "",
         assigned_to: "",
-        assigned_by: "",
+        assigned_by: user?.id || "",
         description: "",
         deadline: "",
       });
     } catch (error) {
       console.error("Task creation failed:", error.response?.data || error);
 
-      // Handle specific error messages
       if (error.response?.status === 409) {
         alert("Error: Task ID already exists. Please use a different Task ID.");
       } else if (error.response?.status === 400) {
@@ -147,7 +170,6 @@ function TaskAllocation() {
       {showOverlay && (
         <div className="overlay d-flex justify-content-center align-items-center">
           <div className="overlay-box p-4 shadow position-relative">
-            {/* Close Icon */}
             <ion-icon
               name="close-outline"
               style={{
@@ -229,7 +251,8 @@ function TaskAllocation() {
               {
                 icon: "newspaper-outline",
                 name: "assigned_by",
-                placeholder: "Assigned By (ID) *",
+                placeholder: "Assigned By (Manager ID) *",
+                readOnly: true
               },
               {
                 icon: "list-outline",
@@ -240,12 +263,14 @@ function TaskAllocation() {
               {
                 icon: "hourglass-outline",
                 name: "deadline",
-                placeholder: "Deadline (YYYY-MM-DD) *",
+                placeholder: "Deadline *",
+                type: "date"
               },
-            ].map(({ icon, name, placeholder, isTextarea }, i) => (
+            ].map(({ icon, name, placeholder, isTextarea, type, options, readOnly }, i) => (
               <div
                 className="form-group mb-3 d-flex align-items-center"
                 key={i}
+                style={{ position: 'relative' }}
               >
                 <ion-icon name={icon}></ion-icon>
                 {isTextarea ? (
@@ -257,25 +282,46 @@ function TaskAllocation() {
                     value={formData[name]}
                     onChange={handleChange}
                     required
+                    style={{ paddingLeft: '2.2rem' }}
                   ></textarea>
+                ) : name === "assigned_by" ? (
+                  <input
+                    type="text"
+                    name={name}
+                    className="form-control bg-light text-muted"
+                    placeholder={placeholder}
+                    value={formData[name]}
+                    readOnly
+                    style={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#888', paddingLeft: '2.2rem' }}
+                  />
+                ) : type === "date" ? (
+                  <input
+                    type="date"
+                    name={name}
+                    className="form-control"
+                    value={formData[name]}
+                    onChange={handleChange}
+                    required
+                    style={{ paddingLeft: '2.2rem' }}
+                  />
                 ) : (
                   <input
-                    type={name === "deadline" ? "date" : "text"}
+                    type="text"
                     name={name}
                     className="form-control"
                     placeholder={placeholder}
                     value={formData[name]}
                     onChange={handleChange}
                     required
+                    style={{ paddingLeft: '2.2rem' }}
                   />
                 )}
               </div>
             ))}
 
-            <div className="d-flex justify-content-between mt-4">
-              <button className="custom-button w-50 me-2">Schedule</button>
+            <div className="d-flex justify-content-end mt-4">
               <button
-                className="custom-button w-50"
+                className="custom-button w-100"
                 onClick={handleTaskSubmit}
                 disabled={isSubmitting}
               >
