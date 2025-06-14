@@ -96,10 +96,6 @@ function ToDo() {
 
   // Add, edit, delete note
   const handleAddNote = async () => {
-    console.log('handleAddNote called');
-    console.log('Current newNote state:', newNote);
-    console.log('Available userLists:', userLists);
-    console.log('Selected list_id:', newNote.list_id);
     if (newNote.title.trim() && newNote.list_id) {
       // Convert dd-mm-yyyy to yyyy-mm-dd if needed
       let due_date = newNote.due_date;
@@ -122,25 +118,18 @@ function ToDo() {
         content: contentArr,
         user_id: user?.id,
       };
-      console.log('Prepared payload for POST:', payload);
       try {
         const response = await axios.post("http://localhost:3001/api/notes", payload, { withCredentials: true });
-        console.log('Note creation response:', response.data);
         setNewNote({ title: "", content: "", list_id: "", due_date: "", due_time: "09:00", duration_minutes: 30, completed: false });
         setShowAddModal(false);
         fetchNotes();
-        console.log('Note added and notes re-fetched.');
       } catch (error) {
-        console.error('Error creating note:', error);
         if (error.response) {
-          console.error('Error response data:', error.response.data);
-          console.error('Error response status:', error.response.status);
-          console.error('Error response headers:', error.response.headers);
+          if (error.response.status === 400) {
+            alert('Failed to create note. Please try again.');
+          }
         }
-        alert('Failed to create note. Please try again.');
       }
-    } else {
-      console.warn('Add Note validation failed. Title or list_id missing.');
     }
   };
 
@@ -201,7 +190,19 @@ function ToDo() {
 
   const getTasksForDate = (date) => {
     const dateStr = date.toISOString().split("T")[0];
-    return stickyNotes.filter((note) => note.dueDate === dateStr);
+    return stickyNotes.filter((note) => {
+      if (!note.due_date) return false;
+      let noteDate = note.due_date;
+      // If due_date is a string with time, extract only the date part
+      if (typeof noteDate === "string" && noteDate.includes("T")) {
+        noteDate = noteDate.split("T")[0];
+      }
+      // If due_date is a Date object
+      if (noteDate instanceof Date) {
+        noteDate = noteDate.toISOString().split("T")[0];
+      }
+      return noteDate === dateStr;
+    });
   };
 
   const getTasksForView = (view) => {
@@ -215,15 +216,15 @@ function ToDo() {
 
     switch (view) {
       case "today":
-        return stickyNotes.filter((note) => note.dueDate === today);
+        return stickyNotes.filter((note) => note.due_date === today);
       case "tomorrow":
-        return stickyNotes.filter((note) => note.dueDate === tomorrow);
+        return stickyNotes.filter((note) => note.due_date === tomorrow);
       case "thisweek":
         return stickyNotes.filter(
-          (note) => note.dueDate > today && note.dueDate <= thisWeekEnd
+          (note) => note.due_date > today && note.due_date <= thisWeekEnd
         );
       case "upcoming":
-        return stickyNotes.filter((note) => note.dueDate >= today);
+        return stickyNotes.filter((note) => note.due_date >= today);
       default:
         return stickyNotes;
     }
@@ -303,7 +304,7 @@ function ToDo() {
   const renderUpcomingTasks = () => {
     const upcomingTasks = getTasksForView("upcoming");
     const groupedTasks = upcomingTasks.reduce((groups, task) => {
-      const date = task.dueDate;
+      const date = task.due_date;
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -343,8 +344,7 @@ function ToDo() {
       <div className="today-tasks">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="mb-0">
-            Today -{" "}
-            {today.toLocaleDateString("en-US", {
+            Today - {today.toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
               month: "long",
@@ -357,11 +357,105 @@ function ToDo() {
             <p>No tasks for today. Enjoy your free time!</p>
           </div>
         ) : (
-          renderTimelineView(todayTasks)
+          <div className="row g-4">
+            {todayTasks.map((note) => {
+              const list = userLists.find((l) => l.id === note.list_id);
+              const listColor = (list && list.color) ? list.color : "secondary";
+              let contentArr = note.content;
+              if (typeof contentArr === "string") {
+                try {
+                  contentArr = JSON.parse(contentArr);
+                } catch {
+                  contentArr = [contentArr];
+                }
+              }
+              if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
+              const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
+              return (
+                <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
+                  <div
+                    className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
+                    onClick={() => handleEditNote(note)}
+                    style={{
+                      height: "260px",
+                      minWidth: "100%",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                      borderRadius: "12px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "18px",
+                      background: cardBgColor,
+                    }}
+                  >
+                    <div className="d-flex align-items-start justify-content-between mb-2">
+                      <h5
+                        className="card-title mb-0 text-truncate"
+                        style={{
+                          textDecoration: note.completed ? "line-through" : "none",
+                          maxWidth: "70%",
+                          fontWeight: 600,
+                          fontSize: "1.15rem"
+                        }}
+                        title={note.title}
+                      >
+                        {note.title}
+                      </h5>
+                      <input
+                        type="checkbox"
+                        checked={note.completed}
+                        onChange={() => handleToggleComplete(note.id)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div
+                      className="card-text mb-3 flex-grow-1 text-truncate"
+                      style={{ overflowY: "auto", fontSize: "0.98rem", color: "#444" }}
+                      title={Array.isArray(contentArr) ? contentArr.join("\n") : contentArr}
+                    >
+                      {contentArr.map((c, idx) => (
+                        <div key={idx} className="small text-muted text-truncate" style={{ maxWidth: "100%" }}>
+                          {c}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mt-auto">
+                      <small className="text-muted">
+                        {note.due_date && ` ${note.due_date}`}
+                        {note.due_time && ` at ${note.due_time}`}
+                        {note.duration_minutes && ` • ${note.duration_minutes} min`}
+                      </small>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNote(note.id);
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     );
   };
+
+  // 1. Define a palette of mild, unique pastel colors for calendar highlights
+  const pastelColors = [
+    '#ffe4e1', // light pink
+    '#e1f7d5', // light green
+    '#e1ecf7', // light blue
+    '#fff7e1', // light yellow
+    '#f7e1f7', // light purple
+    '#e1f7f2', // light teal
+    '#f7f3e1', // light beige
+    '#f7e9e1', // light peach
+  ];
 
   const renderCalendar = () => {
     const year = selectedDate.getFullYear();
@@ -382,6 +476,9 @@ function ToDo() {
             const isSelected =
               dateClone.toDateString() === selectedDate.toDateString();
 
+            const hasNotes = tasksForDay.length > 0;
+            const colorIdx = i % pastelColors.length;
+            const dayBg = hasNotes ? pastelColors[colorIdx] : undefined;
             days.push(
               <div
                 key={i}
@@ -389,49 +486,9 @@ function ToDo() {
                   isCurrentMonth ? "current-month" : "other-month"
                 } ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}`}
                 onClick={() => setSelectedDate(dateClone)}
+                style={{ backgroundColor: dayBg, cursor: hasNotes ? 'pointer' : undefined }}
               >
                 <div className="day-number">{dateClone.getDate()}</div>
-                {tasksForDay.length > 0 && (
-                  <div className="task-indicators">
-                    {tasksForDay.slice(0, 4).map((task, idx) => {
-                      const listColor =
-                        userLists.find((l) => l.name === task.list)?.color ||
-                        "secondary";
-                      return (
-                        <div
-                          key={idx}
-                          className={`task-indicator bg-${listColor}`}
-                          title={`${task.title} - ${task.time}`}
-                        ></div>
-                      );
-                    })}
-                    {tasksForDay.length > 4 && (
-                      <div className="task-indicator-more">
-                        +{tasksForDay.length - 4}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {tasksForDay.length > 0 && (
-                  <div className="task-preview">
-                    {tasksForDay.slice(0, 2).map((task, idx) => (
-                      <div key={idx} className="task-preview-item">
-                        <span
-                          className={`task-dot bg-${
-                            userLists.find((l) => l.name === task.list)
-                              ?.color || "secondary"
-                          }`}
-                        ></span>
-                        <span className="task-text">{task.title}</span>
-                      </div>
-                    ))}
-                    {tasksForDay.length > 2 && (
-                      <div className="task-preview-more">
-                        +{tasksForDay.length - 2} more
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             );
 
@@ -507,8 +564,7 @@ function ToDo() {
         {/* Display tasks for the selected date */}
         <div className="mt-5">
           <h4>
-            Tasks for{" "}
-            {selectedDate.toLocaleDateString("en-US", {
+            Tasks for {selectedDate.toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
               month: "long",
@@ -520,7 +576,18 @@ function ToDo() {
               <p>No tasks scheduled for this day.</p>
             </div>
           ) : (
-            renderTimelineView(tasksForSelectedDate)
+            <div className="list-group">
+              {tasksForSelectedDate.map((note) => (
+                <div key={note.id} className="list-group-item mb-3" style={{borderRadius: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', background: '#fff'}}>
+                  <h5 className="mb-1" style={{fontWeight: 600}}>{note.title}</h5>
+                  <div style={{color: '#555'}}>
+                    {Array.isArray(note.content)
+                      ? note.content.map((c, idx) => <div key={idx}>{c}</div>)
+                      : note.content}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -543,35 +610,54 @@ function ToDo() {
       </div>
 
       <div className="row g-4">
-        {stickyNotes
-          .filter((note) => !selectedList || note.list_id === selectedList)
-          .map((note) => {
-            const list = userLists.find((l) => l.id === note.list_id);
-            const listColor = list?.color || "secondary";
-            const listName = list?.name || "No List";
-            let contentArr = note.content;
-            if (typeof contentArr === "string") {
-              try {
-                contentArr = JSON.parse(contentArr);
-              } catch {
-                contentArr = [contentArr];
+        {stickyNotes.length === 0 ? (
+          <div className="col-12 text-center text-muted py-5">
+            <h5>No tasks or notes yet. Click "+ Add Note" to get started!</h5>
+          </div>
+        ) : (
+          stickyNotes
+            .filter((note) => !selectedList || note.list_id === selectedList)
+            .map((note) => {
+              const list = userLists.find((l) => l.id === note.list_id);
+              const listColor = (list && list.color) ? list.color : "secondary";
+              const listName = list?.name || "No List";
+              let contentArr = note.content;
+              if (typeof contentArr === "string") {
+                try {
+                  contentArr = JSON.parse(contentArr);
+                } catch {
+                  contentArr = [contentArr];
+                }
               }
-            }
-            if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
-            return (
-              <div key={note.id} className="col-lg-4 col-md-6">
-                <div
-                  className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
-                  onClick={() => handleEditNote(note)}
-                  style={{ height: "250px" }}
-                >
-                  <div className="card-body d-flex flex-column">
+              if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
+              const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
+              return (
+                <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
+                  <div
+                    className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
+                    onClick={() => handleEditNote(note)}
+                    style={{
+                      height: "260px",
+                      minWidth: "100%",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                      borderRadius: "12px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "18px",
+                      background: cardBgColor,
+                    }}
+                  >
                     <div className="d-flex align-items-start justify-content-between mb-2">
                       <h5
-                        className="card-title mb-0"
+                        className="card-title mb-0 text-truncate"
                         style={{
                           textDecoration: note.completed ? "line-through" : "none",
+                          maxWidth: "70%",
+                          fontWeight: 600,
+                          fontSize: "1.15rem"
                         }}
+                        title={note.title}
                       >
                         {note.title}
                       </h5>
@@ -583,20 +669,19 @@ function ToDo() {
                       />
                     </div>
                     <div
-                      className="card-text mb-3 flex-grow-1"
-                      style={{ overflowY: "auto" }}
+                      className="card-text mb-3 flex-grow-1 text-truncate"
+                      style={{ overflowY: "auto", fontSize: "0.98rem", color: "#444" }}
+                      title={Array.isArray(contentArr) ? contentArr.join("\n") : contentArr}
                     >
                       {contentArr.map((c, idx) => (
-                        <div key={idx} className="small text-muted">
+                        <div key={idx} className="small text-muted text-truncate" style={{ maxWidth: "100%" }}>
                           {c}
                         </div>
                       ))}
                     </div>
-                    <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex justify-content-between align-items-center mt-auto">
                       <small className="text-muted">
-                        <span className={`badge bg-${listColor} me-2`}></span>
-                        {listName}
-                        {note.due_date && ` • ${note.due_date}`}
+                        {note.due_date && ` ${note.due_date}`}
                         {note.due_time && ` at ${note.due_time}`}
                         {note.duration_minutes && ` • ${note.duration_minutes} min`}
                       </small>
@@ -612,9 +697,9 @@ function ToDo() {
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+        )}
       </div>
     </div>
   );
@@ -627,9 +712,14 @@ function ToDo() {
         style={{
           width: "250px",
           minHeight: "100vh",
+          height: "100vh",
           backgroundColor: "#007bff",
           position: "sticky",
           top: 0,
+          flex: '0 0 250px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
         }}
       >
         <h5 className="mb-4">YOUR TASKS</h5>
@@ -647,7 +737,10 @@ function ToDo() {
                 className={`nav-link text-white border-0 bg-transparent w-100 text-start ${
                   activeView === key ? "bg-primary bg-opacity-75 rounded" : ""
                 }`}
-                onClick={() => setActiveView(key)}
+                onClick={() => {
+                  setActiveView(key);
+                  if (key === 'sticky-wall') setSelectedList(null);
+                }}
               >
                 {icon} {label}
               </button>
@@ -658,22 +751,44 @@ function ToDo() {
         <h6 className="mb-3">Lists</h6>
         <ul className="nav flex-column">
           {userLists.map((list, index) => (
-            <li key={index} className="nav-item d-flex align-items-center mb-2">
+            <li key={index} className="nav-item d-flex align-items-center mb-2" style={{gap: '8px'}}>
               <button
-                className={`nav-link text-white border-0 bg-transparent flex-grow-1 text-start ${
+                className={`nav-link text-white border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center ${
                   selectedList === list.id
                     ? "bg-info bg-opacity-25 text-primary fw-bold border border-primary rounded"
                     : ""
                 }`}
-                onClick={() =>
-                  setSelectedList(selectedList === list.id ? null : list.id)
-                }
+                style={{gap: '8px', minHeight: '36px', flex: 1, paddingRight: '0'}}
+                onClick={() => {
+                  if (selectedList !== list.id) {
+                    setSelectedList(list.id);
+                    setActiveView('sticky-wall');
+                  }
+                }}
               >
-                <span className={`color-tag bg-${list.color} me-2`}></span>
-                {list.name}
+                <span className={`color-tag bg-${(list && list.color) ? list.color : "secondary"} me-2`}
+                  style={{
+                    display: 'inline-block',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '4px',
+                    border: '2px solid black',
+                    verticalAlign: 'middle',
+                    marginRight: '8px',
+                  }}
+                ></span>
+                <span style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '90px',
+                  display: 'inline-block',
+                  flexShrink: 1,
+                }}>{list.name}</span>
               </button>
               <button
                 className="btn btn-sm btn-outline-light ms-2"
+                style={{minWidth: '38px', flexShrink: 0, flexGrow: 0, padding: '0 8px'}}
                 onClick={() => handleEditList(list)}
               >
                 Edit
@@ -819,7 +934,13 @@ function ToDo() {
                 </button>
                 <button
                   className="btn btn-primary"
-                  onClick={editingNote ? handleUpdateNote : handleAddNote}
+                  onClick={e => {
+                    if (editingNote) {
+                      handleUpdateNote();
+                    } else {
+                      handleAddNote();
+                    }
+                  }}
                   disabled={!newNote.title.trim()}
                 >
                   {editingNote ? "Update Task" : "Add Task"}
@@ -948,6 +1069,19 @@ function ToDo() {
                 </div>
               </div>
               <div className="modal-footer">
+                <button
+                  className="btn btn-outline-danger me-auto"
+                  onClick={() => {
+                    if (editingList) {
+                      handleDeleteList(editingList.id);
+                      setShowEditListModal(false);
+                      setEditingList(null);
+                    }
+                  }}
+                  title="Delete List"
+                >
+                  <span role="img" aria-label="delete">🗑️</span> Delete
+                </button>
                 <button
                   className="btn btn-secondary"
                   onClick={() => {
