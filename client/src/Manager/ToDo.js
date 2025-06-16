@@ -126,8 +126,8 @@ function ToDo() {
       } catch (error) {
         if (error.response) {
           if (error.response.status === 400) {
-            alert('Failed to create note. Please try again.');
-          }
+        alert('Failed to create note. Please try again.');
+      }
         }
       }
     }
@@ -616,26 +616,26 @@ function ToDo() {
           </div>
         ) : (
           stickyNotes
-            .filter((note) => !selectedList || note.list_id === selectedList)
-            .map((note) => {
-              const list = userLists.find((l) => l.id === note.list_id);
+          .filter((note) => !selectedList || note.list_id === selectedList)
+          .map((note) => {
+            const list = userLists.find((l) => l.id === note.list_id);
               const listColor = (list && list.color) ? list.color : "secondary";
-              const listName = list?.name || "No List";
-              let contentArr = note.content;
-              if (typeof contentArr === "string") {
-                try {
-                  contentArr = JSON.parse(contentArr);
-                } catch {
-                  contentArr = [contentArr];
-                }
+            const listName = list?.name || "No List";
+            let contentArr = note.content;
+            if (typeof contentArr === "string") {
+              try {
+                contentArr = JSON.parse(contentArr);
+              } catch {
+                contentArr = [contentArr];
               }
-              if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
+            }
+            if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
               const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
-              return (
+            return (
                 <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
-                  <div
-                    className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
-                    onClick={() => handleEditNote(note)}
+                <div
+                  className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
+                  onClick={() => handleEditNote(note)}
                     style={{
                       height: "260px",
                       minWidth: "100%",
@@ -694,10 +694,10 @@ function ToDo() {
                       >
                         ×
                       </button>
-                    </div>
                   </div>
                 </div>
-              );
+              </div>
+            );
             })
         )}
       </div>
@@ -763,7 +763,7 @@ function ToDo() {
                   if (selectedList !== list.id) {
                     setSelectedList(list.id);
                     setActiveView('sticky-wall');
-                  }
+                }
                 }}
               >
                 <span className={`color-tag bg-${(list && list.color) ? list.color : "secondary"} me-2`}

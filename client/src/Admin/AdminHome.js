@@ -31,14 +31,21 @@ const AdminHome = () => {
   // Fetch users from the backend
   const fetchUsers = async (role = "") => {
     try {
-      const response = await axios.get("http://localhost:3001/api/user/all", {
+      const response = await axios.get("http://localhost:3001/api/users/all", {
         params: { role: role || undefined },
         withCredentials: true,
       });
 
+      console.log('Fetched users:', response.data); // Debugging line
+
+      if (!response.data || !Array.isArray(response.data)) {
+        console.error("Invalid response format:", response.data);
+        return;
+      }
+
       const formatted = response.data.map((user) => ({
         id: user.id,
-        name: `${user.fname} ${user.lname}`,
+        name: `${user.fname || ''} ${user.lname || ''}`.trim() || 'No Name',
         role: user.role || "No role",
         imageSrc: user.profilepic || "/images/default-user.jpg",
       }));
@@ -50,11 +57,16 @@ const AdminHome = () => {
         )
       );
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        alert("Session expired or unauthorized access. Please log in again.");
-        await handleLogOut();
+      console.error("Failed to fetch users:", error);
+      if (error.response) {
+        if (error.response.status === 401) {
+          alert("Session expired or unauthorized access. Please log in again.");
+          await handleLogOut();
+        } else {
+          alert(`Error: ${error.response.data.error || 'Failed to fetch users'}`);
+        }
       } else {
-        console.error("Failed to fetch users:", error);
+        alert("Network error. Please check your connection.");
       }
     }
   };
@@ -160,14 +172,11 @@ const AdminHome = () => {
         {filteredUsers.length === 0 ? (
           <p>No users found.</p>
         ) : (
-          filteredUsers.map((user, index) => (
+          filteredUsers.map((user) => (
             <UserCard
-              key={index}
-              id={user.id} // ✅ Required for deletion
-              name={user.name}
-              role={user.role}
-              imageSrc={user.imageSrc}
-              onUserDeleted={handleUserDeleted} // ✅ Callback to update list after delete
+              key={user.id}
+              user={user}
+              onUserDeleted={handleUserDeleted}
             />
           ))
         )}

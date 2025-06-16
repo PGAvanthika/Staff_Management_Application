@@ -38,21 +38,20 @@ const UserCard = ({ user, onUserDeleted }) => {
   return (
     <div className="card-container">
       <div className="user-card">
+        <img
+          className="user-image"
+          src={user.profilepic || "/images/default-user.jpg"}
+          alt="User"
+        />
         <div className="user-card-header">
-          <span className="user-card-name">{user.name || user.fullName || user.email}</span>
+          <span className="user-card-name">{user.name || user.fname + ' ' + user.lname || user.fullName || user.email}</span>
         </div>
-        <div className="user-card-body">
-          <div><strong>Email:</strong> {user.email}</div>
-          <div><strong>Role:</strong> {user.role}</div>
-          {user.emp_id && <div><strong>Employee ID:</strong> {user.emp_id}</div>}
-          {user.project_id && <div><strong>Project ID:</strong> {user.project_id}</div>}
-          {/* Add more fields as needed */}
-        </div>
+        <div className="user-card-role">{user.role}</div>
         <div className="card-actions">
-          <button className="delete-item" onClick={handleDeleteClick}>
+          <button className="delete-item" onClick={handleDeleteClick} title="Delete">
             <ion-icon name="trash-bin-outline"></ion-icon>
           </button>
-          <button className="edit-btn" onClick={handleClick}>
+          <button className="edit-btn" onClick={handleClick} title="Edit">
             <ion-icon name="pencil-outline"></ion-icon>
           </button>
         </div>
@@ -61,7 +60,7 @@ const UserCard = ({ user, onUserDeleted }) => {
       {showConfirm && (
         <div className="overlay">
           <div className="modal-box">
-            <p>Are you sure you want to delete this item?</p>
+            <p>Are you sure you want to delete this user?</p>
             <div className="modal-actions">
               <button className="yes-btn" onClick={confirmDelete}>
                 Yes
