@@ -21,7 +21,7 @@ const UserCard = ({ user, onUserDeleted }) => {
     try {
       console.log("Deleting user with ID:", user.id);
       // Ensure to send credentials (cookies) along with the request
-      await axios.delete(`http://localhost:3001/api/user/${user.id}`, {
+      await axios.delete(`http://localhost:3001/api/users/${user.id}`, {
         withCredentials: true, // Send cookies (JWT token) along with the request
       });
       setShowConfirm(false);

@@ -246,8 +246,8 @@ const UserForm = () => {
 
     try {
       const url = id
-        ? `http://localhost:3001/api/user/update/${id}`
-        : `http://localhost:3001/api/user/save`;
+        ? `http://localhost:3001/api/users/update/${id}`
+        : `http://localhost:3001/api/users/save`;
 
       const method = id ? axios.put : axios.post;
 

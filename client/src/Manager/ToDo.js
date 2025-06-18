@@ -57,7 +57,33 @@ function ToDo() {
   const fetchNotes = async () => {
     try {
       const res = await axios.get("http://localhost:3001/api/notes", { withCredentials: true });
-      setStickyNotes(res.data);
+      // Normalize due_date to yyyy-mm-dd for all notes
+      const normalizedNotes = res.data.map(note => {
+        let due_date = note.due_date;
+        if (!due_date) {
+          due_date = "";
+        } else if (/^\d{2}-\d{2}-\d{4}$/.test(due_date)) {
+          const [dd, mm, yyyy] = due_date.split('-');
+          due_date = `${yyyy}-${mm}-${dd}`;
+        } else if (due_date.length > 10) {
+          due_date = due_date.split('T')[0];
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(due_date)) {
+          // already normalized
+        } else {
+          const d = new Date(due_date);
+          if (!isNaN(d)) {
+            due_date = d.toISOString().split('T')[0];
+          }
+        }
+        return { ...note, due_date: due_date.toString() };
+      });
+      console.log('Fetched and normalized notes:', normalizedNotes);
+      
+      // Log all unique due_dates
+      const uniqueDates = [...new Set(normalizedNotes.map(note => note.due_date).filter(Boolean))];
+      console.log('All unique due_dates in notes:', uniqueDates);
+      
+      setStickyNotes(normalizedNotes);
     } catch (err) {
       setStickyNotes([]);
     }
@@ -206,25 +232,60 @@ function ToDo() {
   };
 
   const getTasksForView = (view) => {
-    const today = new Date().toISOString().split("T")[0];
-    const tomorrow = new Date(Date.now() + 86400000)
-      .toISOString()
-      .split("T")[0];
-    const thisWeekEnd = new Date(Date.now() + 7 * 86400000)
-      .toISOString()
-      .split("T")[0];
+    // Use local date instead of UTC to avoid timezone issues
+    const today = new Date().toLocaleDateString('en-CA'); // Returns YYYY-MM-DD in local timezone
+    const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
+    const thisWeekEnd = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-CA');
 
+    console.log('Date comparison values:', { today, tomorrow, thisWeekEnd });
+
+    // Helper to normalize date string
+    const normalizeDate = (date) => {
+      if (!date) return "";
+      if (/^\d{2}-\d{2}-\d{4}$/.test(date)) {
+        const [dd, mm, yyyy] = date.split('-');
+        return `${yyyy}-${mm}-${dd}`;
+      } else if (date.length > 10) {
+        return date.split('T')[0];
+      } else if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date;
+      } else {
+        const d = new Date(date);
+        if (!isNaN(d)) {
+          return d.toISOString().split('T')[0];
+        }
+        return date;
+      }
+    };
+
+    let result;
     switch (view) {
       case "today":
-        return stickyNotes.filter((note) => note.due_date === today);
+        result = stickyNotes.filter((note) => {
+          const normalized = normalizeDate(note.due_date);
+          console.log('Note check:', {id: note.id, original: note.due_date, normalized, today});
+          return normalized === today;
+        });
+        console.log('Today filter:', {today, notes: stickyNotes, filtered: result});
+        return result;
       case "tomorrow":
-        return stickyNotes.filter((note) => note.due_date === tomorrow);
+        result = stickyNotes.filter((note) => normalizeDate(note.due_date) === tomorrow);
+        console.log('Tomorrow filter:', {tomorrow, notes: stickyNotes, filtered: result});
+        return result;
       case "thisweek":
-        return stickyNotes.filter(
-          (note) => note.due_date > today && note.due_date <= thisWeekEnd
+        result = stickyNotes.filter(
+          (note) => normalizeDate(note.due_date) > today && normalizeDate(note.due_date) <= thisWeekEnd
         );
+        console.log('This week filter:', {today, thisWeekEnd, notes: stickyNotes, filtered: result});
+        return result;
       case "upcoming":
-        return stickyNotes.filter((note) => note.due_date >= today);
+        result = stickyNotes.filter((note) => {
+          const normalized = normalizeDate(note.due_date);
+          console.log('Upcoming note check:', {id: note.id, original: note.due_date, normalized, today});
+          return normalized >= today;
+        });
+        console.log('Upcoming filter:', {today, notes: stickyNotes, filtered: result});
+        return result;
       default:
         return stickyNotes;
     }
