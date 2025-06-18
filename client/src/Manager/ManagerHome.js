@@ -157,7 +157,7 @@ const ManagerHome = () => {
           {currentPage === "TeamPerformance" && <TeamPerformance />}
           {currentPage === "DueApproval" && <DueApproval />}
           {currentPage === "ToDo" && <ToDo />}
-          <ManagerDueExtensions />
+          {currentPage === "DueApproval" && <ManagerDueExtensions />}
         </div>
       </div>
 

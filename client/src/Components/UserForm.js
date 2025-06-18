@@ -60,7 +60,7 @@ const UserForm = () => {
 
   const fetchUserById = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/user/${id}`, {
+      const res = await axios.get(`http://localhost:3001/api/users/${id}`, {
         withCredentials: true,
       });
       const user = res.data;

@@ -31,8 +31,8 @@ const Logs = () => {
     const fetchLogs = async () => {
       const endpoint =
         selectedTab === "login"
-          ? `http://localhost:3001/api/login-logs/${selectedDate}`
-          : `http://localhost:3001/api/activity-logs/${selectedDate}`;
+          ? `http://localhost:3001/api/logs/login-logs/${selectedDate}`
+          : `http://localhost:3001/api/logs/activity-logs/${selectedDate}`;
 
       try {
         const res = await axios.get(endpoint);
