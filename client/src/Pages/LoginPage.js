@@ -55,7 +55,7 @@ const LoginPage = () => {
           navigate("/adminhome");
           break;
         case "team_leader":
-          navigate("/tlhome");
+          navigate("/Tlhome");
           break;
         case "Manager":
           navigate("/ManagerHome");

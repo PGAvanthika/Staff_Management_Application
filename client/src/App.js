@@ -8,6 +8,7 @@ import UserForm from "./Components/UserForm";
 import Logs from "./Admin/Logs"; 
 import ManagerHome from "./Manager/ManagerHome";
 import TaskAllocation from "./Components/TaskAllocation";
+import Tlhome from "./TeamLead/Tlhome";
 
 // Protected Route component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -32,7 +33,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-      
+
       {/* Protected Admin Routes */}
       <Route
         path="/adminhome"
@@ -81,6 +82,16 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["Manager"]}>
             <TaskAllocation />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/Tlhome" 
+        element={
+          <ProtectedRoute allowedRoles={["team_leader"]}>
+            {" "}
+            <Tlhome />
           </ProtectedRoute>
         }
       />
