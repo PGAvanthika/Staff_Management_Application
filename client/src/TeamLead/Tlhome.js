@@ -6,7 +6,7 @@ import ReviewTasks from "../Components/ReviewTasks";
 import TeamPerformance from "../Components/TeamPerformance";
 import DashboardUI from "../Components/DashboardUI";
 import ToDo from "../Manager/ToDo.js";
-import DueApproval from "../Components/DueApproval.js";
+import ManagerDueExtensions from "../Components/ManagerDueExtensions.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DeadlineExtensions from "../Components/DeadlineExtension.js";
@@ -74,7 +74,7 @@ const Tlhome = () => {
     },
     {
       label: "DUE EXTENSION FORM",
-      key: "DueExtensionForm",
+      key: "ManagerDueExtension",
       icon: "time-outline",
     },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
@@ -174,11 +174,11 @@ const Tlhome = () => {
               }}
             />
           )}
-          {currentPage === "DueExtensionForm" && selectedDue && (
-            <DueExtensionForm
-              due={selectedDue}
-              onClose={() => setCurrentPage("DashboardUI")}
-              onNavigateBack={() => setCurrentPage("DeadlineExtensions")}
+          {currentPage === "ManagerDueExtension" && (
+            <ManagerDueExtensions
+              onlyShowForm={true}
+              onCloseForm={() => setCurrentPage("DashboardUI")} // ✅ close properly
+              buttonConfig={{ showSubmit: true, showSchedule: true }}
             />
           )}
         </div>
