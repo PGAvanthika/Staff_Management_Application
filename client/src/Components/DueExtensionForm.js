@@ -3,7 +3,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./DueExtensionForm.css";
 import DueIllstration from "../Assets/deadline_img-removebg-preview.png";
 
-const DueExtensionForm = ({ due, onClose, onAction, onNavigateBack }) => {
+const DueExtensionForm = ({
+  due,
+  onClose,
+  onAction,
+  onNavigateBack,
+  showSubmit,
+  showSchedule,
+}) => {
   const modalRef = useRef();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -64,7 +71,27 @@ const DueExtensionForm = ({ due, onClose, onAction, onNavigateBack }) => {
     }
   };
 
-  if (!due) return null;
+  const handleSubmit = () => {
+    alert("Submitted successfully!");
+    if (onAction) onAction();
+  };
+
+  const handleSchedule = () => {
+    alert("Scheduled successfully!");
+    if (onAction) onAction();
+  };
+
+  if (!due) {
+    return (
+      <div className="text-center p-4">
+        <h5>No Due Data Found</h5>
+        <button className="btn btn-secondary mt-3" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    );
+  }
+
   const isProcessed = due.status !== "pending";
 
   return (
@@ -180,23 +207,47 @@ const DueExtensionForm = ({ due, onClose, onAction, onNavigateBack }) => {
                 rows={3}
               ></textarea>
             </div>
+
+            {/* Action Buttons */}
             <div className="d-flex justify-content-center gap-3">
-              <button
-                type="button"
-                className="btn btn-success px-4"
-                disabled={loading || isProcessed}
-                onClick={() => setConfirmAction("approved")}
-              >
-                Approve
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger px-4"
-                disabled={loading || isProcessed}
-                onClick={() => setConfirmAction("rejected")}
-              >
-                Disapprove
-              </button>
+              {showSubmit && (
+                <button
+                  type="button"
+                  className="btn btn-success px-4"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+              )}
+              {showSchedule && (
+                <button
+                  type="button"
+                  className="btn btn-primary px-4"
+                  onClick={handleSchedule}
+                >
+                  Schedule
+                </button>
+              )}
+              {!showSubmit && !showSchedule && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-success px-4"
+                    disabled={loading || isProcessed}
+                    onClick={() => setConfirmAction("approved")}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger px-4"
+                    disabled={loading || isProcessed}
+                    onClick={() => setConfirmAction("rejected")}
+                  >
+                    Disapprove
+                  </button>
+                </>
+              )}
             </div>
           </form>
         </div>

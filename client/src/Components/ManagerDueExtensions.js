@@ -129,7 +129,7 @@ const ManagerDueExtensions = ({
     return (
       <Box sx={{ p: 4 }}>
         <DueExtensionForm
-          due={externalDue || fallbackDue}
+          due={externalDue || fallbackDue} // ✅ fallback if nothing is passed
           onClose={onCloseForm || (() => console.log("Form closed"))}
           onAction={handleAction}
           {...buttonConfig}

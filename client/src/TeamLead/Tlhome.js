@@ -165,7 +165,7 @@ const Tlhome = () => {
           {currentPage === "taskAllocation" && <TaskAllocation />}
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
-          {currentPage === "ToDo" && <ToDo />}
+          {currentPage === "ToDo" && <DeadlineExtensions />}
           {currentPage === "DeadlineExtensions" && (
             <DeadlineExtensions
               onNavigate={(dueItem) => {
@@ -174,11 +174,13 @@ const Tlhome = () => {
               }}
             />
           )}
+
           {currentPage === "ManagerDueExtension" && (
             <ManagerDueExtensions
               onlyShowForm={true}
-              onCloseForm={() => setCurrentPage("DashboardUI")} // ✅ close properly
-              buttonConfig={{ showSubmit: true, showSchedule: true }}
+              selectedDue={selectedDue} // ✅ required!
+              onCloseForm={() => setCurrentPage("DashboardUI")}
+              buttonConfig={{ showSubmit: true, showSchedule: true }} // ✅ correct buttons
             />
           )}
         </div>
