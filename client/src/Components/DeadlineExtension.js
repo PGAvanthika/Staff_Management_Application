@@ -1,8 +1,8 @@
+// ✅ DeadlineExtensions.js
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import TaskDetailsCard from "./TaskDetails"; // make sure this file exists and exports the component
+import TaskDetailsCard from "./TaskDetails";
 
-// Sample task data
 const deadlineData = [
   {
     project: "prj123",
@@ -38,13 +38,22 @@ const deadlineData = [
   },
 ];
 
-const DeadlineExtensions = () => {
+const DeadlineExtensions = ({
+  customHeading = "DEADLINE EXTENSIONS",
+  isToDo = false,
+  onExtendNavigate,
+}) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showExtensionForm, setShowExtensionForm] = useState(false);
 
   const handleExtendClick = (task) => {
-    alert("Redirecting to deadline extension form...");
-    setShowExtensionForm(true);
+    if (isToDo && onExtendNavigate) {
+      alert("Redirecting to dummy extend deadline form...");
+      onExtendNavigate(task);
+    } else {
+      alert("Redirecting to deadline extension form...");
+      setShowExtensionForm(true);
+    }
   };
 
   const handleBack = () => {
@@ -54,17 +63,16 @@ const DeadlineExtensions = () => {
 
   return (
     <div
-      className="min-vh-100 d-flex flex-column align-items-center py-4"
+      className="min-vh-100 w-100 py-4 px-2"
       style={{ backgroundColor: "#7d98a5" }}
     >
       <h2 className="text-center fw-bold mb-4" style={{ color: "#1d2b53" }}>
-        DEADLINE EXTENSIONS
+        {customHeading}
       </h2>
 
-      {/* Task List View */}
       {!selectedTask ? (
         <div
-          className="rounded shadow p-3"
+          className="rounded shadow p-3 mx-auto"
           style={{
             backgroundColor: "#c7e8f3",
             width: "90%",
@@ -100,7 +108,6 @@ const DeadlineExtensions = () => {
           ))}
         </div>
       ) : showExtensionForm ? (
-        // Deadline Extension Form
         <div className="w-100 d-flex flex-column align-items-center">
           <div
             className="bg-white p-4 rounded shadow"
@@ -127,7 +134,6 @@ const DeadlineExtensions = () => {
           </div>
         </div>
       ) : (
-        // Task Details View
         <div className="w-100 d-flex flex-column align-items-center">
           <TaskDetailsCard
             task={selectedTask}

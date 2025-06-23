@@ -5,7 +5,6 @@ import TaskAllocation from "../Components/TaskAllocation";
 import ReviewTasks from "../Components/ReviewTasks";
 import TeamPerformance from "../Components/TeamPerformance";
 import DashboardUI from "../Components/DashboardUI";
-import ToDo from "../Manager/ToDo.js";
 import ManagerDueExtensions from "../Components/ManagerDueExtensions.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -165,7 +164,16 @@ const Tlhome = () => {
           {currentPage === "taskAllocation" && <TaskAllocation />}
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
-          {currentPage === "ToDo" && <DeadlineExtensions />}
+          {currentPage === "ToDo" && (
+            <DeadlineExtensions
+              isToDo={true}
+              customHeading="YOUR TASKS"
+              onExtendNavigate={(task) => {
+                navigate("ManagerDueExtension/"); // Dummy route for now
+              }}
+            />
+          )}
+
           {currentPage === "DeadlineExtensions" && (
             <DeadlineExtensions
               onNavigate={(dueItem) => {
