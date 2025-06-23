@@ -35,26 +35,37 @@ exports.createTask = async (data) => {
     throw new Error(`Project with ID '${project_id}' does not exist`);
   }
 
-  const assignedToUser = await sql.query(
+  // Check assigned_to user
+  const assignedToResult = await sql.query(
     "SELECT role FROM users WHERE id = $1",
     [assigned_to]
   );
-  if (assignedToUser.length === 0) {
+  if (assignedToResult.length === 0) {
     throw new Error('Assigned to user does not exist');
   }
-  if (assignedToUser[0].role !== 'employee') {
-    throw new Error('Tasks can only be assigned to employees');
-  }
+  const assignedToRole = assignedToResult[0].role.toLowerCase();
 
-  const assignedByUser = await sql.query(
+  // Check assigned_by user
+  const assignedByResult = await sql.query(
     "SELECT role FROM users WHERE id = $1",
     [assigned_by]
   );
-  if (assignedByUser.length === 0) {
+  if (assignedByResult.length === 0) {
     throw new Error('Assigned by user does not exist');
   }
-  if (!['Manager', 'team_leader'].includes(assignedByUser[0].role)) {
-    throw new Error('Only Managers or Team Leaders can assign tasks');
+  const assignedByRole = assignedByResult[0].role.toLowerCase();
+
+  // Authorization rules:
+  if (assignedByRole === 'manager') {
+    if (!['employee', 'team_leader'].includes(assignedToRole)) {
+      throw new Error('Managers can only assign tasks to team leaders or employees');
+    }
+  } else if (assignedByRole === 'team_leader') {
+    if (assignedToRole !== 'employee') {
+      throw new Error('Team leaders can only assign tasks to employees');
+    }
+  } else {
+    throw new Error('Only managers or team leaders can assign tasks');
   }
 
   const result = await sql.query(
@@ -90,6 +101,8 @@ exports.updateTask = async (task_id, data) => {
   if (existingTask.length === 0) {
     return null;
   }
+
+  // Optionally re-check roles here if needed
 
   const result = await sql.query(
     `UPDATE tasks SET

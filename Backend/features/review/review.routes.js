@@ -1,12 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const { isLoggedIn, isManager } = require("../../middlewares/authMiddleware");
+const { isLoggedIn, authorizeRoles } = require("../../middlewares/authMiddleware");
 const reviewController = require("./review.controller");
 
-// Get all projects assigned by or assigned to the logged-in manager
-router.get("/projects", isLoggedIn, isManager, reviewController.getProjectsForManager);
+// Get all projects for manager or team leader
+router.get(
+  "/projects",
+  isLoggedIn,
+  authorizeRoles("manager", "team_leader"),
+  reviewController.getProjectsForManager
+);
 
-// Get tasks by project and manager
-router.get("/projects/:projectId/tasks", isLoggedIn, isManager, reviewController.getTasksByProjectForManager);
+// Get tasks by project for manager or team leader
+router.get(
+  "/projects/:projectId/tasks",
+  isLoggedIn,
+  authorizeRoles("manager", "team_leader"),
+  reviewController.getTasksByProjectForManager
+);
 
 module.exports = router;
