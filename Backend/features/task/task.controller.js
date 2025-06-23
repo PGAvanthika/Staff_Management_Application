@@ -22,6 +22,10 @@ exports.createTask = async (req, res) => {
       }
     }
 
+    if (error.code === 'DUPLICATE') {
+      return res.status(409).json({ message: error.message });
+    }
+
     res.status(500).json({
       message: "Database error while creating task",
       error: error.message

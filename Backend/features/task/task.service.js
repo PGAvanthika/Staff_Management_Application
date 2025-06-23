@@ -42,8 +42,8 @@ exports.createTask = async (data) => {
   if (assignedToUser.length === 0) {
     throw new Error('Assigned to user does not exist');
   }
-  if (!['team_leader', 'employee'].includes(assignedToUser[0].role)) {
-    throw new Error('Task can only be assigned to team leaders or employees');
+  if (assignedToUser[0].role !== 'employee') {
+    throw new Error('Tasks can only be assigned to employees');
   }
 
   const assignedByUser = await sql.query(
@@ -53,8 +53,8 @@ exports.createTask = async (data) => {
   if (assignedByUser.length === 0) {
     throw new Error('Assigned by user does not exist');
   }
-  if (assignedByUser[0].role !== 'Manager') {
-    throw new Error('Only managers can assign tasks');
+  if (!['Manager', 'team_leader'].includes(assignedByUser[0].role)) {
+    throw new Error('Only Managers or Team Leaders can assign tasks');
   }
 
   const result = await sql.query(
@@ -86,13 +86,10 @@ exports.updateTask = async (task_id, data) => {
     throw new Error('Deadline must be in YYYY-MM-DD format');
   }
 
-  // Check if task exists
   const existingTask = await sql.query('SELECT * FROM tasks WHERE task_id = $1', [task_id]);
   if (existingTask.length === 0) {
     return null;
   }
-
-  // Optionally, validate project_id, assigned_to, assigned_by as in createTask
 
   const result = await sql.query(
     `UPDATE tasks SET

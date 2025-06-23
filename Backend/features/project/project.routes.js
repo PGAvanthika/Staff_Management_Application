@@ -7,6 +7,6 @@ const projectController = require('./project.controller');
 router.post("/", isLoggedIn, authorizeRoles('Admin', 'Manager'), projectController.createProject);
 
 // Check if project exists (Admin or Manager)
-router.get("/:projectId", isLoggedIn, authorizeRoles('Admin', 'Manager'), projectController.checkProjectExists);
+router.get("/:projectId", isLoggedIn, authorizeRoles('Admin', 'Manager','team_leader'), projectController.checkProjectExists);
 
 module.exports = router;
