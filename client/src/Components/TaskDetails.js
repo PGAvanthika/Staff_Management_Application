@@ -7,7 +7,29 @@ const TaskDetails = ({
   showExtend = false,
   showApprove = false,
   showDecline = false,
+  onAction,
+  onExtendClick,
 }) => {
+  const handleSubmit = () => {
+    alert("Submitted successfully!");
+    if (onAction) onAction();
+  };
+
+  const handleApprove = () => {
+    alert("Approved!");
+    if (onAction) onAction();
+  };
+
+  const handleDecline = () => {
+    alert("Oops. The submission has been declined.");
+    if (onAction) onAction();
+  };
+
+  const handleExtend = () => {
+    alert("Redirecting to deadline extension form...");
+    if (onExtendClick) onExtendClick(task);
+  };
+
   const deadline = new Date(task.dueDate);
   const now = new Date();
   const isWithin24Hours = (deadline - now) / (1000 * 60 * 60) <= 24;
@@ -54,22 +76,30 @@ const TaskDetails = ({
       <Row className="justify-content-end">
         {showExtend && isWithin24Hours && (
           <Col xs="auto">
-            <Button variant="danger">Extend Deadline</Button>
+            <Button variant="danger" onClick={handleExtend}>
+              Extend Deadline
+            </Button>
           </Col>
         )}
         {showDecline && (
           <Col xs="auto">
-            <Button variant="danger">Decline</Button>
+            <Button variant="danger" onClick={handleDecline}>
+              Decline
+            </Button>
           </Col>
         )}
         {showSubmit && (
           <Col xs="auto">
-            <Button variant="secondary">Submit</Button>
+            <Button variant="secondary" onClick={handleSubmit}>
+              Submit
+            </Button>
           </Col>
         )}
         {showApprove && (
           <Col xs="auto">
-            <Button variant="secondary">Approve</Button>
+            <Button variant="secondary" onClick={handleApprove}>
+              Approve
+            </Button>
           </Col>
         )}
       </Row>

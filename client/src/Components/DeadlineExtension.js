@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import TaskDetailsCard from "./TaskDetails";
+import TaskDetailsCard from "./TaskDetails"; // make sure this file exists and exports the component
 
+// Sample task data
 const deadlineData = [
   {
     project: "prj123",
@@ -39,6 +40,17 @@ const deadlineData = [
 
 const DeadlineExtensions = () => {
   const [selectedTask, setSelectedTask] = useState(null);
+  const [showExtensionForm, setShowExtensionForm] = useState(false);
+
+  const handleExtendClick = (task) => {
+    alert("Redirecting to deadline extension form...");
+    setShowExtensionForm(true);
+  };
+
+  const handleBack = () => {
+    setSelectedTask(null);
+    setShowExtensionForm(false);
+  };
 
   return (
     <div
@@ -49,6 +61,7 @@ const DeadlineExtensions = () => {
         DEADLINE EXTENSIONS
       </h2>
 
+      {/* Task List View */}
       {!selectedTask ? (
         <div
           className="rounded shadow p-3"
@@ -69,9 +82,7 @@ const DeadlineExtensions = () => {
                 <br />
                 {item.task}
               </div>
-
               <div className="fw-bold text-center">{item.label}</div>
-
               <div className="text-end">
                 <button
                   className="btn"
@@ -88,7 +99,35 @@ const DeadlineExtensions = () => {
             </div>
           ))}
         </div>
+      ) : showExtensionForm ? (
+        // Deadline Extension Form
+        <div className="w-100 d-flex flex-column align-items-center">
+          <div
+            className="bg-white p-4 rounded shadow"
+            style={{ maxWidth: "600px" }}
+          >
+            <h4 className="text-center mb-3">Deadline Extension Form</h4>
+            <p>
+              Task: <strong>{selectedTask.task}</strong>
+            </p>
+            <p>
+              Project: <strong>{selectedTask.project}</strong>
+            </p>
+            <label>Reason for Extension:</label>
+            <textarea className="form-control mb-3" rows="3" />
+            <button
+              className="btn btn-success me-2"
+              onClick={() => alert("Extension Request Submitted")}
+            >
+              Submit Request
+            </button>
+            <button className="btn btn-secondary" onClick={handleBack}>
+              Back
+            </button>
+          </div>
+        </div>
       ) : (
+        // Task Details View
         <div className="w-100 d-flex flex-column align-items-center">
           <TaskDetailsCard
             task={selectedTask}
@@ -96,11 +135,9 @@ const DeadlineExtensions = () => {
             showExtend={true}
             showApprove={true}
             showDecline={true}
+            onExtendClick={handleExtendClick}
           />
-          <button
-            className="btn btn-outline-dark mt-3"
-            onClick={() => setSelectedTask(null)}
-          >
+          <button className="btn btn-outline-dark mt-3" onClick={handleBack}>
             Back
           </button>
         </div>
