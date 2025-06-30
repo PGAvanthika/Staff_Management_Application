@@ -26,7 +26,7 @@ function TaskAllocation() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/user/all", {
+        const response = await axios.get("http://localhost:3001/api/users/all", {
           withCredentials: true
         });
         // Filter users to only include team_leader and employee roles

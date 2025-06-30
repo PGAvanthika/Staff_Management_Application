@@ -45,7 +45,9 @@ const AdminHome = () => {
 
       const formatted = response.data.map((user) => ({
         id: user.id,
-        name: `${user.fname || ''} ${user.lname || ''}`.trim() || 'No Name',
+        name: (user.fname && user.lname)
+          ? `${user.fname} ${user.lname}`.trim()
+          : (user.email || 'No Name'),
         role: user.role || "No role",
         imageSrc: user.profilepic || "/images/default-user.jpg",
       }));

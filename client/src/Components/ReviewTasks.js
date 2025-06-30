@@ -120,7 +120,10 @@ const ReviewTasks = () => {
               style={{ cursor: "pointer" }}
               onClick={() => setSelectedProject(project)}
             >
-              {project.title}
+              <div>{project.title}</div>
+              <div style={{ fontWeight: "normal", fontSize: "0.85em", color: "#888" }}>
+                {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : ""}
+              </div>
             </div>
           ))
         ) : (

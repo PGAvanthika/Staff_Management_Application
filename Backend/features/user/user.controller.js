@@ -33,7 +33,7 @@ exports.deleteUser = async (req, res) => {
   } catch (err) {
     await sql`ROLLBACK`;
     console.error('Delete user error:', err);
-    res.status(500).json({ error: "Failed to delete user" });
+    res.status(500).json({ error: err.message || "Failed to delete user" });
   }
 };
 
@@ -59,6 +59,6 @@ exports.updateUser = async (req, res) => {
   } catch (err) {
     await sql`ROLLBACK`;
     console.error('Update user error:', err);
-    res.status(500).json({ error: "Failed to update user. Transaction rolled back." });
+    res.status(500).json({ error: err.message || "Failed to update user. Transaction rolled back." });
   }
 };

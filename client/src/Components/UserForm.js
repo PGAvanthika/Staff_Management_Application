@@ -244,6 +244,14 @@ const UserForm = () => {
     e.preventDefault();
     if (!isValid()) return;
 
+    // Prepare payload with numbers for experience, school_year, college_year
+    const payload = {
+      ...form,
+      experience: isNaN(Number(form.experience)) ? 0 : Number(form.experience),
+      school_year: isNaN(Number(form.school_year)) ? 0 : Number(form.school_year),
+      college_year: isNaN(Number(form.college_year)) ? 0 : Number(form.college_year),
+    };
+
     try {
       const url = id
         ? `http://localhost:3001/api/users/update/${id}`
@@ -251,16 +259,18 @@ const UserForm = () => {
 
       const method = id ? axios.put : axios.post;
 
-      const res = await method(url, form, {
+      const res = await method(url, payload, {
         withCredentials: true,
       });
+
+      console.log('Update user response:', res);
 
       if (res.status === 200) {
         alert(`User ${id ? "updated" : "saved"} successfully!`);
         navigate("/adminhome");
       }
     } catch (err) {
-      console.error(err);
+      console.error('Update user error:', err);
       alert(err.response?.data?.error || "Failed to save user");
     }
   };

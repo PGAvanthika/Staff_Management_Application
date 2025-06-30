@@ -3,6 +3,7 @@
     padding: 1rem;
     min-height: 100vh;
     color: #030550;
+    overflow-y: auto; /* Enable vertical scroll if needed */
   }
   
   .top-nav {
