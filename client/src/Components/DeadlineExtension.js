@@ -97,39 +97,71 @@ const DeadlineExtensions = ({
                   }}
                   onClick={() => setSelectedTask(item)}
                 >
-                  view
+                  View
                 </button>
               </div>
             </div>
           ))}
         </div>
       ) : showExtensionForm ? (
-        <div className="w-100 d-flex flex-column align-items-center">
+        <div
+          className="d-flex justify-content-center align-items-center w-100"
+          style={{ minHeight: "80vh" }}
+        >
           <div
-            className="bg-white p-4 rounded shadow"
-            style={{ maxWidth: "600px" }}
+            className="bg-white p-5 rounded shadow-lg"
+            style={{ width: "100%", maxWidth: "600px" }}
           >
-            <h4 className="text-center mb-3">Deadline Extension Form</h4>
-            <p>
-              Task: <strong>{selectedTask.task}</strong>
-            </p>
-            <p>
-              Project: <strong>{selectedTask.project}</strong>
-            </p>
-            <label>Reason for Extension:</label>
-            <textarea className="form-control mb-3" rows="3" />
-            <button
-              className="btn btn-success me-2"
-              onClick={() => {
-                alert("Extension Request Submitted");
-                handleBack();
-              }}
-            >
-              Submit Request
-            </button>
-            <button className="btn btn-secondary" onClick={handleBack}>
-              Back
-            </button>
+            <h4 className="text-center mb-4 fw-bold text-primary">
+              Deadline Extension Form
+            </h4>
+
+            <div className="mb-3">
+              <label className="form-label">Task</label>
+              <input
+                type="text"
+                className="form-control"
+                value={selectedTask.task}
+                disabled
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Project</label>
+              <input
+                type="text"
+                className="form-control"
+                value={selectedTask.project}
+                disabled
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Reason for Extension</label>
+              <textarea
+                className="form-control"
+                rows="4"
+                placeholder="e.g. Task dependencies delayed, resource unavailable..."
+              ></textarea>
+            </div>
+
+            <div className="d-flex justify-content-between">
+              <button
+                className="btn btn-success px-4"
+                onClick={() => {
+                  alert("Extension Request Submitted");
+                  handleBack();
+                }}
+              >
+                Submit Request
+              </button>
+              <button
+                className="btn btn-outline-secondary px-4"
+                onClick={handleBack}
+              >
+                Back
+              </button>
+            </div>
           </div>
         </div>
       ) : (
