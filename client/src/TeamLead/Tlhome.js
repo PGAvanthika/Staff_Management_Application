@@ -169,13 +169,14 @@ const Tlhome = () => {
               isToDo={true}
               customHeading="YOUR TASKS"
               onExtendNavigate={(task) => {
-                navigate("ManagerDueExtension/"); // Dummy route for now
+                navigate("ManagerDueExtensions/"); // Dummy route for now
               }}
             />
           )}
 
           {currentPage === "DeadlineExtensions" && (
             <DeadlineExtensions
+              customHeading="DEADLINE EXTENSIONS"
               onNavigate={(dueItem) => {
                 setSelectedDue(dueItem);
                 setCurrentPage("DueExtensionForm");

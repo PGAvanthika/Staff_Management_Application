@@ -26,7 +26,6 @@ const TaskDetails = ({
   };
 
   const handleExtend = () => {
-    alert("Redirecting to deadline extension form...");
     if (onExtendClick) onExtendClick(task);
   };
 

@@ -61,10 +61,12 @@ const LoginPage = () => {
           navigate("/ManagerHome");
           break;
         case "employee":
-          navigate("/employeehome");
+          navigate("/EmployeeHome");
           break;
         default:
           throw new Error("Unknown role");
+
+          
       }
     } catch (err) {
       console.error("Login error:", err);

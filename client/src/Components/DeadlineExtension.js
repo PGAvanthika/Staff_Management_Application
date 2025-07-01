@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TaskDetailsCard from "./TaskDetails";
+import { useNavigate } from "react-router-dom";
 
 const deadlineData = [
   {
@@ -45,15 +46,10 @@ const DeadlineExtensions = ({
 }) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showExtensionForm, setShowExtensionForm] = useState(false);
+  const navigate = useNavigate();
 
   const handleExtendClick = (task) => {
-    if (isToDo && onExtendNavigate) {
-      alert("Redirecting to dummy extend deadline form...");
-      onExtendNavigate(task);
-    } else {
-      alert("Redirecting to deadline extension form...");
-      setShowExtensionForm(true);
-    }
+    setShowExtensionForm(true);
   };
 
   const handleBack = () => {
@@ -93,7 +89,7 @@ const DeadlineExtensions = ({
               <div className="fw-bold text-center">{item.label}</div>
               <div className="text-end">
                 <button
-                  className="btn"
+                  className="btn me-2"
                   style={{
                     backgroundColor: "#93b6c3",
                     color: "#000",
@@ -124,7 +120,10 @@ const DeadlineExtensions = ({
             <textarea className="form-control mb-3" rows="3" />
             <button
               className="btn btn-success me-2"
-              onClick={() => alert("Extension Request Submitted")}
+              onClick={() => {
+                alert("Extension Request Submitted");
+                handleBack();
+              }}
             >
               Submit Request
             </button>
@@ -138,14 +137,21 @@ const DeadlineExtensions = ({
           <TaskDetailsCard
             task={selectedTask}
             showSubmit={false}
-            showExtend={true}
+            showExtend={false}
             showApprove={true}
             showDecline={true}
-            onExtendClick={handleExtendClick}
           />
-          <button className="btn btn-outline-dark mt-3" onClick={handleBack}>
-            Back
-          </button>
+          <div className="mt-3">
+            <button
+              className="btn btn-danger me-2"
+              onClick={() => handleExtendClick(selectedTask)}
+            >
+              Extend Deadline
+            </button>
+            <button className="btn btn-outline-dark" onClick={handleBack}>
+              Back
+            </button>
+          </div>
         </div>
       )}
     </div>
