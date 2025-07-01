@@ -50,7 +50,7 @@ const TaskDetails = ({
       </Row>
 
       <Row className="justify-content-end">
-        {showExtend && isWithin24Hours && (
+        {showExtend && (
           <Col xs="auto">
             <Button variant="danger" onClick={handleExtend}>Extend Deadline</Button>
           </Col>

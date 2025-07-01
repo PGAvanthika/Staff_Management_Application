@@ -136,22 +136,16 @@ const DeadlineExtensions = ({
         <div className="w-100 d-flex flex-column align-items-center">
           <TaskDetailsCard
             task={selectedTask}
-            showSubmit={false}
-            showExtend={false}
-            showApprove={true}
-            showDecline={true}
+            showSubmit={isToDo}
+            showExtend={isToDo}
+            showApprove={!isToDo}
+            showDecline={!isToDo}
+            onExtendClick={() => handleExtendClick(selectedTask)}
+            onAction={handleBack}
           />
-          <div className="mt-3">
-            <button
-              className="btn btn-danger me-2"
-              onClick={() => handleExtendClick(selectedTask)}
-            >
-              Extend Deadline
-            </button>
-            <button className="btn btn-outline-dark" onClick={handleBack}>
-              Back
-            </button>
-          </div>
+          <button className="btn btn-outline-dark mt-3" onClick={handleBack}>
+            Back
+          </button>
         </div>
       )}
     </div>
