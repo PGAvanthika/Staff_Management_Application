@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      console.log('Checking authentication status...');
       const response = await fetch('http://localhost:3001/api/auth/validate', {
         credentials: 'include',
         headers: {
@@ -22,18 +21,13 @@ export const AuthProvider = ({ children }) => {
         }
       });
       
-      console.log('Auth check response status:', response.status);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('Auth check successful:', data);
         setUser(data.user);
       } else {
-        console.log('Auth check failed');
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -41,13 +35,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (userData) => {
-    console.log('Setting user data:', userData);
     setUser(userData);
   };
 
   const logout = async () => {
     try {
-      console.log('Attempting logout...');
       const response = await fetch('http://localhost:3001/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
@@ -57,15 +49,10 @@ export const AuthProvider = ({ children }) => {
         }
       });
       
-      console.log('Logout response status:', response.status);
-      
       if (response.ok) {
-        console.log('Logout successful');
       } else {
-        console.log('Logout failed');
       }
     } catch (error) {
-      console.error('Logout failed:', error);
     } finally {
       setUser(null);
     }

@@ -35,3 +35,16 @@ exports.checkProjectExists = async (req, res) => {
     });
   }
 };
+
+exports.getAllProjects = async (req, res) => {
+  try {
+    const projects = await projectService.getAllProjects();
+    res.json(projects.map(project => ({
+      id: project.project_id,
+      title: project.project_name,
+      createdAt: project.created_at
+    })));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch projects", error: error.message });
+  }
+};

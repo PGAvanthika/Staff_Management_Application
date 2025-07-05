@@ -29,3 +29,11 @@ exports.checkIfExists = async (projectId) => {
 
   return rows.length > 0;
 };
+
+exports.getAllProjects = async () => {
+  const result = await sql.query("SELECT * FROM projects ORDER BY created_at DESC");
+  if (!Array.isArray(result)) {
+    throw new Error("Unexpected DB response format");
+  }
+  return result;
+};

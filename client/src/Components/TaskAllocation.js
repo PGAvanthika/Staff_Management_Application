@@ -118,7 +118,6 @@ function TaskAllocation() {
       }
 
       // If project exists, create the task
-      console.log("Form Data Submitted:", formData);
       await axios.post(
         "http://localhost:3001/api/tasks",
         {

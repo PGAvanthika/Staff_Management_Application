@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isLoggedIn, isManager } = require('../../middlewares/authMiddleware');
+const { isLoggedIn, isManager, authorizeRoles } = require('../../middlewares/authMiddleware');
 const dueController = require('./due.controller');
 
 // Create a new due extension request
@@ -23,5 +23,9 @@ router.put('/:id/status', isLoggedIn, isManager, dueController.updateDueStatus);
 
 // Manager can update a due extension (e.g., approve/reject or update fields)
 router.put('/:id', isLoggedIn, isManager, dueController.updateDueExtension);
+
+// Team Leader can view and act on due extension requests
+router.get('/teamleader/dues', isLoggedIn, authorizeRoles('Team_Leader'), dueController.getTeamLeaderDueExtensions);
+router.put('/teamleader/dues/:id/status', isLoggedIn, authorizeRoles('Team_Leader'), dueController.updateDueStatusByTeamLeader);
 
 module.exports = router; 

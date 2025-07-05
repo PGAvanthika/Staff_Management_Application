@@ -126,7 +126,7 @@ const EmployeeHome = () => {
                   isToDo={true}
                   customHeading="YOUR TASKS"
                   onExtendNavigate={(task) => {
-                    console.log("Extend clicked for task", task);
+                    // No console.log statements
                   }}
                 />
               }

@@ -128,12 +128,17 @@ const ManagerDueExtensions = ({
   if (onlyShowForm) {
     return (
       <Box sx={{ p: 4 }}>
-        <DueExtensionForm
-          due={externalDue || fallbackDue} // ✅ fallback if nothing is passed
-          onClose={onCloseForm || (() => console.log("Form closed"))}
-          onAction={handleAction}
-          {...buttonConfig}
-        />
+        {externalDue ? (
+          <DueExtensionForm
+            due={externalDue}
+            onClose={onCloseForm || (() => console.log("Form closed"))}
+            onAction={handleAction}
+            readOnly={true}
+            {...buttonConfig}
+          />
+        ) : (
+          <Typography variant="body1">No Due Data Found</Typography>
+        )}
       </Box>
     );
   }
@@ -304,6 +309,7 @@ const ManagerDueExtensions = ({
           due={selectedDue}
           onClose={handleCloseForm}
           onAction={handleAction}
+          readOnly={true}
           {...buttonConfig}
         />
       )}

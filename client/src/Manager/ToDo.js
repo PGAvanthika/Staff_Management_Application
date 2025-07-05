@@ -77,11 +77,6 @@ function ToDo() {
         }
         return { ...note, due_date: due_date.toString() };
       });
-      console.log('Fetched and normalized notes:', normalizedNotes);
-      
-      // Log all unique due_dates
-      const uniqueDates = [...new Set(normalizedNotes.map(note => note.due_date).filter(Boolean))];
-      console.log('All unique due_dates in notes:', uniqueDates);
       
       setStickyNotes(normalizedNotes);
     } catch (err) {
@@ -237,8 +232,6 @@ function ToDo() {
     const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
     const thisWeekEnd = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-CA');
 
-    console.log('Date comparison values:', { today, tomorrow, thisWeekEnd });
-
     // Helper to normalize date string
     const normalizeDate = (date) => {
       if (!date) return "";
@@ -263,28 +256,22 @@ function ToDo() {
       case "today":
         result = stickyNotes.filter((note) => {
           const normalized = normalizeDate(note.due_date);
-          console.log('Note check:', {id: note.id, original: note.due_date, normalized, today});
           return normalized === today;
         });
-        console.log('Today filter:', {today, notes: stickyNotes, filtered: result});
         return result;
       case "tomorrow":
         result = stickyNotes.filter((note) => normalizeDate(note.due_date) === tomorrow);
-        console.log('Tomorrow filter:', {tomorrow, notes: stickyNotes, filtered: result});
         return result;
       case "thisweek":
         result = stickyNotes.filter(
           (note) => normalizeDate(note.due_date) > today && normalizeDate(note.due_date) <= thisWeekEnd
         );
-        console.log('This week filter:', {today, thisWeekEnd, notes: stickyNotes, filtered: result});
         return result;
       case "upcoming":
         result = stickyNotes.filter((note) => {
           const normalized = normalizeDate(note.due_date);
-          console.log('Upcoming note check:', {id: note.id, original: note.due_date, normalized, today});
           return normalized >= today;
         });
-        console.log('Upcoming filter:', {today, notes: stickyNotes, filtered: result});
         return result;
       default:
         return stickyNotes;
@@ -655,115 +642,125 @@ function ToDo() {
     );
   };
 
-  const renderStickyWall = () => (
-    <div
-      className="container-fluid"
-      style={{ overflowY: "auto", height: "calc(100vh - 60px)" }}
-    >
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3>Sticky Wall</h3>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddModal(true)}
-        >
-          + Add Note
-        </button>
-      </div>
+  const renderStickyWall = () => {
+    const allTasks = getTasksForView(activeView);
+    if (allTasks.length === 0) {
+      return (
+        <div className="text-center py-5 text-muted">
+          <p>No tasks for now.</p>
+        </div>
+      );
+    }
+    return (
+      <div
+        className="container-fluid"
+        style={{ overflowY: "auto", height: "calc(100vh - 60px)" }}
+      >
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h3>Sticky Wall</h3>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowAddModal(true)}
+          >
+            + Add Note
+          </button>
+        </div>
 
-      <div className="row g-4">
-        {stickyNotes.length === 0 ? (
-          <div className="col-12 text-center text-muted py-5">
-            <h5>No tasks or notes yet. Click "+ Add Note" to get started!</h5>
-          </div>
-        ) : (
-          stickyNotes
-          .filter((note) => !selectedList || note.list_id === selectedList)
-          .map((note) => {
-            const list = userLists.find((l) => l.id === note.list_id);
-              const listColor = (list && list.color) ? list.color : "secondary";
-            const listName = list?.name || "No List";
-            let contentArr = note.content;
-            if (typeof contentArr === "string") {
-              try {
-                contentArr = JSON.parse(contentArr);
-              } catch {
-                contentArr = [contentArr];
+        <div className="row g-4">
+          {stickyNotes.length === 0 ? (
+            <div className="col-12 text-center text-muted py-5">
+              <h5>No tasks or notes yet. Click "+ Add Note" to get started!</h5>
+            </div>
+          ) : (
+            stickyNotes
+            .filter((note) => !selectedList || note.list_id === selectedList)
+            .map((note) => {
+              const list = userLists.find((l) => l.id === note.list_id);
+                const listColor = (list && list.color) ? list.color : "secondary";
+              const listName = list?.name || "No List";
+              let contentArr = note.content;
+              if (typeof contentArr === "string") {
+                try {
+                  contentArr = JSON.parse(contentArr);
+                } catch {
+                  contentArr = [contentArr];
+                }
               }
-            }
-            if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
-              const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
-            return (
-                <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
-                <div
-                  className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
-                  onClick={() => handleEditNote(note)}
-                    style={{
-                      height: "260px",
-                      minWidth: "100%",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                      borderRadius: "12px",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      padding: "18px",
-                      background: cardBgColor,
-                    }}
-                  >
-                    <div className="d-flex align-items-start justify-content-between mb-2">
-                      <h5
-                        className="card-title mb-0 text-truncate"
-                        style={{
-                          textDecoration: note.completed ? "line-through" : "none",
-                          maxWidth: "70%",
-                          fontWeight: 600,
-                          fontSize: "1.15rem"
-                        }}
-                        title={note.title}
-                      >
-                        {note.title}
-                      </h5>
-                      <input
-                        type="checkbox"
-                        checked={note.completed}
-                        onChange={() => handleToggleComplete(note.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div
-                      className="card-text mb-3 flex-grow-1 text-truncate"
-                      style={{ overflowY: "auto", fontSize: "0.98rem", color: "#444" }}
-                      title={Array.isArray(contentArr) ? contentArr.join("\n") : contentArr}
+              if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
+                const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
+              return (
+                  <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
+                  <div
+                    className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
+                    onClick={() => handleEditNote(note)}
+                      style={{
+                        height: "260px",
+                        minWidth: "100%",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        borderRadius: "12px",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        padding: "18px",
+                        background: cardBgColor,
+                      }}
                     >
-                      {contentArr.map((c, idx) => (
-                        <div key={idx} className="small text-muted text-truncate" style={{ maxWidth: "100%" }}>
-                          {c}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="d-flex justify-content-between align-items-center mt-auto">
-                      <small className="text-muted">
-                        {note.due_date && ` ${note.due_date}`}
-                        {note.due_time && ` at ${note.due_time}`}
-                        {note.duration_minutes && ` • ${note.duration_minutes} min`}
-                      </small>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteNote(note.id);
-                        }}
+                      <div className="d-flex align-items-start justify-content-between mb-2">
+                        <h5
+                          className="card-title mb-0 text-truncate"
+                          style={{
+                            textDecoration: note.completed ? "line-through" : "none",
+                            maxWidth: "70%",
+                            fontWeight: 600,
+                            fontSize: "1.15rem"
+                          }}
+                          title={note.title}
+                        >
+                          {note.title}
+                        </h5>
+                        <input
+                          type="checkbox"
+                          checked={note.completed}
+                          onChange={() => handleToggleComplete(note.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div
+                        className="card-text mb-3 flex-grow-1 text-truncate"
+                        style={{ overflowY: "auto", fontSize: "0.98rem", color: "#444" }}
+                        title={Array.isArray(contentArr) ? contentArr.join("\n") : contentArr}
                       >
-                        ×
-                      </button>
+                        {contentArr.map((c, idx) => (
+                          <div key={idx} className="small text-muted text-truncate" style={{ maxWidth: "100%" }}>
+                            {c}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center mt-auto">
+                        <small className="text-muted">
+                          {note.due_date && ` ${note.due_date}`}
+                          {note.due_time && ` at ${note.due_time}`}
+                          {note.duration_minutes && ` • ${note.duration_minutes} min`}
+                        </small>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNote(note.id);
+                          }}
+                        >
+                          ×
+                        </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-            })
-        )}
+              );
+              })
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="d-flex" style={{ minHeight: "100vh" }}>

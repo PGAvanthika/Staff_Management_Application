@@ -9,4 +9,7 @@ router.post("/", isLoggedIn, authorizeRoles('Admin', 'Manager'), projectControll
 // Check if project exists (Admin or Manager)
 router.get("/:projectId", isLoggedIn, authorizeRoles('Admin', 'Manager','team_leader'), projectController.checkProjectExists);
 
+// Fetch all projects (Admin, Manager, team_leader)
+router.get("/", isLoggedIn, authorizeRoles('Admin', 'manager', 'team_leader'), projectController.getAllProjects);
+
 module.exports = router;

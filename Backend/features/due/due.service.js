@@ -1,12 +1,12 @@
 const sql = require('../../config/db');
 
 exports.createDueExtension = async (data) => {
-  const { emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason } = data;
-  const result = await sql`
-    INSERT INTO dues (emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, status)
-    VALUES (${emp_id}, ${tl_id}, ${project_id}, ${task_id}, ${to_manager}, ${no_of_days}, ${reason}, 'pending')
-    RETURNING *;
-  `;
+  const { emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date } = data;
+  const result = await sql.query(
+    `INSERT INTO dues (emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+    [emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date]
+  );
   return result[0];
 };
 
@@ -21,13 +21,10 @@ exports.getDueExtensionById = async (id) => {
 
 // Get all due extensions for a specific manager
 exports.getDueExtensionsForManager = async (managerId) => {
-  return await sql`
-    SELECT d.*, t.deadline as current_deadline 
-    FROM dues d
-    JOIN tasks t ON d.task_id = t.task_id
-    WHERE d.to_manager = ${managerId}
-    ORDER BY d.due_id DESC
-  `;
+  return sql.query(
+    "SELECT * FROM dues WHERE to_manager = $1 AND status IN ('pending', 'escalated', 'tl_approved')",
+    [managerId]
+  );
 };
 
 // Get all due extensions for a specific manager for a given month
@@ -121,5 +118,19 @@ exports.updateDueExtension = async (id, data) => {
   `;
   
   const result = await sql.unsafe(query, [...values, id]);
+  return result[0];
+};
+
+exports.getDueExtensionsForTeamLeader = async (tlId) => {
+  return sql.query("SELECT * FROM dues WHERE tl_id = $1 AND status = 'pending'", [tlId]);
+};
+
+exports.updateDueExtensionStatusByTeamLeader = async (id, status, tlId) => {
+  // Only allow TL to update if the due is assigned to them and is pending
+  const due = await sql.query("SELECT * FROM dues WHERE due_id = $1 AND tl_id = $2 AND status = 'pending'", [id, tlId]);
+  if (!due.length) return null;
+
+  // Update status
+  const result = await sql.query("UPDATE dues SET status = $1 WHERE due_id = $2 RETURNING *", [status, id]);
   return result[0];
 }; 

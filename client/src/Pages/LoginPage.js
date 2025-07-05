@@ -25,8 +25,6 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      console.log('Attempting login with credentials:', credentials);
-      
       const res = await fetch("http://localhost:3001/api/auth/login", {
         method: "POST",
         headers: {
@@ -36,10 +34,7 @@ const LoginPage = () => {
         body: JSON.stringify(credentials),
       });
 
-      console.log('Login response status:', res.status);
-      
       const data = await res.json();
-      console.log('Login response data:', data);
 
       if (!res.ok) {
         throw new Error(data.message || 'Login failed');
@@ -47,7 +42,6 @@ const LoginPage = () => {
 
       // Store user data in auth context
       login(data.user);
-      console.log('User data stored in auth context:', data.user);
 
       // Navigate based on role
       switch (data.user.role) {
@@ -65,11 +59,8 @@ const LoginPage = () => {
           break;
         default:
           throw new Error("Unknown role");
-
-          
       }
     } catch (err) {
-      console.error("Login error:", err);
       setError(err.message || "Server error");
     }
   };

@@ -11,19 +11,11 @@ exports.getNotesForUser = async (req, res) => {
 };
 
 exports.createNote = async (req, res) => {
-  console.log('createNote controller called');
-  console.log('Request method:', req.method);
-  console.log('Request headers:', req.headers);
-  console.log('Request user object:', req.user);
   try {
-    console.log('Received note creation request:', req.body);
     const userId = req.user.userId;
-    console.log('User ID from request:', userId);
     const note = await notesService.createNote({ ...req.body, user_id: userId });
-    console.log('Created note:', note);
     res.status(201).json(note);
   } catch (err) {
-    console.error('Error creating note:', err);
     res.status(500).json({ error: 'Failed to create note', details: err.message, stack: err.stack });
   }
 };

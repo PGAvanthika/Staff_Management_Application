@@ -1,43 +1,8 @@
 // ✅ DeadlineExtensions.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TaskDetailsCard from "./TaskDetails";
 import { useNavigate } from "react-router-dom";
-
-const deadlineData = [
-  {
-    project: "prj123",
-    task: "Tsk113",
-    label: "prototype",
-    dueDate: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
-    assignedBy: "ManagerA",
-    description: "Complete prototype integration.",
-  },
-  {
-    project: "prj123",
-    task: "Tsk116",
-    label: "prototype",
-    dueDate: new Date(Date.now() + 30 * 60 * 60 * 1000).toISOString(),
-    assignedBy: "ManagerB",
-    description: "Design UI for prototype module.",
-  },
-  {
-    project: "prj121",
-    task: "Tsk118",
-    label: "prototype",
-    dueDate: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(),
-    assignedBy: "ManagerC",
-    description: "Build API for prototype data.",
-  },
-  {
-    project: "prj124",
-    task: "Tsk173",
-    label: "prototype",
-    dueDate: new Date(Date.now() + 26 * 60 * 60 * 1000).toISOString(),
-    assignedBy: "ManagerD",
-    description: "Test prototype flow.",
-  },
-];
 
 const DeadlineExtensions = ({
   customHeading = "DEADLINE EXTENSIONS",
@@ -46,7 +11,27 @@ const DeadlineExtensions = ({
 }) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showExtensionForm, setShowExtensionForm] = useState(false);
+  const [deadlineData, setDeadlineData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/dues/teamleader/dues", { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch deadline extensions");
+        return res.json();
+      })
+      .then((data) => {
+        setDeadlineData(data);
+        setError("");
+      })
+      .catch((err) => {
+        setError("Failed to fetch deadline extensions");
+        setDeadlineData([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleExtendClick = (task) => {
     setShowExtensionForm(true);
@@ -66,7 +51,11 @@ const DeadlineExtensions = ({
         {customHeading}
       </h2>
 
-      {!selectedTask ? (
+      {loading ? (
+        <div className="text-center">Loading...</div>
+      ) : error ? (
+        <div className="text-center text-danger">{error}</div>
+      ) : !selectedTask ? (
         <div
           className="rounded shadow p-3 mx-auto"
           style={{
@@ -75,33 +64,37 @@ const DeadlineExtensions = ({
             maxWidth: "900px",
           }}
         >
-          {deadlineData.map((item, index) => (
-            <div
-              key={index}
-              className="d-flex justify-content-between align-items-center p-3 mb-3 rounded"
-              style={{ backgroundColor: "#e5f4f9" }}
-            >
-              <div className="fw-bold">
-                {item.project}
-                <br />
-                {item.task}
+          {deadlineData.length === 0 ? (
+            <div className="text-center">No deadline extensions found.</div>
+          ) : (
+            deadlineData.map((item, index) => (
+              <div
+                key={item.due_id || index}
+                className="d-flex justify-content-between align-items-center p-3 mb-3 rounded"
+                style={{ backgroundColor: "#e5f4f9" }}
+              >
+                <div className="fw-bold">
+                  {item.project_id || item.project}
+                  <br />
+                  {item.task_id || item.task}
+                </div>
+                <div className="fw-bold text-center">{item.label || item.reason || "-"}</div>
+                <div className="text-end">
+                  <button
+                    className="btn me-2"
+                    style={{
+                      backgroundColor: "#93b6c3",
+                      color: "#000",
+                      fontWeight: "bold",
+                    }}
+                    onClick={() => setSelectedTask(item)}
+                  >
+                    View
+                  </button>
+                </div>
               </div>
-              <div className="fw-bold text-center">{item.label}</div>
-              <div className="text-end">
-                <button
-                  className="btn me-2"
-                  style={{
-                    backgroundColor: "#93b6c3",
-                    color: "#000",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => setSelectedTask(item)}
-                >
-                  View
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       ) : showExtensionForm ? (
         <div

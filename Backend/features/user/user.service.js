@@ -71,7 +71,6 @@ const deleteUser = async (id) => {
   const contactResult = await sql`DELETE FROM user_contact_info WHERE id = ${id} RETURNING id`;
   const personalResult = await sql`DELETE FROM user_personal_info WHERE id = ${id} RETURNING id`;
   const userResult = await sql`DELETE FROM users WHERE id = ${id} RETURNING id`;
-  console.log('Delete results:', { profResult, contactResult, personalResult, userResult });
   if (
     profResult.length === 0 &&
     contactResult.length === 0 &&
@@ -118,7 +117,6 @@ const updateUser = async (id, data) => {
     WHERE id = ${id}
     RETURNING id
   `;
-  console.log('Users table update result:', userResult);
   if (userResult.length === 0) {
     await sql`ROLLBACK`;
     throw new Error('No user updated in users table. User may not exist.');
@@ -133,7 +131,6 @@ const updateUser = async (id, data) => {
     WHERE id = ${id}
     RETURNING id
   `;
-  console.log('Personal info update result:', personalResult);
   if (personalResult.length === 0) {
     await sql`ROLLBACK`;
     throw new Error('No personal info updated. User may not exist.');
@@ -148,7 +145,6 @@ const updateUser = async (id, data) => {
     WHERE id = ${id}
     RETURNING id
   `;
-  console.log('Contact info update result:', contactResult);
   if (contactResult.length === 0) {
     await sql`ROLLBACK`;
     throw new Error('No contact info updated. User may not exist.');
@@ -162,7 +158,6 @@ const updateUser = async (id, data) => {
     WHERE id = ${id}
     RETURNING id
   `;
-  console.log('Professional info update result:', professionalResult);
   if (professionalResult.length === 0) {
     await sql`ROLLBACK`;
     throw new Error('No professional info updated. User may not exist.');

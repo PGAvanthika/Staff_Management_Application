@@ -36,10 +36,7 @@ const AdminHome = () => {
         withCredentials: true,
       });
 
-      console.log('Fetched users:', response.data); // Debugging line
-
       if (!response.data || !Array.isArray(response.data)) {
-        console.error("Invalid response format:", response.data);
         return;
       }
 
@@ -59,7 +56,6 @@ const AdminHome = () => {
         )
       );
     } catch (error) {
-      console.error("Failed to fetch users:", error);
       if (error.response) {
         if (error.response.status === 401) {
           alert("Session expired or unauthorized access. Please log in again.");

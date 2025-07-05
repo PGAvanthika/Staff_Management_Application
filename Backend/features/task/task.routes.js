@@ -9,4 +9,7 @@ router.post("/", isLoggedIn, taskController.createTask);
 // PUT /api/tasks/:id
 router.put('/:id', isLoggedIn, taskController.updateTask);
 
+// GET /api/tasks/teamleader
+router.get('/teamleader', isLoggedIn, taskController.getTasksByTeamLeader);
+
 module.exports = router;

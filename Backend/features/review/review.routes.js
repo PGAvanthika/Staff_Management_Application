@@ -7,7 +7,7 @@ const reviewController = require("./review.controller");
 router.get(
   "/projects",
   isLoggedIn,
-  authorizeRoles("manager", "team_leader"),
+  authorizeRoles("manager", "team_leader", "Admin"),
   reviewController.getProjectsForManager
 );
 
@@ -15,7 +15,7 @@ router.get(
 router.get(
   "/projects/:projectId/tasks",
   isLoggedIn,
-  authorizeRoles("manager", "team_leader"),
+  authorizeRoles("manager", "team_leader", "Admin"),
   reviewController.getTasksByProjectForManager
 );
 

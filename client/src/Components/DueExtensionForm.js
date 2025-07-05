@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./DueExtensionForm.css";
 import DueIllstration from "../Assets/deadline_img-removebg-preview.png";
+import { useAuth } from '../context/AuthContext';
 
 const DueExtensionForm = ({
   due,
@@ -10,12 +11,22 @@ const DueExtensionForm = ({
   onNavigateBack,
   showSubmit,
   showSchedule,
+  readOnly = false,
+  onlyEditFields = null,
 }) => {
   const modalRef = useRef();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [reason, setReason] = useState(due.reason || "");
+  const [noOfDays, setNoOfDays] = useState(due.no_of_days || "");
+  const [empId, setEmpId] = useState(due.emp_id || "");
+  const { user } = useAuth();
+  const [tlId, setTlId] = useState(user?.id || due.tl_id || "");
+  const [projectId, setProjectId] = useState(due.project_id || "");
+  const [taskId, setTaskId] = useState(due.task_id || "");
+  const [toManager, setToManager] = useState(due.to_manager || "");
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -71,14 +82,48 @@ const DueExtensionForm = ({
     }
   };
 
-  const handleSubmit = () => {
-    alert("Submitted successfully!");
-    if (onAction) onAction();
+  const handleSubmit = async () => {
+    const today = new Date();
+    const dueDate = new Date(today.getTime() + Number(noOfDays) * 24 * 60 * 60 * 1000);
+    const dueDateStr = dueDate.toISOString().split('T')[0];
+    const payload = {
+      emp_id: onlyEditFields ? tlId : empId,
+      tl_id: tlId,
+      project_id: projectId,
+      task_id: taskId,
+      to_manager: toManager,
+      no_of_days: Number(noOfDays),
+      reason,
+      due_date: dueDateStr,
+    };
+    try {
+      const res = await fetch('http://localhost:3001/api/dues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Submitted successfully!');
+        if (onAction) onAction();
+      } else {
+        alert(data.error || 'Failed to submit due extension');
+      }
+    } catch (err) {
+      alert('Server error');
+    }
   };
 
   const handleSchedule = () => {
     alert("Scheduled successfully!");
     if (onAction) onAction();
+  };
+
+  const isFieldEditable = (field) => {
+    if (readOnly) return false;
+    if (!onlyEditFields) return true;
+    return onlyEditFields.includes(field);
   };
 
   if (!due) {
@@ -124,48 +169,55 @@ const DueExtensionForm = ({
         {/* Right Form */}
         <div className="right-form shadow p-5 flex-grow-1 w-100">
           <h3 className="form-title text-primary text-center mb-4">
-            DUE EXTENSION DETAILS
+            {due.due_id === "NEW" ? "CREATE DUE EXTENSION" : "DUE EXTENSION DETAILS"}
           </h3>
           {message && <div className="alert alert-success">{message}</div>}
           {error && <div className="alert alert-danger">{error}</div>}
           <form>
+            {(!onlyEditFields) && (
+              <div className="form-group mb-3">
+                <input
+                  className="form-control"
+                  value={empId}
+                  onChange={(e) => setEmpId(e.target.value)}
+                  readOnly={!isFieldEditable("emp_id")}
+                  placeholder="Employee ID"
+                />
+              </div>
+            )}
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={due.emp_id}
-                readOnly
-                placeholder="Employee ID"
-              />
-            </div>
-            <div className="form-group mb-3">
-              <input
-                className="form-control"
-                value={due.tl_id}
-                readOnly
+                value={tlId}
+                onChange={(e) => setTlId(e.target.value)}
+                readOnly={!isFieldEditable("tl_id")}
                 placeholder="TL ID"
               />
             </div>
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={due.project_id}
-                readOnly
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                readOnly={!isFieldEditable("project_id")}
                 placeholder="Project ID"
               />
             </div>
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={due.task_id}
-                readOnly
+                value={taskId}
+                onChange={(e) => setTaskId(e.target.value)}
+                readOnly={!isFieldEditable("task_id")}
                 placeholder="Task ID"
               />
             </div>
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={due.to_manager}
-                readOnly
+                value={toManager}
+                onChange={(e) => setToManager(e.target.value)}
+                readOnly={!isFieldEditable("to_manager")}
                 placeholder="To Manager"
               />
             </div>
@@ -173,47 +225,39 @@ const DueExtensionForm = ({
               <input
                 type="number"
                 className="form-control"
-                value={due.no_of_days}
-                readOnly
+                value={noOfDays}
+                onChange={(e) => setNoOfDays(e.target.value)}
+                readOnly={!isFieldEditable("no_of_days")}
                 placeholder="No. of Days"
               />
             </div>
             <div className="form-group mb-3">
-              <input
-                className="form-control"
-                value={due.status}
-                readOnly
-                placeholder="Status"
-              />
-            </div>
-            <div className="form-group mb-3">
-              <input
-                className="form-control"
-                value={
-                  due.current_deadline
-                    ? new Date(due.current_deadline).toLocaleDateString()
-                    : ""
-                }
-                readOnly
-                placeholder="Current Deadline"
-              />
-            </div>
-            <div className="form-group mb-4">
               <textarea
                 className="form-control"
-                value={due.reason}
-                readOnly
-                placeholder="REASON"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                readOnly={!isFieldEditable("reason")}
+                placeholder="Reason for Extension"
                 rows={3}
-              ></textarea>
+              />
             </div>
-
-            {/* Action Buttons */}
+            {(!onlyEditFields && due.due_id !== "NEW") && (
+              <div className="form-group mb-3">
+                <input
+                  className="form-control"
+                  value={due.status}
+                  readOnly
+                  placeholder="Status"
+                />
+              </div>
+            )}
+            {/* Action buttons based on props */}
             <div className="d-flex justify-content-center gap-3">
               {showSubmit && (
                 <button
                   type="button"
-                  className="btn btn-success px-4"
+                  className="btn btn-primary px-4"
+                  disabled={loading}
                   onClick={handleSubmit}
                 >
                   Submit
@@ -222,7 +266,8 @@ const DueExtensionForm = ({
               {showSchedule && (
                 <button
                   type="button"
-                  className="btn btn-primary px-4"
+                  className="btn btn-info px-4"
+                  disabled={loading}
                   onClick={handleSchedule}
                 >
                   Schedule

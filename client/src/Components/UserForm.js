@@ -263,8 +263,6 @@ const UserForm = () => {
         withCredentials: true,
       });
 
-      console.log('Update user response:', res);
-
       if (res.status === 200) {
         alert(`User ${id ? "updated" : "saved"} successfully!`);
         navigate("/adminhome");

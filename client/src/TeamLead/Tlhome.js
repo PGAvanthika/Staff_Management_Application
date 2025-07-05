@@ -10,11 +10,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DeadlineExtensions from "../Components/DeadlineExtension.js";
 import DueExtensionForm from "../Components/DueExtensionForm.js";
+import TeamLeaderTasks from "../Components/TeamLeaderTasks";
 
 const Tlhome = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [currentPage, setCurrentPage] = useState("DashboardUI");
   const [selectedDue, setSelectedDue] = useState(null); // NEW STATE
+  const [dueExtensionTask, setDueExtensionTask] = useState(null);
+  const [showDueExtensionForm, setShowDueExtensionForm] = useState(false);
   const navigate = useNavigate();
 
   // Role-based access control
@@ -165,13 +168,41 @@ const Tlhome = () => {
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
           {currentPage === "ToDo" && (
-            <DeadlineExtensions
-              isToDo={true}
-              customHeading="YOUR TASKS"
-              onExtendNavigate={(task) => {
-                navigate("ManagerDueExtensions/"); // Dummy route for now
-              }}
-            />
+            showDueExtensionForm && dueExtensionTask ? (
+              <DueExtensionForm
+                due={{
+                  ...dueExtensionTask,
+                  emp_id: dueExtensionTask.assigned_to,
+                  tl_id: dueExtensionTask.assigned_to,
+                  project_id: dueExtensionTask.project_id,
+                  task_id: dueExtensionTask.task_id,
+                  to_manager: dueExtensionTask.assigned_by,
+                  no_of_days: '',
+                  reason: '',
+                  status: 'pending',
+                  due_date: dueExtensionTask.deadline,
+                }}
+                onClose={() => {
+                  setShowDueExtensionForm(false);
+                  setDueExtensionTask(null);
+                }}
+                onAction={() => {
+                  setShowDueExtensionForm(false);
+                  setDueExtensionTask(null);
+                }}
+                showSubmit={true}
+                showSchedule={false}
+                readOnly={false}
+                onlyEditFields={["no_of_days", "reason"]}
+              />
+            ) : (
+              <TeamLeaderTasks
+                onRequestDueExtension={(task) => {
+                  setDueExtensionTask(task);
+                  setShowDueExtensionForm(true);
+                }}
+              />
+            )
           )}
 
           {currentPage === "DeadlineExtensions" && (
@@ -179,17 +210,56 @@ const Tlhome = () => {
               customHeading="DEADLINE EXTENSIONS"
               onNavigate={(dueItem) => {
                 setSelectedDue(dueItem);
-                setCurrentPage("DueExtensionForm");
+                setCurrentPage("ManagerDueExtension");
               }}
             />
           )}
 
           {currentPage === "ManagerDueExtension" && (
-            <ManagerDueExtensions
-              onlyShowForm={true}
-              selectedDue={selectedDue} // ✅ required!
-              onCloseForm={() => setCurrentPage("DashboardUI")}
-              buttonConfig={{ showSubmit: true, showSchedule: true }} // ✅ correct buttons
+            <DueExtensionForm
+              due={selectedDue || {
+                due_id: "NEW",
+                emp_id: "",
+                tl_id: "",
+                project_id: "",
+                task_id: "",
+                no_of_days: "",
+                reason: "",
+                status: "pending",
+                to_manager: ""
+              }}
+              onClose={() => setCurrentPage("DashboardUI")}
+              onAction={() => {
+                setCurrentPage("DashboardUI");
+                setSelectedDue(null);
+              }}
+              showSubmit={true}
+              showSchedule={true}
+              readOnly={false}
+            />
+          )}
+
+          {currentPage === "DueExtensionForm" && (
+            <DueExtensionForm
+              due={selectedDue || {
+                due_id: "NEW",
+                emp_id: "",
+                tl_id: "",
+                project_id: "",
+                task_id: "",
+                no_of_days: "",
+                reason: "",
+                status: "pending",
+                to_manager: ""
+              }}
+              onClose={() => setCurrentPage("DashboardUI")}
+              onAction={() => {
+                setCurrentPage("DashboardUI");
+                setSelectedDue(null);
+              }}
+              showSubmit={true}
+              showSchedule={true}
+              readOnly={false}
             />
           )}
         </div>

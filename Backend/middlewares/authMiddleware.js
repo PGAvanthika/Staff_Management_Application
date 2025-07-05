@@ -41,7 +41,10 @@ function authorizeRoles(...allowedRoles) {
       return res.status(401).json({ message: "Not logged in" });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    // Case-insensitive role check
+    const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+    const allowed = allowedRoles.map(r => r.toLowerCase());
+    if (!allowed.includes(userRole)) {
       return res.status(403).json({ 
         message: `Access denied. Required role: ${allowedRoles.join(", ")}` 
       });
