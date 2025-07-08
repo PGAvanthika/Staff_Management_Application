@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 import loginIllustration from "../Assets/forgot-password.avif";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,17 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
-
+  const [rememberMe, setRememberMe] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setCredentials((c) => ({ ...c, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleChange = (e) => {
     setCredentials({
@@ -42,6 +50,13 @@ const LoginPage = () => {
 
       // Store user data in auth context
       login(data.user);
+
+      // Remember Me logic
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", credentials.email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
 
       // Navigate based on role
       switch (data.user.role) {
@@ -98,7 +113,12 @@ const LoginPage = () => {
         </div>
         <div className="options">
           <label>
-            <input type="checkbox" /> Remember Me
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={() => setRememberMe((v) => !v)}
+            />
+            Remember Me
           </label>
           <span onClick={() => setShowOverlay(true)}>Forgot Password?</span>
         </div>

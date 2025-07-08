@@ -1,5 +1,5 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./Pages/LoginPage";
@@ -30,6 +30,45 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   return children;
 };
+
+// AuthRedirector component
+function AuthRedirector() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Only run on the login page
+    if (location.pathname === "/") {
+      fetch("http://localhost:3001/api/auth/validate", {
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user && data.user.role) {
+            // Redirect based on role
+            switch (data.user.role) {
+              case "Admin":
+                navigate("/adminhome");
+                break;
+              case "team_leader":
+                navigate("/Tlhome");
+                break;
+              case "Manager":
+                navigate("/ManagerHome");
+                break;
+              case "employee":
+                navigate("/EmployeeHome");
+                break;
+              default:
+                break;
+            }
+          }
+        });
+    }
+  }, [location, navigate]);
+
+  return null; // This component does not render anything
+}
 
 function AppRoutes() {
   return (
@@ -114,6 +153,7 @@ function App() {
   return (
     <div className="App">
       <AuthProvider>
+        <AuthRedirector />
         <AppRoutes />
       </AuthProvider>
     </div>

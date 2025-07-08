@@ -369,21 +369,34 @@ const UserForm = () => {
             </div>
 
             <div className="input-group">
-              <input
+              <select
                 name="gender"
                 value={form.gender}
-                placeholder="Gender (M/F/O)"
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             <div className="input-group">
-              <input
+              <select
                 name="blood_group"
                 value={form.blood_group}
-                placeholder="Blood group (e.g., A+)"
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
             </div>
 
             <div className="input-group">
@@ -548,7 +561,7 @@ const UserForm = () => {
               <input
                 name="school_year"
                 value={form.school_year}
-                placeholder="Year of Completion"
+                placeholder="Year of School Completion (e.g., 2020)"
                 onChange={handleChange}
               />
             </div>
@@ -566,7 +579,7 @@ const UserForm = () => {
               <input
                 name="college_year"
                 value={form.college_year}
-                placeholder="Year of Completion"
+                placeholder="Year of College Completion (e.g., 2022)"
                 onChange={handleChange}
               />
             </div>
@@ -581,14 +594,19 @@ const UserForm = () => {
             </div>
 
             <div className="input-group">
-              <input
+              <select
                 name="role"
                 value={form.role}
-                placeholder="Role (Required)"
                 onChange={handleChange}
                 required
                 className={errors.role ? "error" : ""}
-              />
+              >
+                <option value="">Select Role</option>
+                <option value="Admin">Admin</option>
+                <option value="team_leader">Team Leader</option>
+                <option value="Manager">Manager</option>
+                <option value="employee">Employee</option>
+              </select>
               {errors.role && (
                 <span className="error-message">{errors.role}</span>
               )}
@@ -609,9 +627,12 @@ const UserForm = () => {
             <div className="input-group">
               <input
                 name="experience"
+                type="number"
+                step="0.01"
                 value={form.experience}
-                placeholder="Experience"
+                placeholder="Experience in years (e.g., 0.4 for 4 months)"
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
