@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TaskDetailsCard from "./TaskDetails";
 import { useNavigate } from "react-router-dom";
+import DueExtensionForm from "./DueExtensionForm";
 
 const DeadlineExtensions = ({
   customHeading = "DEADLINE EXTENSIONS",
@@ -159,14 +160,13 @@ const DeadlineExtensions = ({
         </div>
       ) : (
         <div className="w-100 d-flex flex-column align-items-center">
-          <TaskDetailsCard
-            task={selectedTask}
-            showSubmit={isToDo}
-            showExtend={isToDo}
-            showApprove={!isToDo}
-            showDecline={!isToDo}
-            onExtendClick={() => handleExtendClick(selectedTask)}
+          <DueExtensionForm
+            due={selectedTask}
+            onClose={handleBack}
             onAction={handleBack}
+            readOnly={false}
+            showSubmit={false}
+            showSchedule={false}
           />
           <button className="btn btn-outline-dark mt-3" onClick={handleBack}>
             Back

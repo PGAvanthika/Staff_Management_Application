@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const Profile = ({ onClose }) => {
   const overlayRef = useRef(null);
   const cardRef = useRef(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -23,11 +25,10 @@ const Profile = ({ onClose }) => {
     };
   }, [onClose]);
 
-  // Dummy user data
-  const name = "Avanthika PG";
-  const employeeId = "EMP1024";
-  const email = "avanthika@example.com";
-  const photoUrl = "https://via.placeholder.com/100";
+  if (!user) return null;
+  const name = user.fname && user.lname ? `${user.fname} ${user.lname}` : user.name || user.email;
+  const employeeId = user.id || "-";
+  const email = user.email || "-";
 
   return (
     <div
@@ -59,8 +60,9 @@ const Profile = ({ onClose }) => {
           userSelect: "none",
         }}
       >
-        <img
-          src={photoUrl}
+        {/* Optionally show a profile image if available */}
+        {/* <img
+          src={user.profilepic || "/images/default-user.jpg"}
           alt="User"
           style={{
             width: "64px",
@@ -69,7 +71,7 @@ const Profile = ({ onClose }) => {
             objectFit: "cover",
             border: "2px solid #ccc",
           }}
-        />
+        /> */}
         <div>
           <div
             style={{

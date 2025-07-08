@@ -6,13 +6,15 @@ import DeadlineExtensions from "../../Components/DeadlineExtension.js";
 import EmployeeTasks from "../../Components/EmployeeTasks";
 
 import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const EmployeeHome = () => {
   const [showProfile, setShowProfile] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  const handleLogOut = () => {
-    // Just redirect to login page
+  const handleLogOut = async () => {
+    await logout();
     navigate("/");
   };
 

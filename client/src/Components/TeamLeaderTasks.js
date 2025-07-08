@@ -8,6 +8,13 @@ function isOneDayBefore(dateStr) {
   return diff > 0 && diff < 2;
 }
 
+// Helper to check if deadline is exceeded
+function isOverdue(dateStr) {
+  const now = new Date();
+  const due = new Date(dateStr);
+  return now > due;
+}
+
 const TeamLeaderTasks = ({ onRequestDueExtension }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +39,9 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
   }, []);
 
   if (selectedTask) {
-    const showExtend = isOneDayBefore(selectedTask.deadline);
+    const showExtend = true; // Always allow extension request
+    const hasPendingDue = selectedTask.has_pending_due_extension;
+    const overdue = isOverdue(selectedTask.deadline);
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100 w-100" style={{ backgroundColor: "#7d98a5" }}>
         <div className="bg-white p-5 rounded shadow-lg" style={{ width: "100%", maxWidth: "600px" }}>
@@ -42,7 +51,10 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
           <div className="mb-2"><b>Deadline:</b> {selectedTask.deadline}</div>
           <div className="mb-2"><b>Status:</b> {selectedTask.task_status}</div>
           <div className="mb-2"><b>Assigned By:</b> {selectedTask.assigned_by_email}</div>
-          {showExtend && (
+          {overdue && (
+            <div className="alert alert-danger mt-2">This task is <b>overdue</b>!</div>
+          )}
+          {showExtend && !hasPendingDue && (
             <button
               className="btn btn-warning mt-3 me-2"
               onClick={() => onRequestDueExtension && onRequestDueExtension(selectedTask)}

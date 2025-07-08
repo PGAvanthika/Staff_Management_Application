@@ -27,6 +27,17 @@ const addStatusColumn = async () => {
   }
 };
 
+const addDueDateColumn = async () => {
+  try {
+    await sql`
+      ALTER TABLE dues ADD COLUMN IF NOT EXISTS due_date DATE NOT NULL DEFAULT CURRENT_DATE;
+    `;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
-  addStatusColumn
+  addStatusColumn,
+  addDueDateColumn
 }; 

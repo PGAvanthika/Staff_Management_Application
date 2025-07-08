@@ -4,6 +4,19 @@ import "./DueExtensionForm.css";
 import DueIllstration from "../Assets/deadline_img-removebg-preview.png";
 import { useAuth } from '../context/AuthContext';
 
+// Helper to check if a date string is valid
+function isValidDateString(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return d instanceof Date && !isNaN(d);
+}
+
+// Helper to get display value for a field
+function getDisplayValue(value, readOnly) {
+  if (readOnly) return value || 'N/A';
+  return value || '';
+}
+
 const DueExtensionForm = ({
   due,
   onClose,
@@ -27,6 +40,13 @@ const DueExtensionForm = ({
   const [projectId, setProjectId] = useState(due.project_id || "");
   const [taskId, setTaskId] = useState(due.task_id || "");
   const [toManager, setToManager] = useState(due.to_manager || "");
+  const [dueDate, setDueDate] = useState(
+    isValidDateString(due.due_date) ? new Date(due.due_date).toISOString().split('T')[0] : ""
+  );
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  console.log('Raw due.due_date:', due.due_date, '| Computed dueDate:', dueDate);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -83,9 +103,15 @@ const DueExtensionForm = ({
   };
 
   const handleSubmit = async () => {
+    setError("");
+    setMessage("");
+    if (!noOfDays || isNaN(Number(noOfDays)) || Number(noOfDays) <= 0) {
+      setError("Please enter a valid number of days");
+      return;
+    }
     const today = new Date();
-    const dueDate = new Date(today.getTime() + Number(noOfDays) * 24 * 60 * 60 * 1000);
-    const dueDateStr = dueDate.toISOString().split('T')[0];
+    const dueDateObj = new Date(today.getTime() + Number(noOfDays) * 24 * 60 * 60 * 1000);
+    const dueDateStr = dueDateObj.toISOString().split('T')[0];
     const payload = {
       emp_id: onlyEditFields ? tlId : empId,
       tl_id: tlId,
@@ -93,7 +119,7 @@ const DueExtensionForm = ({
       task_id: taskId,
       to_manager: toManager,
       no_of_days: Number(noOfDays),
-      reason,
+      reason: reason || "No reason provided",
       due_date: dueDateStr,
     };
     try {
@@ -106,18 +132,58 @@ const DueExtensionForm = ({
       const data = await res.json();
       if (res.ok) {
         alert('Submitted successfully!');
-        if (onAction) onAction();
+        window.location.reload();
       } else {
-        alert(data.error || 'Failed to submit due extension');
+        setError(data.error || 'Failed to submit due extension');
       }
     } catch (err) {
-      alert('Server error');
+      setError('Server error');
     }
   };
 
   const handleSchedule = () => {
-    alert("Scheduled successfully!");
-    if (onAction) onAction();
+    setShowTimePicker(true);
+  };
+
+  const handleScheduleSubmit = async () => {
+    setError("");
+    setMessage("");
+    if (!scheduledTime) {
+      setError("Please select a time to schedule the request.");
+      return;
+    }
+    // Prepare payload with scheduled time
+    const today = new Date();
+    const dueDateObj = new Date(today.getTime() + Number(noOfDays) * 24 * 60 * 60 * 1000);
+    const dueDateStr = dueDateObj.toISOString().split('T')[0];
+    const payload = {
+      emp_id: onlyEditFields ? tlId : empId,
+      tl_id: tlId,
+      project_id: projectId,
+      task_id: taskId,
+      to_manager: toManager,
+      no_of_days: Number(noOfDays),
+      reason: reason || "No reason provided",
+      due_date: dueDateStr,
+      scheduled_time: scheduledTime,
+    };
+    try {
+      const res = await fetch('http://localhost:3001/api/dues/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Scheduled successfully!');
+        if (onAction) onAction();
+      } else {
+        setError(data.error || 'Failed to schedule due extension');
+      }
+    } catch (err) {
+      setError('Server error');
+    }
   };
 
   const isFieldEditable = (field) => {
@@ -137,7 +203,7 @@ const DueExtensionForm = ({
     );
   }
 
-  const isProcessed = due.status !== "pending";
+  const isProcessed = (due.status ?? "pending") !== "pending";
 
   return (
     <div className="overlay">
@@ -178,7 +244,7 @@ const DueExtensionForm = ({
               <div className="form-group mb-3">
                 <input
                   className="form-control"
-                  value={empId}
+                  value={getDisplayValue(empId, !isFieldEditable("emp_id"))}
                   onChange={(e) => setEmpId(e.target.value)}
                   readOnly={!isFieldEditable("emp_id")}
                   placeholder="Employee ID"
@@ -188,7 +254,7 @@ const DueExtensionForm = ({
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={tlId}
+                value={getDisplayValue(tlId, !isFieldEditable("tl_id"))}
                 onChange={(e) => setTlId(e.target.value)}
                 readOnly={!isFieldEditable("tl_id")}
                 placeholder="TL ID"
@@ -197,7 +263,7 @@ const DueExtensionForm = ({
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={projectId}
+                value={getDisplayValue(projectId, !isFieldEditable("project_id"))}
                 onChange={(e) => setProjectId(e.target.value)}
                 readOnly={!isFieldEditable("project_id")}
                 placeholder="Project ID"
@@ -206,7 +272,7 @@ const DueExtensionForm = ({
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={taskId}
+                value={getDisplayValue(taskId, !isFieldEditable("task_id"))}
                 onChange={(e) => setTaskId(e.target.value)}
                 readOnly={!isFieldEditable("task_id")}
                 placeholder="Task ID"
@@ -215,7 +281,7 @@ const DueExtensionForm = ({
             <div className="form-group mb-3">
               <input
                 className="form-control"
-                value={toManager}
+                value={getDisplayValue(toManager, !isFieldEditable("to_manager"))}
                 onChange={(e) => setToManager(e.target.value)}
                 readOnly={!isFieldEditable("to_manager")}
                 placeholder="To Manager"
@@ -225,7 +291,7 @@ const DueExtensionForm = ({
               <input
                 type="number"
                 className="form-control"
-                value={noOfDays}
+                value={getDisplayValue(noOfDays, !isFieldEditable("no_of_days"))}
                 onChange={(e) => setNoOfDays(e.target.value)}
                 readOnly={!isFieldEditable("no_of_days")}
                 placeholder="No. of Days"
@@ -234,11 +300,20 @@ const DueExtensionForm = ({
             <div className="form-group mb-3">
               <textarea
                 className="form-control"
-                value={reason}
+                value={getDisplayValue(reason, !isFieldEditable("reason"))}
                 onChange={(e) => setReason(e.target.value)}
                 readOnly={!isFieldEditable("reason")}
                 placeholder="Reason for Extension"
                 rows={3}
+              />
+            </div>
+            <div className="form-group mb-3">
+              <input
+                type="text"
+                className="form-control"
+                value={isValidDateString(dueDate) ? dueDate : (readOnly ? "N/A" : "")}
+                readOnly
+                placeholder="Due Date"
               />
             </div>
             {(!onlyEditFields && due.due_id !== "NEW") && (
@@ -263,7 +338,7 @@ const DueExtensionForm = ({
                   Submit
                 </button>
               )}
-              {showSchedule && (
+              {showSchedule && !showTimePicker && (
                 <button
                   type="button"
                   className="btn btn-info px-4"
@@ -273,7 +348,33 @@ const DueExtensionForm = ({
                   Schedule
                 </button>
               )}
-              {!showSubmit && !showSchedule && (
+              {showTimePicker && (
+                <div className="d-flex flex-column align-items-center w-100">
+                  <input
+                    type="datetime-local"
+                    className="form-control mb-2"
+                    value={scheduledTime}
+                    onChange={e => setScheduledTime(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-success px-4"
+                    disabled={loading}
+                    onClick={handleScheduleSubmit}
+                  >
+                    Confirm Schedule
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary px-4 mt-2"
+                    disabled={loading}
+                    onClick={() => setShowTimePicker(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              {!showSubmit && !showSchedule && !showTimePicker && (
                 <>
                   <button
                     type="button"

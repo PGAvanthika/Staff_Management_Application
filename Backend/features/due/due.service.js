@@ -122,7 +122,7 @@ exports.updateDueExtension = async (id, data) => {
 };
 
 exports.getDueExtensionsForTeamLeader = async (tlId) => {
-  return sql.query("SELECT * FROM dues WHERE tl_id = $1 AND status = 'pending'", [tlId]);
+  return sql.query("SELECT * FROM dues WHERE tl_id = $1 ORDER BY due_id DESC", [tlId]);
 };
 
 exports.updateDueExtensionStatusByTeamLeader = async (id, status, tlId) => {

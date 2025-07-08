@@ -168,6 +168,14 @@ exports.getTasksByEmployee = async (employeeId) => {
 
   try {
     const result = await sql.query(query, [employeeId]);
+    // For each task, check if there is a pending due extension
+    for (const task of result) {
+      const due = await sql.query(
+        `SELECT 1 FROM dues WHERE emp_id = $1 AND task_id = $2 AND status = 'pending' LIMIT 1`,
+        [employeeId, task.task_id]
+      );
+      task.has_pending_due_extension = due.length > 0;
+    }
     return result;
   } catch (error) {
     throw error;
