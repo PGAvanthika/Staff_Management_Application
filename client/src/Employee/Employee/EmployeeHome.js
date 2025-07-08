@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Profile from "../../Components/Profile.js";
 import DashboardUI from "../../Components/DashboardUI.js";
 import DeadlineExtensions from "../../Components/DeadlineExtension.js";
+import EmployeeTasks from "../../Components/EmployeeTasks";
 
 import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
 
@@ -121,15 +122,7 @@ const EmployeeHome = () => {
             <Route path="dashboard" element={<DashboardUI />} />
             <Route
               path="tasks"
-              element={
-                <DeadlineExtensions
-                  isToDo={true}
-                  customHeading="YOUR TASKS"
-                  onExtendNavigate={(task) => {
-                    // No console.log statements
-                  }}
-                />
-              }
+              element={<EmployeeTasks />}
             />
           </Routes>
         </div>

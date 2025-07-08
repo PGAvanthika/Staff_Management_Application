@@ -146,3 +146,30 @@ exports.getTasksByTeamLeader = async (teamLeaderId) => {
     throw error;
   }
 };
+
+// Get tasks assigned to an employee
+exports.getTasksByEmployee = async (employeeId) => {
+  const query = `
+    SELECT 
+      t.task_id,
+      t.description,
+      t.deadline,
+      t.task_status,
+      t.project_id,
+      p.project_name,
+      t.assigned_by,
+      u.email as assigned_by_email
+    FROM tasks t
+    JOIN projects p ON t.project_id = p.project_id
+    JOIN users u ON t.assigned_by = u.id
+    WHERE t.assigned_to = $1
+    ORDER BY t.deadline ASC
+  `;
+
+  try {
+    const result = await sql.query(query, [employeeId]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};

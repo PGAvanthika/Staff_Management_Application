@@ -57,3 +57,15 @@ exports.getTasksByTeamLeader = async (req, res) => {
     res.status(500).json({ message: 'Database error while fetching tasks', error: error.message });
   }
 };
+
+// Get tasks assigned to an employee
+exports.getTasksByEmployee = async (req, res) => {
+  try {
+    const employeeId = req.user.userId;
+    const tasks = await taskService.getTasksByEmployee(employeeId);
+    res.json(tasks);
+  } catch (error) {
+    console.error('=== GET EMPLOYEE TASKS ERROR ===', error);
+    res.status(500).json({ message: 'Database error while fetching tasks', error: error.message });
+  }
+};

@@ -12,4 +12,7 @@ router.put('/:id', isLoggedIn, taskController.updateTask);
 // GET /api/tasks/teamleader
 router.get('/teamleader', isLoggedIn, taskController.getTasksByTeamLeader);
 
+// GET /api/tasks/employee
+router.get('/employee', isLoggedIn, taskController.getTasksByEmployee);
+
 module.exports = router;
