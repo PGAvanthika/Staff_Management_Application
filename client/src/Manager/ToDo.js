@@ -13,6 +13,7 @@ function ToDo() {
   const [editingList, setEditingList] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedList, setSelectedList] = useState(null);
+  const [selectedTodayDate, setSelectedTodayDate] = useState(new Date()); // NEW
 
   // Fetch lists and notes from backend
   const [userLists, setUserLists] = useState([]);
@@ -77,8 +78,8 @@ function ToDo() {
         }
         return { ...note, due_date: due_date.toString() };
       });
-      
       setStickyNotes(normalizedNotes);
+      console.log('Fetched stickyNotes:', normalizedNotes);
     } catch (err) {
       setStickyNotes([]);
     }
@@ -226,13 +227,34 @@ function ToDo() {
     });
   };
 
-  const getTasksForView = (view) => {
-    // Use local date instead of UTC to avoid timezone issues
-    const today = new Date().toLocaleDateString('en-CA'); // Returns YYYY-MM-DD in local timezone
-    const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
-    const thisWeekEnd = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-CA');
+  // Helper to format date as YYYY-MM-DD
+  const formatDate = (date) => {
+    if (!date) return "";
+    if (typeof date === "string" && date.length === 10 && date.includes("-")) {
+      // If DD-MM-YYYY, convert to YYYY-MM-DD
+      if (/^\d{2}-\d{2}-\d{4}$/.test(date)) {
+        const [dd, mm, yyyy] = date.split('-');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      // If already YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+    }
+    const d = new Date(date);
+    if (!isNaN(d)) return d.toISOString().split("T")[0];
+    return "";
+  };
 
-    // Helper to normalize date string
+  // When user picks a date, always store as YYYY-MM-DD string
+  const handleTodayDateChange = (e) => {
+    setSelectedTodayDate(formatDate(e.target.value));
+  };
+
+  // Update getTasksForView to use robust date comparison
+  const getTasksForView = (view) => {
+    const today = formatDate(selectedTodayDate); // For 'today' view
+    const todayDateObj = new Date(today);
+    const systemToday = formatDate(new Date()); // For 'upcoming' view
+    const systemTodayObj = new Date(systemToday);
     const normalizeDate = (date) => {
       if (!date) return "";
       if (/^\d{2}-\d{2}-\d{4}$/.test(date)) {
@@ -250,7 +272,6 @@ function ToDo() {
         return date;
       }
     };
-
     let result;
     switch (view) {
       case "today":
@@ -259,18 +280,13 @@ function ToDo() {
           return normalized === today;
         });
         return result;
-      case "tomorrow":
-        result = stickyNotes.filter((note) => normalizeDate(note.due_date) === tomorrow);
-        return result;
-      case "thisweek":
-        result = stickyNotes.filter(
-          (note) => normalizeDate(note.due_date) > today && normalizeDate(note.due_date) <= thisWeekEnd
-        );
-        return result;
       case "upcoming":
         result = stickyNotes.filter((note) => {
           const normalized = normalizeDate(note.due_date);
-          return normalized >= today;
+          if (!normalized) return false;
+          // Compare as Date objects for robustness
+          const noteDateObj = new Date(normalized);
+          return noteDateObj >= systemTodayObj;
         });
         return result;
       default:
@@ -351,6 +367,7 @@ function ToDo() {
 
   const renderUpcomingTasks = () => {
     const upcomingTasks = getTasksForView("upcoming");
+    console.log('Upcoming tasks:', upcomingTasks);
     const groupedTasks = upcomingTasks.reduce((groups, task) => {
       const date = task.due_date;
       if (!groups[date]) {
@@ -386,19 +403,24 @@ function ToDo() {
 
   const renderTodayTasks = () => {
     const todayTasks = getTasksForView("today");
-    const today = new Date();
-
     return (
       <div className="today-tasks">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="mb-0">
-            Today - {today.toLocaleDateString("en-US", {
+            Today - {new Date(formatDate(selectedTodayDate)).toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
           </h3>
+          <input
+            type="date"
+            className="form-control ms-3"
+            style={{ maxWidth: 200 }}
+            value={formatDate(selectedTodayDate)}
+            onChange={handleTodayDateChange}
+          />
         </div>
         {todayTasks.length === 0 ? (
           <div className="text-center py-5 text-muted">
@@ -406,7 +428,7 @@ function ToDo() {
           </div>
         ) : (
           <div className="row g-4">
-            {todayTasks.map((note) => {
+            {todayTasks.map((note, idx) => {
               const list = userLists.find((l) => l.id === note.list_id);
               const listColor = (list && list.color) ? list.color : "secondary";
               let contentArr = note.content;
@@ -420,7 +442,7 @@ function ToDo() {
               if (!Array.isArray(contentArr)) contentArr = [String(contentArr)];
               const cardBgColor = listColor === 'blue' ? '#e3f0ff' : undefined;
               return (
-                <div key={note.id} className="col-12 col-md-6 col-lg-4 d-flex">
+                <div key={note.id || note.note_id || idx} className="col-12 col-md-6 col-lg-4 d-flex">
                   <div
                     className={`card sticky-note bg-${listColor} bg-opacity-10 border-${listColor}`}
                     onClick={() => handleEditNote(note)}
@@ -583,7 +605,7 @@ function ToDo() {
             </button>
             <button
               className="btn btn-primary"
-              onClick={() => setShowAddModal(true)}
+              onClick={handleShowAddModal}
             >
               + Add Task
             </button>
@@ -660,7 +682,7 @@ function ToDo() {
           <h3>Sticky Wall</h3>
           <button
             className="btn btn-primary"
-            onClick={() => setShowAddModal(true)}
+            onClick={handleShowAddModal}
           >
             + Add Note
           </button>
@@ -760,6 +782,25 @@ function ToDo() {
         </div>
       </div>
     );
+  };
+
+  // Find the Personal list ID helper
+  const getPersonalListId = () => {
+    const personal = userLists.find((l) => l.name.toLowerCase() === "personal");
+    return personal ? personal.id : (userLists[0]?.id || "");
+  };
+
+  const handleShowAddModal = () => {
+    setNewNote({
+      title: "",
+      content: "",
+      list_id: getPersonalListId(),
+      due_date: formatDate(selectedTodayDate),
+      due_time: "09:00",
+      duration_minutes: 30,
+      completed: false,
+    });
+    setShowAddModal(true);
   };
 
   return (

@@ -116,6 +116,7 @@ exports.getTeamLeaderDueExtensions = async (req, res) => {
   try {
     const tlId = req.user.userId;
     const dues = await dueService.getDueExtensionsForTeamLeader(tlId);
+    console.log('[DEBUG] TeamLeaderDueExtensions for tlId:', tlId, '| count:', dues.length);
     res.json(dues);
   } catch (err) {
     res.status(500).json({ error: err.message });

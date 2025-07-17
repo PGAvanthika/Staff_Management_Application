@@ -15,6 +15,17 @@ function isOverdue(dateStr) {
   return now > due;
 }
 
+// Helper to get the correct team leader ID for a task
+function getTeamLeaderId(task) {
+  // If the task object has a team_leader_id, use it
+  if (task.team_leader_id) return task.team_leader_id;
+  // If assigned_by_role is available and is 'team_leader', use assigned_by
+  if (task.assigned_by_role && task.assigned_by_role === 'team_leader') return task.assigned_by;
+  // If assigned_by_email contains 'tl' or similar, you can add more logic here
+  // Fallback: return empty string (should not default to employee's own ID)
+  return '';
+}
+
 const EmployeeTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,12 +57,13 @@ const EmployeeTasks = () => {
   }, []);
 
   if (showDueExtensionForm && dueExtensionTask) {
+    const correctTlId = getTeamLeaderId(dueExtensionTask);
     return (
       <DueExtensionForm
         due={{
           ...dueExtensionTask,
           emp_id: dueExtensionTask.assigned_to,
-          tl_id: dueExtensionTask.assigned_by,
+          tl_id: correctTlId,
           project_id: dueExtensionTask.project_id,
           task_id: dueExtensionTask.task_id,
           to_manager: dueExtensionTask.assigned_by,

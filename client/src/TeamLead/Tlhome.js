@@ -11,8 +11,10 @@ import { useNavigate } from "react-router-dom";
 import DeadlineExtensions from "../Components/DeadlineExtension.js";
 import DueExtensionForm from "../Components/DueExtensionForm.js";
 import TeamLeaderTasks from "../Components/TeamLeaderTasks";
+import { useAuth } from "../context/AuthContext";
 
 const Tlhome = () => {
+  const { user } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
   const [currentPage, setCurrentPage] = useState("DashboardUI");
   const [selectedDue, setSelectedDue] = useState(null); // NEW STATE
@@ -173,7 +175,7 @@ const Tlhome = () => {
                 due={{
                   ...dueExtensionTask,
                   emp_id: dueExtensionTask.assigned_to,
-                  tl_id: dueExtensionTask.assigned_to,
+                  tl_id: user?.id || dueExtensionTask.assigned_to,
                   project_id: dueExtensionTask.project_id,
                   task_id: dueExtensionTask.task_id,
                   to_manager: dueExtensionTask.assigned_by,

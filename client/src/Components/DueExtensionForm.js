@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./DueExtensionForm.css";
 import DueIllstration from "../Assets/deadline_img-removebg-preview.png";
 import { useAuth } from '../context/AuthContext';
+import axios from "axios";
 
 // Helper to check if a date string is valid
 function isValidDateString(dateStr) {
@@ -36,7 +37,7 @@ const DueExtensionForm = ({
   const [noOfDays, setNoOfDays] = useState(due.no_of_days || "");
   const [empId, setEmpId] = useState(due.emp_id || "");
   const { user } = useAuth();
-  const [tlId, setTlId] = useState(user?.id || due.tl_id || "");
+  const [tlId, setTlId] = useState(due.tl_id || "");
   const [projectId, setProjectId] = useState(due.project_id || "");
   const [taskId, setTaskId] = useState(due.task_id || "");
   const [toManager, setToManager] = useState(due.to_manager || "");
@@ -45,6 +46,7 @@ const DueExtensionForm = ({
   );
   const [scheduledTime, setScheduledTime] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [teamLeaders, setTeamLeaders] = useState([]);
 
   console.log('Raw due.due_date:', due.due_date, '| Computed dueDate:', dueDate);
 
@@ -69,20 +71,37 @@ const DueExtensionForm = ({
     };
   }, [onClose, onNavigateBack]);
 
+  useEffect(() => {
+    // Fetch all team leaders for dropdown
+    axios.get("http://localhost:3001/api/users/all", { withCredentials: true })
+      .then(res => {
+        const tls = res.data.filter(u => u.role === "team_leader");
+        console.log('Fetched team leaders:', tls); // Debug log
+        setTeamLeaders(tls);
+      })
+      .catch(() => setTeamLeaders([]));
+  }, [onClose, onNavigateBack]);
+
   const handleAction = async (status) => {
     setMessage("");
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/dues/${due.due_id}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ status }),
-        }
-      );
+      let endpoint = "";
+      let statusPayload = status;
+      if (user?.role === "team_leader") {
+        endpoint = `http://localhost:3001/api/dues/teamleader/dues/${due.due_id}/status`;
+        statusPayload = status === "approved" ? "tl_approved" : (status === "rejected" ? "tl_rejected" : status);
+      } else {
+        endpoint = `http://localhost:3001/api/dues/${due.due_id}/status`;
+        statusPayload = status;
+      }
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status: statusPayload }),
+      });
       const data = await res.json();
       if (res.ok) {
         setMessage(
@@ -240,26 +259,7 @@ const DueExtensionForm = ({
           {message && <div className="alert alert-success">{message}</div>}
           {error && <div className="alert alert-danger">{error}</div>}
           <form>
-            {(!onlyEditFields) && (
-              <div className="form-group mb-3">
-                <input
-                  className="form-control"
-                  value={getDisplayValue(empId, !isFieldEditable("emp_id"))}
-                  onChange={(e) => setEmpId(e.target.value)}
-                  readOnly={!isFieldEditable("emp_id")}
-                  placeholder="Employee ID"
-                />
-              </div>
-            )}
-            <div className="form-group mb-3">
-              <input
-                className="form-control"
-                value={getDisplayValue(tlId, !isFieldEditable("tl_id"))}
-                onChange={(e) => setTlId(e.target.value)}
-                readOnly={!isFieldEditable("tl_id")}
-                placeholder="TL ID"
-              />
-            </div>
+            {/* Team Leader ID field removed as per user request */}
             <div className="form-group mb-3">
               <input
                 className="form-control"
