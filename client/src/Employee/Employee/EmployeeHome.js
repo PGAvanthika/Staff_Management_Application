@@ -4,6 +4,7 @@ import Profile from "../../Components/Profile.js";
 import DashboardUI from "../../Components/DashboardUI.js";
 import DeadlineExtensions from "../../Components/DeadlineExtension.js";
 import EmployeeTasks from "../../Components/EmployeeTasks";
+import TaskHistory from "../../Components/TaskHistory.js";
 
 import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -89,6 +90,23 @@ const EmployeeHome = () => {
                   YOUR TASKS
                 </button>
               </li>
+              <li className="nav-item border-bottom">
+                <button
+                  className="btn btn-link w-100 text-start d-flex align-items-center px-2 py-2"
+                  onClick={() => navigate("/employeehome/history")}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <ion-icon
+                    name="time-outline"
+                    style={{ fontSize: "1.5rem", marginRight: "10px" }}
+                  ></ion-icon>
+                  TASK HISTORY
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -125,6 +143,10 @@ const EmployeeHome = () => {
             <Route
               path="tasks"
               element={<EmployeeTasks />}
+            />
+            <Route
+              path="history"
+              element={<TaskHistory />}
             />
           </Routes>
         </div>

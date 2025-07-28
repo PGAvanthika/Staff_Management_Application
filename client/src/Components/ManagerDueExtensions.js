@@ -231,7 +231,9 @@ const ManagerDueExtensions = ({
                     </Typography>
                     <Typography fontSize={15}>
                       <strong>Deadline:</strong>{" "}
-                      {new Date(due.current_deadline).toLocaleDateString()}
+                      {due.current_deadline && !isNaN(new Date(due.current_deadline))
+                        ? new Date(due.current_deadline).toLocaleDateString()
+                        : "N/A"}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -286,7 +288,7 @@ const ManagerDueExtensions = ({
                       />
                     </TableCell>
                     <TableCell>
-                      {due.current_deadline
+                      {due.current_deadline && !isNaN(new Date(due.current_deadline))
                         ? new Date(due.current_deadline).toLocaleDateString()
                         : "N/A"}
                     </TableCell>

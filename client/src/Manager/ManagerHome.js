@@ -10,6 +10,7 @@ import DueApproval from "../Components/DueApproval.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ManagerDueExtensions from '../Components/ManagerDueExtensions';
+import TaskHistory from '../Components/TaskHistory';
 
 const ManagerHome = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -68,6 +69,7 @@ const ManagerHome = () => {
     },
     { label: "DUE EXTENSIONS", key: "DueApproval", icon: "time-outline" },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
+    { label: "TASK HISTORY", key: "TaskHistory", icon: "time-outline" },
   ];
 
   return (
@@ -158,6 +160,7 @@ const ManagerHome = () => {
           {currentPage === "DueApproval" && <DueApproval />}
           {currentPage === "ToDo" && <ToDo />}
           {currentPage === "DueApproval" && <ManagerDueExtensions />}
+          {currentPage === "TaskHistory" && <TaskHistory />}
         </div>
       </div>
 

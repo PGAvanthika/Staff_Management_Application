@@ -124,13 +124,43 @@ const DueExtensionForm = ({
   const handleSubmit = async () => {
     setError("");
     setMessage("");
+    console.log('=== SUBMITTING DUE EXTENSION ===');
+    
     if (!noOfDays || isNaN(Number(noOfDays)) || Number(noOfDays) <= 0) {
       setError("Please enter a valid number of days");
       return;
     }
+    
+    // Validate all required fields
+    if (!empId) {
+      setError("Employee ID is missing");
+      return;
+    }
+    if (!tlId) {
+      setError("Team Leader ID is missing");
+      return;
+    }
+    if (!projectId) {
+      setError("Project ID is missing");
+      return;
+    }
+    if (!taskId) {
+      setError("Task ID is missing");
+      return;
+    }
+    if (!toManager) {
+      setError("Manager ID is missing");
+      return;
+    }
+    if (!reason.trim()) {
+      setError("Please provide a reason for the extension");
+      return;
+    }
+    
     const today = new Date();
     const dueDateObj = new Date(today.getTime() + Number(noOfDays) * 24 * 60 * 60 * 1000);
     const dueDateStr = dueDateObj.toISOString().split('T')[0];
+    
     const payload = {
       emp_id: onlyEditFields ? tlId : empId,
       tl_id: tlId,
@@ -141,6 +171,21 @@ const DueExtensionForm = ({
       reason: reason || "No reason provided",
       due_date: dueDateStr,
     };
+    
+    console.log('Payload being sent:', payload);
+    console.log('User role:', user?.role);
+    console.log('Individual field values:', {
+      empId,
+      tlId,
+      projectId,
+      taskId,
+      toManager,
+      noOfDays,
+      reason,
+      dueDateStr,
+      onlyEditFields
+    });
+    
     try {
       const res = await fetch('http://localhost:3001/api/dues', {
         method: 'POST',
@@ -148,14 +193,22 @@ const DueExtensionForm = ({
         credentials: 'include',
         body: JSON.stringify(payload),
       });
+      
+      console.log('Response status:', res.status);
+      console.log('Response headers:', res.headers);
+      
       const data = await res.json();
+      console.log('Response data:', data);
+      
       if (res.ok) {
         alert('Submitted successfully!');
         window.location.reload();
       } else {
+        console.error('Error response:', data);
         setError(data.error || 'Failed to submit due extension');
       }
     } catch (err) {
+      console.error('Fetch error:', err);
       setError('Server error');
     }
   };

@@ -1,12 +1,20 @@
 const sql = require('../../config/db');
 
 exports.createDueExtension = async (data) => {
+  console.log('=== DUE SERVICE - CREATE DUE EXTENSION ===');
+  console.log('Input data:', data);
+  
   const { emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date } = data;
+  
+  console.log('Executing SQL query with parameters:', [emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date]);
+  
   const result = await sql.query(
     `INSERT INTO dues (emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
     [emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date]
   );
+  
+  console.log('SQL query result:', result);
   return result[0];
 };
 
@@ -21,10 +29,18 @@ exports.getDueExtensionById = async (id) => {
 
 // Get all due extensions for a specific manager
 exports.getDueExtensionsForManager = async (managerId) => {
-  return sql.query(
-    "SELECT * FROM dues WHERE to_manager = $1 AND status IN ('pending', 'escalated', 'tl_approved')",
+  console.log('=== GETTING DUE EXTENSIONS FOR MANAGER ===', managerId);
+  
+  const result = await sql.query(
+    `SELECT d.*, t.deadline as current_deadline 
+     FROM dues d
+     JOIN tasks t ON d.task_id = t.task_id
+     WHERE d.to_manager = $1 AND d.status IN ('pending', 'escalated', 'tl_approved')`,
     [managerId]
   );
+  
+  console.log('Due extensions result:', result);
+  return result;
 };
 
 // Get all due extensions for a specific manager for a given month
@@ -59,31 +75,30 @@ exports.updateDueExtensionStatus = async (dueId, status, managerId) => {
 
   if (status === 'approved') {
     // Calculate new deadline by adding days to current deadline
-    const result = await sql`
-      WITH updated_due AS (
+    const result = await sql.query(
+      `WITH updated_due AS (
         UPDATE dues 
-        SET status = ${status}
-        WHERE due_id = ${dueId}
+        SET status = $1
+        WHERE due_id = $2
         RETURNING *
       )
       UPDATE tasks t
       SET deadline = (
-        SELECT deadline + (no_of_days || ' days')::interval
+        SELECT deadline + INTERVAL '1 day' * no_of_days
         FROM updated_due
-        WHERE due_id = ${dueId}
+        WHERE due_id = $2
       )
       FROM updated_due d
       WHERE t.task_id = d.task_id
-      RETURNING t.*, d.*
-    `;
+      RETURNING t.*, d.*`,
+      [status, dueId]
+    );
     return result[0];
   } else if (status === 'rejected') {
-    const result = await sql`
-      UPDATE dues 
-      SET status = ${status}
-      WHERE due_id = ${dueId}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      'UPDATE dues SET status = $1 WHERE due_id = $2 RETURNING *',
+      [status, dueId]
+    );
     return result[0];
   } else {
     throw new Error('Invalid status');

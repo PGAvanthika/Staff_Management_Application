@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import DeadlineExtensions from "../Components/DeadlineExtension.js";
 import DueExtensionForm from "../Components/DueExtensionForm.js";
 import TeamLeaderTasks from "../Components/TeamLeaderTasks";
+import TaskHistory from "../Components/TaskHistory";
 import { useAuth } from "../context/AuthContext";
 
 const Tlhome = () => {
@@ -82,6 +83,7 @@ const Tlhome = () => {
       icon: "time-outline",
     },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
+    { label: "TASK HISTORY", key: "TaskHistory", icon: "time-outline" },
   ];
 
   return (
@@ -264,6 +266,8 @@ const Tlhome = () => {
               readOnly={false}
             />
           )}
+
+          {currentPage === "TaskHistory" && <TaskHistory />}
         </div>
       </div>
 

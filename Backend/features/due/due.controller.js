@@ -3,11 +3,22 @@ const sql = require('../../config/db'); // or wherever your db connection is
 
 exports.createDueExtension = async (req, res) => {
   try {
+    console.log('=== CREATING DUE EXTENSION ===');
+    console.log('Request body:', req.body);
+    console.log('User:', req.user);
+    
     const { emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date } = req.body;
+    
+    console.log('Extracted fields:', {
+      emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date
+    });
+    
     if (!emp_id || !tl_id || !project_id || !task_id || !to_manager || !no_of_days || !reason || !due_date) {
+      console.log('Missing fields detected');
       return res.status(400).json({ error: "All fields are required" });
     }
     // Validate IDs
+    console.log('Validating IDs...');
     const [emp, tl, mgr, project, task] = await Promise.all([
       sql.query('SELECT id FROM users WHERE id = $1', [emp_id]),
       sql.query('SELECT id FROM users WHERE id = $1', [tl_id]),
@@ -15,15 +26,31 @@ exports.createDueExtension = async (req, res) => {
       sql.query('SELECT project_id FROM projects WHERE project_id = $1', [project_id]),
       sql.query('SELECT task_id FROM tasks WHERE task_id = $1', [task_id]),
     ]);
+    
+    console.log('Validation results:', {
+      emp: emp.length > 0,
+      tl: tl.length > 0,
+      mgr: mgr.length > 0,
+      project: project.length > 0,
+      task: task.length > 0
+    });
+    
     if (!emp.length) return res.status(400).json({ error: 'Invalid employee ID' });
     if (!tl.length) return res.status(400).json({ error: 'Invalid team leader ID' });
     if (!mgr.length) return res.status(400).json({ error: 'Invalid manager ID' });
     if (!project.length) return res.status(400).json({ error: 'Invalid project ID' });
     if (!task.length) return res.status(400).json({ error: 'Invalid task ID' });
+    
+    console.log('All validations passed, creating due extension...');
     // Do not allow created_at from frontend
     const due = await dueService.createDueExtension({ emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date });
+    console.log('Due extension created:', due);
     res.status(201).json(due);
   } catch (err) {
+    console.error('=== DUE EXTENSION CREATION ERROR ===', err);
+    console.error('Error code:', err.code);
+    console.error('Error message:', err.message);
+    
     if (err.code === '23503') {
       return res.status(400).json({ error: "Invalid reference: One of the IDs does not exist" });
     }
