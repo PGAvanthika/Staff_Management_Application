@@ -115,7 +115,7 @@ const DashboardUI = () => {
     labels: ["Completed", "Remaining"],
     datasets: [
       {
-        data: kpiData ? [kpiData.completed, kpiData.active + kpiData.overdue] : [0, 0],
+        data: kpiData ? [kpiData.totalCompleted, kpiData.activeTasks] : [0, 0],
         backgroundColor: ["#3c658e", "#d6d6d6"],
         borderWidth: 0,
       },
@@ -197,15 +197,15 @@ const DashboardUI = () => {
           <p>Total Tasks</p>
         </div>
         <div className="summary-card">
-          <h2>{kpiData?.overdue || 0}</h2>
+          <h2>{kpiData?.completedOverdue || 0}</h2>
           <p>Tasks Overdue</p>
         </div>
         <div className="summary-card">
-          <h2>{kpiData?.kpi || 0}%</h2>
+          <h2>{kpiData?.kpiScore || 0}%</h2>
           <p>KPI Score</p>
         </div>
         <div className="summary-card">
-          <h2>{kpiData?.active || 0}</h2>
+          <h2>{kpiData?.activeTasks || 0}</h2>
           <p>Active Tasks</p>
         </div>
       </div>
@@ -215,9 +215,9 @@ const DashboardUI = () => {
           <h5>OVERALL PERFORMANCE</h5>
           <Doughnut data={doughnutData} />
           <p className="chart-footer">
-            {kpiData?.kpi >= 80 ? "Excellent" : 
-             kpiData?.kpi >= 60 ? "Good" : 
-             kpiData?.kpi >= 40 ? "Fair" : "Needs Improvement"}
+            {kpiData?.kpiScore >= 80 ? "Excellent" : 
+             kpiData?.kpiScore >= 60 ? "Good" : 
+             kpiData?.kpiScore >= 40 ? "Fair" : "Needs Improvement"}
           </p>
         </div>
 
@@ -240,9 +240,10 @@ const DashboardUI = () => {
               <div className="card-body">
                 <h6 className="card-title">Task Completion Breakdown</h6>
                 <ul className="list-unstyled">
-                  <li>✅ Completed tasks: {kpiData?.completed || 0}</li>
-                  <li>📋 Active tasks: {kpiData?.active || 0}</li>
-                  <li>🚨 Overdue tasks: {kpiData?.overdue || 0}</li>
+                  <li>✅ Completed tasks: {kpiData?.completedOnTime || 0}</li>
+                  <li>📋 Active tasks: {kpiData?.activeTasks || 0}</li>
+                  <li>🚨 Overdue tasks: {kpiData?.completedOverdue || 0}</li>
+                  <li>⏰ Due extension requests: {kpiData?.totalDueExtensions || 0}</li>
                 </ul>
               </div>
             </div>
@@ -252,9 +253,10 @@ const DashboardUI = () => {
               <div className="card-body">
                 <h6 className="card-title">Performance Metrics</h6>
                 <ul className="list-unstyled">
-                  <li>🎯 KPI Score: {kpiData?.kpi || 0}%</li>
+                  <li>🎯 KPI Score: {kpiData?.kpiScore || 0}%</li>
                   <li>📊 Completion Rate: {kpiData?.completionRate || 0}%</li>
-                  <li>📈 Completion Rate: {kpiData?.completionRate || 0}%</li>
+                  <li>📈 On-Time Rate: {kpiData?.onTimeRate || 0}%</li>
+                  <li>⚠️ Due Extension Penalty: -{kpiData?.dueExtensionPenalty || 0}%</li>
                 </ul>
               </div>
             </div>

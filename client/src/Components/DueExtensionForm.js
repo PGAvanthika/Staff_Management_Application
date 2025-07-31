@@ -104,12 +104,19 @@ const DueExtensionForm = ({
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage(
-          `Request ${
-            status === "approved" ? "approved" : "rejected"
-          } successfully!`
-        );
+        setMessage(data.message || `Request ${
+          status === "approved" ? "approved" : "rejected"
+        } successfully!`);
+        
+        // Show success message and refresh data
+        alert(data.message || `Request ${status} successfully!`);
+        
         if (onAction) onAction();
+        
+        // Close the form after a short delay
+        setTimeout(() => {
+          if (onClose) onClose();
+        }, 2000);
       } else {
         setError(data.error || `Failed to ${status}`);
       }
@@ -132,7 +139,8 @@ const DueExtensionForm = ({
     }
     
     // Validate all required fields
-    if (!empId) {
+    const finalEmpId = onlyEditFields ? tlId : empId;
+    if (!finalEmpId) {
       setError("Employee ID is missing");
       return;
     }

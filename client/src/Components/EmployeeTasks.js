@@ -19,12 +19,19 @@ function canRequestDueExtension(task) {
   // Don't allow if there's already a pending due extension
   if (task.has_pending_due_extension) return false;
   
+  // Don't allow if there's an escalated due extension (waiting for manager)
+  if (task.has_escalated_due_extension) return false;
+  
+  // Don't allow if there's a rejected due extension (permanent block)
+  if (task.has_rejected_due_extension) return false;
+  
   // Only allow if deadline is within 1 day or overdue
   const today = new Date();
   const effectiveDeadline = new Date(task.effective_deadline || task.deadline);
   const diff = (effectiveDeadline - today) / (1000 * 60 * 60 * 24);
   
-  return diff <= 1; // Allow if due today, tomorrow, or overdue
+  // Only show button if due today, tomorrow, or overdue
+  return diff <= 1 && diff >= -30; // Allow if due today, tomorrow, or overdue (but not too far in the past)
 }
 
 // Helper to check if deadline is exceeded
@@ -98,16 +105,16 @@ const EmployeeTasks = () => {
     console.log('Correct TL ID:', correctTlId);
     
     const dueData = {
-      ...dueExtensionTask,
-      emp_id: dueExtensionTask.assigned_to,
-      tl_id: correctTlId,
-      project_id: dueExtensionTask.project_id,
-      task_id: dueExtensionTask.task_id,
-      to_manager: dueExtensionTask.assigned_by,
-      no_of_days: '',
-      reason: '',
-      status: 'pending',
-      due_date: dueExtensionTask.deadline,
+          ...dueExtensionTask,
+          emp_id: dueExtensionTask.assigned_to,
+          tl_id: correctTlId,
+          project_id: dueExtensionTask.project_id,
+          task_id: dueExtensionTask.task_id,
+          to_manager: dueExtensionTask.assigned_by,
+          no_of_days: '',
+          reason: '',
+          status: 'pending',
+          due_date: dueExtensionTask.deadline,
     };
     
     console.log('Due data being passed to form:', dueData);
@@ -199,7 +206,15 @@ const EmployeeTasks = () => {
           )}
           
           {hasApprovedDue && (
-            <div className="alert alert-info mt-2">Your due extension request has been <b>approved</b>!</div>
+            <div className="alert alert-success mt-2">Your due extension request has been <b>approved</b>!</div>
+          )}
+          
+          {selectedTask.has_rejected_due_extension && (
+            <div className="alert alert-danger mt-2">Your due extension request has been <b>rejected</b>. No further extensions allowed.</div>
+          )}
+          
+          {selectedTask.has_escalated_due_extension && (
+            <div className="alert alert-info mt-2">Your due extension request has been <b>escalated to manager</b> for approval.</div>
           )}
           
           {/* Complete Task Button - Only show if can be completed */}
@@ -221,7 +236,7 @@ const EmployeeTasks = () => {
           )}
           
           {/* Due Extension Button - Only show if conditions are met */}
-          {canExtend && (
+          {canExtend && !selectedTask.has_escalated_due_extension && (
             <button
               className="btn btn-warning mt-3 me-2"
               onClick={() => {
@@ -285,8 +300,14 @@ const EmployeeTasks = () => {
                 {task.has_pending_due_extension && (
                   <small className="text-warning">Due extension pending</small>
                 )}
+                {task.has_escalated_due_extension && (
+                  <small className="text-info">Due extension escalated to manager</small>
+                )}
                 {task.has_approved_due_extension && (
                   <small className="text-success">Due extension approved</small>
+                )}
+                {task.has_rejected_due_extension && (
+                  <small className="text-danger">Due extension rejected</small>
                 )}
                 {task.is_overdue && task.task_status !== 'completed' && task.task_status !== 'completed_overdue' && (
                   <small className="text-danger">Overdue</small>

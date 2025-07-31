@@ -12,6 +12,7 @@ import DeadlineExtensions from "../Components/DeadlineExtension.js";
 import DueExtensionForm from "../Components/DueExtensionForm.js";
 import TeamLeaderTasks from "../Components/TeamLeaderTasks";
 import TaskHistory from "../Components/TaskHistory";
+import TeamLeaderDueHistory from "../Components/TeamLeaderDueHistory";
 import { useAuth } from "../context/AuthContext";
 
 const Tlhome = () => {
@@ -84,6 +85,7 @@ const Tlhome = () => {
     },
     { label: "YOUR TASKS", key: "ToDo", icon: "list-outline" },
     { label: "TASK HISTORY", key: "TaskHistory", icon: "time-outline" },
+    { label: "DUE EXTENSION HISTORY", key: "TeamLeaderDueHistory", icon: "time-outline" },
   ];
 
   return (
@@ -177,10 +179,10 @@ const Tlhome = () => {
                 due={{
                   ...dueExtensionTask,
                   emp_id: dueExtensionTask.assigned_to,
-                  tl_id: user?.id || dueExtensionTask.assigned_to,
+                  tl_id: user?.id || '',
                   project_id: dueExtensionTask.project_id,
                   task_id: dueExtensionTask.task_id,
-                  to_manager: dueExtensionTask.assigned_by,
+                  to_manager: 'E01', // Send to manager E01 (avanthikapg22@gmail.com)
                   no_of_days: '',
                   reason: '',
                   status: 'pending',
@@ -268,6 +270,8 @@ const Tlhome = () => {
           )}
 
           {currentPage === "TaskHistory" && <TaskHistory />}
+          
+          {currentPage === "TeamLeaderDueHistory" && <TeamLeaderDueHistory />}
         </div>
       </div>
 

@@ -32,10 +32,14 @@ exports.getDueExtensionsForManager = async (managerId) => {
   console.log('=== GETTING DUE EXTENSIONS FOR MANAGER ===', managerId);
   
   const result = await sql.query(
-    `SELECT d.*, t.deadline as current_deadline 
+    `SELECT d.*, t.deadline as current_deadline, t.description as task_description, p.project_name, u1.email as employee_email, u2.email as team_leader_email
      FROM dues d
      JOIN tasks t ON d.task_id = t.task_id
-     WHERE d.to_manager = $1 AND d.status IN ('pending', 'escalated', 'tl_approved')`,
+     JOIN projects p ON d.project_id = p.project_id
+     JOIN users u1 ON d.emp_id = u1.id
+     JOIN users u2 ON d.tl_id = u2.id
+     WHERE d.to_manager = $1 AND d.status IN ('pending', 'escalated', 'tl_approved')
+     ORDER BY d.due_id DESC`,
     [managerId]
   );
   
@@ -69,7 +73,7 @@ exports.updateDueExtensionStatus = async (dueId, status, managerId) => {
   if (!due || due.to_manager !== managerId) {
     throw new Error('Due extension not found or unauthorized');
   }
-  if (due.status !== 'pending') {
+  if (due.status !== 'pending' && due.status !== 'escalated') {
     throw new Error('This due extension has already been processed.');
   }
 
@@ -137,7 +141,25 @@ exports.updateDueExtension = async (id, data) => {
 };
 
 exports.getDueExtensionsForTeamLeader = async (tlId) => {
-  return sql.query("SELECT * FROM dues WHERE tl_id = $1 ORDER BY due_id DESC", [tlId]);
+  const query = `
+    SELECT 
+      d.*,
+      t.description as task_description,
+      t.deadline as task_deadline,
+      p.project_name,
+      u1.email as employee_email,
+      u2.email as manager_email
+    FROM dues d
+    JOIN tasks t ON d.task_id = t.task_id
+    JOIN projects p ON d.project_id = p.project_id
+    JOIN users u1 ON d.emp_id = u1.id
+    JOIN users u2 ON d.to_manager = u2.id
+    WHERE d.tl_id = $1 
+      AND t.assigned_by = $1  -- Only show requests for tasks assigned by this team leader
+      AND d.status IN ('pending', 'escalated')  -- Only show pending and escalated requests
+    ORDER BY d.due_id DESC
+  `;
+  return sql.query(query, [tlId]);
 };
 
 exports.updateDueExtensionStatusByTeamLeader = async (id, status, tlId) => {
@@ -145,7 +167,38 @@ exports.updateDueExtensionStatusByTeamLeader = async (id, status, tlId) => {
   const due = await sql.query("SELECT * FROM dues WHERE due_id = $1 AND tl_id = $2 AND status = 'pending'", [id, tlId]);
   if (!due.length) return null;
 
+  // Team Leaders can only escalate to manager or reject, not approve themselves
+  if (status === 'tl_approved') {
+    // Change to 'escalated' status for manager approval
+    status = 'escalated';
+  }
+
   // Update status
   const result = await sql.query("UPDATE dues SET status = $1 WHERE due_id = $2 RETURNING *", [status, id]);
   return result[0];
+};
+
+// Get due extension history for Team Leader
+exports.getTeamLeaderDueHistory = async (tlId, year, month) => {
+  const query = `
+    SELECT 
+      d.*,
+      t.description as task_description,
+      t.deadline as task_deadline,
+      p.project_name,
+      u1.email as employee_email,
+      u2.email as manager_email
+    FROM dues d
+    JOIN tasks t ON d.task_id = t.task_id
+    JOIN projects p ON d.project_id = p.project_id
+    JOIN users u1 ON d.emp_id = u1.id
+    JOIN users u2 ON d.to_manager = u2.id
+    WHERE d.tl_id = $1 
+      AND d.created_at IS NOT NULL
+      AND EXTRACT(YEAR FROM d.created_at) = $2
+      AND EXTRACT(MONTH FROM d.created_at) = $3
+      AND d.status IN ('approved', 'rejected', 'escalated')
+    ORDER BY d.due_id DESC
+  `;
+  return sql.query(query, [tlId, year, month]);
 }; 

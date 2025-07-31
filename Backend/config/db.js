@@ -3,6 +3,6 @@ require('dotenv').config();
 
 const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD } = process.env;
 
-sql=neon(`postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}`)
+const sql = neon(`postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}`);
 
-module.exports=sql
+module.exports = sql;

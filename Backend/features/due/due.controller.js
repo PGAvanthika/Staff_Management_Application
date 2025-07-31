@@ -41,6 +41,16 @@ exports.createDueExtension = async (req, res) => {
     if (!project.length) return res.status(400).json({ error: 'Invalid project ID' });
     if (!task.length) return res.status(400).json({ error: 'Invalid task ID' });
     
+    // Check if there's already a pending, approved, or escalated due extension for this task
+    const existingDue = await sql.query(
+      'SELECT * FROM dues WHERE task_id = $1 AND status IN ($2, $3, $4)',
+      [task_id, 'pending', 'approved', 'escalated']
+    );
+    
+    if (existingDue.length > 0) {
+      return res.status(400).json({ error: 'A due extension request already exists for this task' });
+    }
+    
     console.log('All validations passed, creating due extension...');
     // Do not allow created_at from frontend
     const due = await dueService.createDueExtension({ emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date });
@@ -119,7 +129,17 @@ exports.updateDueStatus = async (req, res) => {
     if (!result) {
       return res.status(404).json({ error: 'Due extension not found' });
     }
-    res.json(result);
+    
+    // Return success message with details
+    const message = status === 'approved' 
+      ? 'Due extension approved successfully. Task deadline has been extended.'
+      : 'Due extension rejected successfully.';
+    
+    res.json({
+      ...result,
+      message: message,
+      status: status
+    });
   } catch (err) {
     if (err.message === 'Due extension not found or unauthorized' || err.message === 'This due extension has already been processed.') {
       return res.status(400).json({ error: err.message });
@@ -165,7 +185,31 @@ exports.updateDueStatusByTeamLeader = async (req, res) => {
     if (!result) {
       return res.status(404).json({ error: 'Due extension not found' });
     }
-    res.json(result);
+    
+    // If escalated, send a success message
+    if (status === 'tl_approved') {
+      res.json({ ...result, message: 'Due extension escalated to manager for approval' });
+    } else {
+      res.json(result);
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}; 
+
+// Get due extension history for Team Leader
+exports.getTeamLeaderDueHistory = async (req, res) => {
+  try {
+    const tlId = req.user.userId;
+    const year = parseInt(req.query.year, 10);
+    const month = parseInt(req.query.month, 10);
+    
+    if (!year || !month) {
+      return res.status(400).json({ error: 'Year and month are required' });
+    }
+    
+    const history = await dueService.getTeamLeaderDueHistory(tlId, year, month);
+    res.json(history);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -157,9 +157,8 @@ const ManagerHome = () => {
           {currentPage === "taskAllocation" && <TaskAllocation />}
           {currentPage === "ReviewTasks" && <ReviewTasks />}
           {currentPage === "TeamPerformance" && <TeamPerformance />}
-          {currentPage === "DueApproval" && <DueApproval />}
-          {currentPage === "ToDo" && <ToDo />}
           {currentPage === "DueApproval" && <ManagerDueExtensions />}
+          {currentPage === "ToDo" && <ToDo />}
           {currentPage === "TaskHistory" && <TaskHistory />}
         </div>
       </div>

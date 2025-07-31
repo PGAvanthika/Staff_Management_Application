@@ -120,73 +120,6 @@ exports.updateTask = async (task_id, data) => {
   return result[0];
 };
 
-// Update task status to completed with penalty system
-exports.completeTask = async (task_id, employeeId) => {
-  try {
-    console.log('=== COMPLETING TASK ===');
-    console.log('Task ID:', task_id);
-    console.log('Employee ID:', employeeId);
-    
-    // Verify the task belongs to the employee and get current task data
-    const task = await sql.query(
-      `SELECT t.*, 
-              CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline
-       FROM tasks t
-       LEFT JOIN dues d ON t.task_id = d.task_id AND d.status = 'approved'
-       WHERE t.task_id = $1 AND t.assigned_to = $2`,
-      [task_id, employeeId]
-    );
-    
-    console.log('Task query result:', task);
-    
-    if (task.length === 0) {
-      throw new Error('Task not found or unauthorized');
-    }
-    
-    const currentTask = task[0];
-    console.log('Current task:', currentTask);
-    
-    const now = new Date();
-    const effectiveDeadline = new Date(currentTask.effective_deadline);
-    
-    console.log('Now:', now);
-    console.log('Effective deadline:', effectiveDeadline);
-    console.log('Is overdue:', now > effectiveDeadline);
-    
-    // Check if task can be completed
-    let completionStatus = 'completed';
-    let penaltyApplied = false;
-    
-    // Check if task is overdue (completion after deadline)
-    if (now > effectiveDeadline) {
-      completionStatus = 'completed_overdue';
-      penaltyApplied = true;
-    }
-    
-    console.log('Completion status:', completionStatus);
-    console.log('Penalty applied:', penaltyApplied);
-    
-    // Update task status with penalty information
-    const result = await sql.query(
-      'UPDATE tasks SET task_status = $1 WHERE task_id = $2 RETURNING *',
-      [completionStatus, task_id]
-    );
-    
-    console.log('Update result:', result);
-    
-    return {
-      ...result[0],
-      penaltyApplied,
-      completedOnTime: !penaltyApplied
-    };
-  } catch (error) {
-    console.error('=== COMPLETE TASK ERROR ===', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    throw error;
-  }
-};
-
 // Get tasks assigned to a team leader
 exports.getTasksByTeamLeader = async (teamLeaderId) => {
   const query = `
@@ -198,11 +131,37 @@ exports.getTasksByTeamLeader = async (teamLeaderId) => {
       t.project_id,
       p.project_name,
       t.assigned_by,
-      u.email as assigned_by_email
+      t.assigned_to,
+      u.email as assigned_by_email,
+      CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline,
+      CASE WHEN d.status = 'approved' THEN true ELSE false END as has_approved_due_extension,
+      CASE WHEN d.status = 'pending' THEN true ELSE false END as has_pending_due_extension,
+      CASE WHEN d.status = 'rejected' THEN true ELSE false END as has_rejected_due_extension,
+      CASE WHEN d.status = 'escalated' THEN true ELSE false END as has_escalated_due_extension,
+      CASE WHEN d.status IS NOT NULL THEN true ELSE false END as has_any_due_extension,
+      CASE 
+        WHEN t.task_status IN ('completed', 'completed_overdue') THEN false
+        WHEN d.status = 'pending' THEN false  -- Cannot complete if due extension is pending
+        WHEN d.status = 'escalated' THEN false  -- Cannot complete if due extension is escalated to manager
+        WHEN d.status = 'approved' THEN true  -- Can complete if due extension is approved
+        WHEN NOW() <= t.deadline THEN true    -- Can complete if not overdue
+        ELSE false  -- Cannot complete if overdue without approved extension
+      END as can_be_completed,
+      CASE 
+        WHEN d.status = 'approved' THEN NOW() > (t.deadline + INTERVAL '1 day' * d.no_of_days)
+        ELSE NOW() > t.deadline
+      END as is_overdue,
+      (SELECT COUNT(*) FROM dues WHERE task_id = t.task_id AND status IN ('pending', 'approved', 'rejected', 'escalated')) as due_extension_count
     FROM tasks t
     JOIN projects p ON t.project_id = p.project_id
     JOIN users u ON t.assigned_by = u.id
-    WHERE t.assigned_to = $1
+    LEFT JOIN (
+      SELECT DISTINCT ON (task_id) task_id, status, no_of_days
+      FROM dues 
+      WHERE status IN ('approved', 'pending', 'rejected', 'escalated')
+      ORDER BY task_id, due_id DESC
+    ) d ON t.task_id = d.task_id
+    WHERE t.assigned_by = $1 AND t.task_status NOT IN ('completed', 'completed_overdue')
     ORDER BY t.deadline ASC
   `;
 
@@ -214,7 +173,7 @@ exports.getTasksByTeamLeader = async (teamLeaderId) => {
   }
 };
 
-// Get tasks assigned to an employee
+// Get tasks assigned to an employee with due extension info
 exports.getTasksByEmployee = async (employeeId) => {
   const query = `
     SELECT 
@@ -223,135 +182,134 @@ exports.getTasksByEmployee = async (employeeId) => {
       t.deadline,
       t.task_status,
       t.project_id,
-      t.assigned_to,
       p.project_name,
       t.assigned_by,
+      t.assigned_to,
       u.email as assigned_by_email,
-      CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline
+      CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline,
+      CASE WHEN d.status = 'approved' THEN true ELSE false END as has_approved_due_extension,
+      CASE WHEN d.status = 'pending' THEN true ELSE false END as has_pending_due_extension,
+      CASE WHEN d.status = 'rejected' THEN true ELSE false END as has_rejected_due_extension,
+      CASE WHEN d.status = 'escalated' THEN true ELSE false END as has_escalated_due_extension,
+      CASE WHEN d.status IS NOT NULL THEN true ELSE false END as has_any_due_extension,
+      CASE 
+        WHEN t.task_status IN ('completed', 'completed_overdue') THEN false
+        WHEN d.status = 'pending' THEN false  -- Cannot complete if due extension is pending
+        WHEN d.status = 'escalated' THEN false  -- Cannot complete if due extension is escalated to manager
+        WHEN d.status = 'approved' THEN true  -- Can complete if due extension is approved
+        WHEN NOW() <= t.deadline THEN true    -- Can complete if not overdue
+        ELSE false  -- Cannot complete if overdue without approved extension
+      END as can_be_completed,
+      CASE 
+        WHEN d.status = 'approved' THEN NOW() > (t.deadline + INTERVAL '1 day' * d.no_of_days)
+        ELSE NOW() > t.deadline
+      END as is_overdue,
+      (SELECT COUNT(*) FROM dues WHERE task_id = t.task_id AND status IN ('pending', 'approved', 'rejected', 'escalated')) as due_extension_count
     FROM tasks t
     JOIN projects p ON t.project_id = p.project_id
     JOIN users u ON t.assigned_by = u.id
-    LEFT JOIN dues d ON t.task_id = d.task_id AND d.status = 'approved'
-    WHERE t.assigned_to = $1
+    LEFT JOIN (
+      SELECT DISTINCT ON (task_id) task_id, status, no_of_days
+      FROM dues 
+      WHERE status IN ('approved', 'pending', 'rejected', 'escalated')
+      ORDER BY task_id, due_id DESC
+    ) d ON t.task_id = d.task_id
+    WHERE t.assigned_to = $1 AND t.task_status NOT IN ('completed', 'completed_overdue')
     ORDER BY t.deadline ASC
   `;
 
   try {
     const result = await sql.query(query, [employeeId]);
-    // For each task, check due extension status and completion eligibility
-    for (const task of result) {
-      // Check for pending due extension
-      const pendingDue = await sql.query(
-        `SELECT 1 FROM dues WHERE emp_id = $1 AND task_id = $2 AND status = 'pending' LIMIT 1`,
-        [employeeId, task.task_id]
-      );
-      task.has_pending_due_extension = pendingDue.length > 0;
-      
-      // Check for approved due extension
-      const approvedDue = await sql.query(
-        `SELECT 1 FROM dues WHERE emp_id = $1 AND task_id = $2 AND status = 'approved' LIMIT 1`,
-        [employeeId, task.task_id]
-      );
-      task.has_approved_due_extension = approvedDue.length > 0;
-      
-      // Check for any due extension (pending or approved)
-      const anyDue = await sql.query(
-        `SELECT 1 FROM dues WHERE emp_id = $1 AND task_id = $2 LIMIT 1`,
-        [employeeId, task.task_id]
-      );
-      task.has_any_due_extension = anyDue.length > 0;
-      
-      // Check if task can be completed
-      const now = new Date();
-      const effectiveDeadline = new Date(task.effective_deadline);
-      
-      // Task can be completed if:
-      // 1. Not already completed
-      // 2. Not overdue (unless due extension is approved)
-      // 3. Either before deadline OR after deadline with approved extension
-      task.can_be_completed = (
-        task.task_status !== 'completed' && 
-        task.task_status !== 'completed_overdue' &&
-        (
-          now <= effectiveDeadline || 
-          (now > effectiveDeadline && task.has_approved_due_extension)
-        )
-      );
-      
-      // Check if task is overdue
-      task.is_overdue = now > effectiveDeadline && !task.has_approved_due_extension;
-    }
     return result;
   } catch (error) {
+    console.error('=== GET TASKS BY EMPLOYEE ERROR ===', error);
     throw error;
   }
 };
 
-// Calculate KPI for a specific user with penalty system
+// Calculate KPI for a user
 exports.calculateUserKPI = async (userId) => {
   try {
     console.log('=== CALCULATING KPI FOR USER ===', userId);
     
-    // Get all tasks for the user with penalty-aware KPI calculation
-    const query = `
+    // Get task completion data
+    const taskQuery = `
       SELECT 
-        t.task_id,
         t.task_status,
-        t.deadline,
-        CASE 
-          WHEN t.task_status = 'completed' THEN 'completed_on_time'
-          WHEN t.task_status = 'completed_overdue' THEN 'completed_overdue'
-          WHEN t.task_status = 'overdue' THEN 'overdue'
-          WHEN t.task_status IN ('assigned', 'in_progress', 'in-progress') THEN 'active'
-          ELSE 'other'
-        END as completion_status
+        COUNT(*) as count,
+        CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline
       FROM tasks t
+      LEFT JOIN dues d ON t.task_id = d.task_id AND d.status = 'approved'
       WHERE t.assigned_to = $1
+      GROUP BY t.task_status, t.deadline, d.status, d.no_of_days
     `;
     
-    console.log('Executing query with userId:', userId);
-    const tasks = await sql.query(query, [userId]);
-    console.log('Raw tasks data:', tasks);
+    // Get due extension penalty data
+    const dueExtensionQuery = `
+      SELECT 
+        t.task_id,
+        COUNT(d.due_id) as extension_count
+      FROM tasks t
+      LEFT JOIN dues d ON t.task_id = d.task_id AND d.status IN ('pending', 'approved', 'rejected')
+      WHERE t.assigned_to = $1
+      GROUP BY t.task_id
+    `;
     
-    const totalTasks = tasks.length;
-    const completedOnTime = tasks.filter(t => t.completion_status === 'completed_on_time').length;
-    const completedOverdue = tasks.filter(t => t.completion_status === 'completed_overdue').length;
-    const overdue = tasks.filter(t => t.completion_status === 'overdue').length;
-    const active = tasks.filter(t => t.completion_status === 'active').length;
+    const [taskResult, dueExtensionResult] = await Promise.all([
+      sql.query(taskQuery, [userId]),
+      sql.query(dueExtensionQuery, [userId])
+    ]);
     
-    console.log('Task counts:', {
-      totalTasks,
-      completedOnTime,
-      completedOverdue,
-      overdue,
-      active
+    console.log('KPI task query result:', taskResult);
+    console.log('KPI due extension query result:', dueExtensionResult);
+    
+    let totalTasks = 0;
+    let completedOnTime = 0;
+    let completedOverdue = 0;
+    let activeTasks = 0;
+    let totalDueExtensions = 0;
+    
+    taskResult.forEach(row => {
+      const count = parseInt(row.count);
+      totalTasks += count;
+      
+      if (row.task_status === 'completed') {
+        completedOnTime += count;
+      } else if (row.task_status === 'completed_overdue') {
+        completedOverdue += count;
+      } else if (row.task_status === 'assigned') {
+        activeTasks += count;
+      }
     });
     
-    // Calculate KPI with penalty system:
-    // - Completed on time: 100% score
-    // - Completed overdue: 50% score (penalty)
-    // - Overdue: 0% score
+    // Calculate due extension penalty
+    dueExtensionResult.forEach(row => {
+      totalDueExtensions += parseInt(row.extension_count);
+    });
+    
     const totalCompleted = completedOnTime + completedOverdue;
-    const totalCompletedWithPenalty = completedOnTime + (completedOverdue * 0.5); // Penalty: 50% score for overdue completions
     
-    const kpi = totalTasks > 0 ? Math.round((totalCompletedWithPenalty / totalTasks) * 100) : 0;
+    // Apply penalties: 50% for overdue + additional penalty for multiple due extensions
+    const overduePenalty = completedOverdue * 0.5;
+    const dueExtensionPenalty = totalDueExtensions * 0.1; // 10% penalty per due extension request
+    const totalCompletedWithPenalty = completedOnTime + overduePenalty - dueExtensionPenalty;
     
-    // Calculate additional metrics
+    const kpiScore = totalTasks > 0 ? Math.round(Math.max(0, (totalCompletedWithPenalty / totalTasks) * 100)) : 0;
     const completionRate = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
     const onTimeRate = totalCompleted > 0 ? Math.round((completedOnTime / totalCompleted) * 100) : 0;
     
     const result = {
-      kpi,
-      totalTasks,
-      completedOnTime,
-      completedOverdue,
-      overdue,
-      active,
+      kpiScore,
       completionRate,
       onTimeRate,
       totalCompleted,
       totalCompletedWithPenalty,
-      tasks
+      completedOnTime,
+      completedOverdue,
+      activeTasks,
+      totalTasks,
+      totalDueExtensions,
+      dueExtensionPenalty
     };
     
     console.log('Final KPI result:', result);
@@ -464,6 +422,63 @@ exports.getMonthlyProgress = async (userId) => {
     
     return monthlyData;
   } catch (error) {
+    throw error;
+  }
+};
+
+// Complete a task
+exports.completeTask = async (task_id, employeeId) => {
+  try {
+    console.log('=== COMPLETING TASK ===');
+    console.log('Task ID:', task_id);
+    console.log('Employee ID:', employeeId);
+    
+    // First, get the task details to check if it can be completed
+    const taskQuery = `
+      SELECT 
+        t.*,
+        CASE WHEN d.status = 'approved' THEN t.deadline + INTERVAL '1 day' * d.no_of_days ELSE t.deadline END as effective_deadline
+      FROM tasks t
+      LEFT JOIN dues d ON t.task_id = d.task_id AND d.status = 'approved'
+      WHERE t.task_id = $1 AND t.assigned_to = $2
+    `;
+    
+    const taskResult = await sql.query(taskQuery, [task_id, employeeId]);
+    
+    if (taskResult.length === 0) {
+      throw new Error('Task not found or not assigned to this employee');
+    }
+    
+    const task = taskResult[0];
+    console.log('Task details:', task);
+    
+    // Check if task can be completed
+    const now = new Date();
+    const effectiveDeadline = new Date(task.effective_deadline);
+    const isOverdue = now > effectiveDeadline;
+    
+    // Determine completion status
+    const completionStatus = isOverdue ? 'completed_overdue' : 'completed';
+    const penaltyApplied = isOverdue;
+    
+    console.log('Completion status:', completionStatus);
+    console.log('Penalty applied:', penaltyApplied);
+    
+    // Update task status
+    const result = await sql.query(
+      'UPDATE tasks SET task_status = $1 WHERE task_id = $2 RETURNING *',
+      [completionStatus, task_id]
+    );
+    
+    console.log('Task completion result:', result[0]);
+    
+    return {
+      task: result[0],
+      penaltyApplied,
+      completionStatus
+    };
+  } catch (error) {
+    console.error('=== COMPLETE TASK ERROR ===', error);
     throw error;
   }
 };

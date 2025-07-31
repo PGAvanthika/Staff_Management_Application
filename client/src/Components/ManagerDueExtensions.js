@@ -112,10 +112,14 @@ const ManagerDueExtensions = ({
   };
 
   const handleAction = () => {
+    // Refresh both due extensions and history
     fetchDueExtensions();
     fetchHistory();
     handleCloseForm();
     onCloseForm?.(); // also trigger parent close if in form-only
+    
+    // Show success message
+    console.log('Due extension action completed successfully');
   };
 
   const handleTabChange = (event, newValue) => {

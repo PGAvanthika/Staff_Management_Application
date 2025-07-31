@@ -25,7 +25,10 @@ router.put('/:id/status', isLoggedIn, isManager, dueController.updateDueStatus);
 router.put('/:id', isLoggedIn, isManager, dueController.updateDueExtension);
 
 // Team Leader can view and act on due extension requests
-router.get('/teamleader/dues', isLoggedIn, authorizeRoles('Team_Leader'), dueController.getTeamLeaderDueExtensions);
-router.put('/teamleader/dues/:id/status', isLoggedIn, authorizeRoles('Team_Leader'), dueController.updateDueStatusByTeamLeader);
+router.get('/teamleader/dues', isLoggedIn, authorizeRoles('team_leader'), dueController.getTeamLeaderDueExtensions);
+router.put('/teamleader/dues/:id/status', isLoggedIn, authorizeRoles('team_leader'), dueController.updateDueStatusByTeamLeader);
+
+// Team Leader can view due extension history
+router.get('/teamleader/history', isLoggedIn, authorizeRoles('team_leader'), dueController.getTeamLeaderDueHistory);
 
 module.exports = router; 
