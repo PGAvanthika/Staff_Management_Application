@@ -9,7 +9,8 @@ function isOneDayBefore(dateStr) {
 }
 
 // Helper to check if deadline is exceeded
-function isOverdue(dateStr) {
+function isOverdue(dateStr, status) {
+  if (status && status.toLowerCase() === 'completed') return false;
   const now = new Date();
   const due = new Date(dateStr);
   return now > due;
@@ -37,6 +38,30 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const refresh = () => {
+    setLoading(true);
+    fetch("http://localhost:3001/api/tasks/teamleader", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setTasks(data))
+      .finally(() => setLoading(false));
+  };
+
+  const markCompleted = async (task) => {
+    try {
+      const url = `http://localhost:3001/api/tasks/${task.task_id}`;
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ task_status: 'completed' }),
+      });
+      if (!res.ok) throw new Error('Failed to update task');
+      refresh();
+    } catch (e) {
+      alert('Failed to mark task as completed');
+    }
+  };
 
   if (selectedTask) {
     const showExtend = true; // Always allow extension request
@@ -100,8 +125,20 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
                 <div>Task: {task.description}</div>
                 <div>Deadline: {task.deadline}</div>
               </div>
-              <div className="fw-bold text-center">
-                Status: {task.task_status}
+              <div className="d-flex align-items-center gap-3">
+                <div className="fw-bold text-center">
+                  Status: {isOverdue(task.deadline, task.task_status) ? 'overdue' : (task.task_status || 'assigned')}
+                </div>
+                <button
+                  className="btn btn-sm btn-success"
+                  disabled={(task.task_status || '').toLowerCase() === 'completed'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    markCompleted(task);
+                  }}
+                >
+                  Completed
+                </button>
               </div>
             </div>
           ))}

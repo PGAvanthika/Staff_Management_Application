@@ -127,6 +127,29 @@ const EmployeeTasks = () => {
     );
   }
 
+  const isOverdue = (dateStr, status) => {
+    if (status && status.toLowerCase() === 'completed') return false;
+    const due = new Date(dateStr);
+    const now = new Date();
+    return now > due;
+  };
+
+  const markCompleted = async (task) => {
+    try {
+      const url = `http://localhost:3001/api/tasks/${task.task_id}`;
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ task_status: 'completed' }),
+      });
+      if (!res.ok) throw new Error('Failed to update task');
+      fetchTasks();
+    } catch (e) {
+      alert('Failed to mark task as completed');
+    }
+  };
+
   return (
     <div
       className="min-vh-100 w-100 py-4 px-2"
@@ -157,8 +180,20 @@ const EmployeeTasks = () => {
                 <div>Task: {task.description}</div>
                 <div>Deadline: {task.deadline}</div>
               </div>
-              <div className="fw-bold text-center">
-                Status: {task.task_status}
+              <div className="d-flex align-items-center gap-3">
+                <div className="fw-bold text-center">
+                  Status: {isOverdue(task.deadline, task.task_status) ? 'overdue' : (task.task_status || 'assigned')}
+                </div>
+                <button
+                  className="btn btn-sm btn-success"
+                  disabled={(task.task_status || '').toLowerCase() === 'completed'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    markCompleted(task);
+                  }}
+                >
+                  Completed
+                </button>
               </div>
             </div>
           ))}
