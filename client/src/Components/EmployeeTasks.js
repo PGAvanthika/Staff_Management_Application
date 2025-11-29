@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DueExtensionForm from "./DueExtensionForm";
+import "./TasksPage.css";
 
 function isOneDayBefore(dateStr) {
   const today = new Date();
@@ -151,54 +152,89 @@ const EmployeeTasks = () => {
   };
 
   return (
-    <div
-      className="min-vh-100 w-100 py-4 px-2"
-      style={{ backgroundColor: "#7d98a5" }}
-    >
-      <h2 className="text-center fw-bold mb-4" style={{ color: "#1d2b53" }}>
-        YOUR TASKS
-      </h2>
-      {loading ? (
-        <div className="text-center">Loading...</div>
-      ) : error ? (
-        <div className="text-center text-danger">{error}</div>
-      ) : tasks.length === 0 ? (
-        <div className="rounded shadow p-3 mx-auto" style={{ backgroundColor: "#c7e8f3", width: "90%", maxWidth: "900px" }}>
-          <div className="text-center">No tasks assigned to you.</div>
+    <div className="tasks-page">
+      <div className="tasks-page-inner">
+        <div className="tasks-page-header">
+          <h2 className="tasks-page-title">Your Tasks</h2>
+          <p className="tasks-page-subtitle">
+            View all tasks assigned to you, mark them as completed, or request a due extension.
+          </p>
+          <div className="tasks-legend">
+            <span className="tasks-legend-label">Legend:</span>
+            <span className="tasks-legend-item">
+              <span className="tasks-legend-dot" style={{ backgroundColor: "#e5e7eb" }} />
+              assigned
+            </span>
+            <span className="tasks-legend-item">
+              <span className="tasks-legend-dot" style={{ backgroundColor: "#bbf7d0" }} />
+              completed
+            </span>
+            <span className="tasks-legend-item">
+              <span className="tasks-legend-dot" style={{ backgroundColor: "#fecaca" }} />
+              overdue
+            </span>
+          </div>
         </div>
-      ) : (
-        <div className="rounded shadow p-3 mx-auto" style={{ backgroundColor: "#c7e8f3", width: "90%", maxWidth: "900px" }}>
-          {tasks.map((task, idx) => (
-            <div
-              key={task.task_id || idx}
-              className="d-flex justify-content-between align-items-center p-3 mb-3 rounded"
-              style={{ backgroundColor: "#e5f4f9", cursor: "pointer" }}
-              onClick={() => setSelectedTask(task)}
-            >
-              <div>
-                <div className="fw-bold">{task.project_name} ({task.project_id})</div>
-                <div>Task: {task.description}</div>
-                <div>Deadline: {task.deadline}</div>
-              </div>
-              <div className="d-flex align-items-center gap-3">
-                <div className="fw-bold text-center">
-                  Status: {isOverdue(task.deadline, task.task_status) ? 'overdue' : (task.task_status || 'assigned')}
-                </div>
-                <button
-                  className="btn btn-sm btn-success"
-                  disabled={(task.task_status || '').toLowerCase() === 'completed'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    markCompleted(task);
-                  }}
+
+        {loading ? (
+          <div className="text-center text-muted">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-danger">{error}</div>
+        ) : tasks.length === 0 ? (
+          <div className="tasks-empty-card text-center">
+            No tasks assigned to you.
+          </div>
+        ) : (
+          <div className="tasks-card-list">
+            {tasks.map((task, idx) => {
+              const overdue = isOverdue(task.deadline, task.task_status);
+              const isCompleted = (task.task_status || "").toLowerCase() === "completed";
+              const statusLabel = overdue ? "Overdue" : isCompleted ? "Completed" : "Assigned";
+              const statusClass = overdue
+                ? "tasks-status-overdue"
+                : isCompleted
+                ? "tasks-status-completed"
+                : "tasks-status-assigned";
+              return (
+                <div
+                  key={task.task_id || idx}
+                  className="tasks-card mb-3"
+                  onClick={() => setSelectedTask(task)}
+                  style={{ cursor: "pointer" }}
                 >
-                  Completed
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <div className="tasks-card-main">
+                    <div className="tasks-card-project">
+                      {task.project_name} ({task.project_id})
+                    </div>
+                    <div className="tasks-card-desc">Task: {task.description}</div>
+                    <div className="tasks-card-deadline">
+                      Deadline:{" "}
+                      {task.deadline
+                        ? new Date(task.deadline).toLocaleDateString()
+                        : "N/A"}
+                    </div>
+                  </div>
+                  <div className="tasks-card-right">
+                    <span className={`tasks-status-pill ${statusClass}`}>
+                      {statusLabel}
+                    </span>
+                    <button
+                      className="btn btn-sm btn-success"
+                      disabled={isCompleted}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markCompleted(task);
+                      }}
+                    >
+                      Completed
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
