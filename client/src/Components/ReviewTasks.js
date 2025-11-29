@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import "./ReviewTasks.css";
 
 const statusColors = {
-  assigned: "#ffffff",
-  "in-progress": "#87CEFA",
-  completed: "#FFFF99",
-  "submit-successful": "#32CD32",
-  overdue: "#FF6347",
-  unapproved: "#FFA500",
+  assigned: "#e5e7eb",
+  completed: "#bbf7d0",
+  overdue: "#fecaca",
 };
 
 const ReviewTasks = () => {
@@ -85,23 +82,39 @@ const ReviewTasks = () => {
   }, [selectedProject, token]);
 
   const getTaskStatus = (status) => {
-    const statusMap = {
-      assigned: "assigned",
-      "in_progress": "in-progress",
-      "in-progress": "in-progress",
-      completed: "completed",
-      "submit_successful": "submit-successful",
-      "submit-successful": "submit-successful",
-      overdue: "overdue",
-      unapproved: "unapproved",
-    };
-    return statusMap[status] || "assigned";
+    const normalized = (status || "").toLowerCase();
+    if (
+      normalized === "completed" ||
+      normalized === "submit_successful" ||
+      normalized === "submit-successful"
+    ) {
+      return "completed";
+    }
+    // Everything else is treated as "assigned" (or "overdue" based on deadline)
+    return "assigned";
+  };
+
+  const getStatusLabel = (normalizedStatus, deadline) => {
+    if (normalizedStatus === "completed") return "Completed";
+    // Derive overdue based on deadline if not completed
+    if (deadline) {
+      const now = new Date();
+      const due = new Date(deadline);
+      if (!isNaN(due.getTime()) && now > due) {
+        return "Overdue";
+      }
+    }
+
+    return "Assigned";
   };
 
   return (
-    <div className="container-fluid review-container d-flex flex-column flex-md-row vh-100">
-      <div className="sidebar bg-white border-end p-3 d-flex flex-column">
-        <h5 className="mb-3 text-primary">Projects</h5>
+    <div className="container-fluid review-container d-flex flex-column flex-md-row">
+      <div className="review-sidebar bg-white border-end p-3 d-flex flex-column">
+        <h5 className="mb-1 text-primary fw-bold">Projects</h5>
+        <p className="text-muted small mb-3">
+          Select a project to see all related tasks and their current status.
+        </p>
 
         {loadingProjects ? (
           <div className="text-center text-muted">
@@ -127,40 +140,93 @@ const ReviewTasks = () => {
             </div>
           ))
         ) : (
-          <p className="text-muted">No projects available.</p>
+          <p className="text-muted small">No projects available.</p>
         )}
       </div>
 
-      <div className="flex-fill p-3 overflow-auto">
-        <h5 className="text-primary mb-3">
-          {selectedProject ? `Tasks for ${selectedProject.title}` : "Select a project"}
-        </h5>
+      <div className="flex-fill p-3 overflow-auto review-main">
+        <div className="review-header d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div className="review-title-block">
+            <h5 className="text-primary mb-1 fw-bold">
+              {selectedProject ? `Tasks for ${selectedProject.title}` : "Select a project to review tasks"}
+            </h5>
+            {selectedProject && (
+              <p className="text-muted small mb-0">
+                Quickly scan task status: overdue, in progress, completed, and more.
+              </p>
+            )}
+          </div>
+          <div className="review-legend d-flex flex-wrap gap-2 align-items-center">
+            <span className="legend-label small text-muted me-1">Legend:</span>
+            {[
+              { key: "assigned", label: "assigned", color: statusColors.assigned },
+              { key: "completed", label: "completed", color: statusColors.completed },
+              { key: "overdue", label: "overdue", color: statusColors.overdue },
+            ].map((item) => (
+              <span key={item.key} className="legend-item d-inline-flex align-items-center small">
+                <span
+                  className="legend-dot me-1"
+                  style={{ backgroundColor: item.color }}
+                />
+                {item.label}
+              </span>
+            ))}
+          </div>
+        </div>
 
         {loadingTasks ? (
-          <div className="text-center text-muted">
+          <div className="text-center text-muted py-4">
             <div className="spinner-border spinner-border-sm me-2" role="status"></div>
             Loading tasks...
           </div>
         ) : tasksError ? (
           <p className="text-danger">{tasksError}</p>
         ) : tasks.length > 0 ? (
-          <div className="list-group">
-            {tasks.map((task) => (
-              <div
-                key={task.task_id}
-                className="list-group-item mb-2 border rounded"
-                style={{
-                  backgroundColor: statusColors[getTaskStatus(task.task_status)],
-                }}
-              >
-                <h6 className="fw-bold">Task ID: {task.task_id}</h6>
-                <p className="mb-1">{task.description}</p>
-                <small className="text-muted">Deadline: {task.deadline}</small>
-              </div>
-            ))}
+          <div className="row g-3">
+            {tasks.map((task) => {
+              const normalizedStatus = getTaskStatus(task.task_status);
+              const label = getStatusLabel(normalizedStatus, task.deadline);
+              const color =
+                label === "Overdue"
+                  ? statusColors.overdue
+                  : normalizedStatus === "completed"
+                  ? statusColors.completed
+                  : statusColors.assigned;
+              return (
+                <div key={task.task_id} className="col-12 col-md-6 col-xl-4">
+                  <div className="task-card border rounded-3 h-100 d-flex flex-column">
+                    <div
+                      className="task-card-header d-flex justify-content-between align-items-center px-3 py-2"
+                      style={{ borderBottom: "1px solid #e5e7eb" }}
+                    >
+                      <span className="fw-semibold small text-muted">
+                        Task ID: {task.task_id}
+                      </span>
+                      <span
+                        className="status-pill small fw-semibold text-capitalize"
+                        style={{ backgroundColor: color }}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                    <div className="task-card-body px-3 py-2">
+                      <p className="mb-2 task-description">{task.description}</p>
+                      <div className="d-flex justify-content-between align-items-center small text-muted">
+                        <span>Deadline:</span>
+                        <span className="fw-semibold">
+                          {task.deadline
+                            ? new Date(task.deadline).toLocaleDateString()
+                            : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : selectedProject ? (
-          <p className="text-muted">No tasks available for this project.</p>
+          <p className="text-muted small">No tasks available for this project.</p>
         ) : null}
       </div>
     </div>

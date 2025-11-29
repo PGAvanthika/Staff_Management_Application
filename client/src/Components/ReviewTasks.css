@@ -1,25 +1,108 @@
 .review-container {
-    font-family: 'Arial', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #dbeafe, #f9fafb);
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+}
+
+.review-sidebar {
+  min-width: 240px;
+  max-width: 280px;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.review-sidebar .menu-item {
+  border-radius: 0.5rem;
+  margin-bottom: 0.4rem;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.review-sidebar .menu-item.active {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.5);
+}
+
+.review-sidebar .menu-item:hover {
+  background-color: #f3f4f6;
+  transform: translateX(1px);
+}
+
+.review-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-header {
+  align-items: flex-start;
+}
+
+.review-title-block {
+  min-width: 220px;
+  margin-right: 0.5rem;
+}
+
+.review-legend {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+}
+
+.task-card {
+  background-color: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.task-description {
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  color: #111827;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 41, 55, 0.35);
+  display: inline-block;
+}
+
+.legend-item {
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+  .review-container {
+    padding: 1rem 0.5rem;
   }
-  
-  .sidebar {
-    min-width: 220px;
+
+  .review-sidebar {
+    margin-bottom: 1rem;
   }
-  
-  .home-icon {
-    font-size: 1.5rem;
+
+   .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
-  
-  .review-icon {
-    font-size: 3rem;
+
+  .review-legend {
+    width: 100%;
   }
-  
-  .project-id {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-  }
-  
-  .task-status {
-    border: 2px solid #888;
-  }
-  
+}
