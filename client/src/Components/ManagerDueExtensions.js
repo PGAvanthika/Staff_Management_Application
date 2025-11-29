@@ -145,15 +145,56 @@ const ManagerDueExtensions = ({
 
   // ✅ Full view: requests + history + popup form
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom fontWeight={700} color="primary">
-        Due Extensions
-      </Typography>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        py: 3,
+        px: 2,
+        background: "linear-gradient(135deg, #dbeafe, #eff6ff)",
+        boxSizing: "border-box",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 1100,
+          bgcolor: "#f9fafb",
+          borderRadius: 3,
+          boxShadow: 6,
+          p: 3,
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", md: "center" }}
+          spacing={1.5}
+          sx={{ mb: 2 }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="primary" gutterBottom sx={{ mb: 0.5 }}>
+              Due Extension Requests
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Review, approve, or reject deadline extension requests from your team.
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
+              Legend:
+            </Typography>
+            <Chip label="Pending" color="warning" size="small" variant="outlined" />
+            <Chip label="Approved" color="success" size="small" variant="outlined" />
+            <Chip label="Rejected" color="error" size="small" variant="outlined" />
+          </Stack>
+        </Stack>
 
-      <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 3 }}>
-        <Tab label="Requests" />
-        <Tab label="History" />
-      </Tabs>
+        <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 3 }}>
+          <Tab label="Requests" />
+          <Tab label="History" />
+        </Tabs>
 
       {error && tab === 0 && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -313,6 +354,7 @@ const ManagerDueExtensions = ({
           {...buttonConfig}
         />
       )}
+      </Box>
     </Box>
   );
 };

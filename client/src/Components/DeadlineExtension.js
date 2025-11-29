@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import TaskDetailsCard from "./TaskDetails";
 import { useNavigate } from "react-router-dom";
 import DueExtensionForm from "./DueExtensionForm";
+import "./TasksPage.css";
 
 const DeadlineExtensions = ({
   customHeading = "DEADLINE EXTENSIONS",
@@ -44,60 +45,58 @@ const DeadlineExtensions = ({
   };
 
   return (
-    <div
-      className="min-vh-100 w-100 py-4 px-2"
-      style={{ backgroundColor: "#7d98a5" }}
-    >
-      <h2 className="text-center fw-bold mb-4" style={{ color: "#1d2b53" }}>
-        {customHeading}
-      </h2>
-
-      {loading ? (
-        <div className="text-center">Loading...</div>
-      ) : error ? (
-        <div className="text-center text-danger">{error}</div>
-      ) : !selectedTask ? (
-        <div
-          className="rounded shadow p-3 mx-auto"
-          style={{
-            backgroundColor: "#c7e8f3",
-            width: "90%",
-            maxWidth: "900px",
-          }}
-        >
-          {deadlineData.length === 0 ? (
-            <div className="text-center">No deadline extensions found.</div>
-          ) : (
-            deadlineData.map((item, index) => (
-              <div
-                key={item.due_id || index}
-                className="d-flex justify-content-between align-items-center p-3 mb-3 rounded"
-                style={{ backgroundColor: "#e5f4f9" }}
-              >
-                <div className="fw-bold">
-                  {item.project_id || item.project}
-                  <br />
-                  {item.task_id || item.task}
-                </div>
-                <div className="fw-bold text-center">{item.label || item.reason || "-"}</div>
-                <div className="text-end">
-                  <button
-                    className="btn me-2"
-                    style={{
-                      backgroundColor: "#93b6c3",
-                      color: "#000",
-                      fontWeight: "bold",
-                    }}
-                    onClick={() => setSelectedTask(item)}
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+    <div className="tasks-page">
+      <div className="tasks-page-inner">
+        <div className="tasks-page-header">
+          <h2 className="tasks-page-title">{customHeading}</h2>
+          <p className="tasks-page-subtitle">
+            Review and act on deadline extension requests from your team.
+          </p>
         </div>
-      ) : showExtensionForm ? (
+
+        {loading ? (
+          <div className="text-center text-muted">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-danger">{error}</div>
+        ) : !selectedTask ? (
+          deadlineData.length === 0 ? (
+            <div className="tasks-empty-card text-center">
+              No deadline extensions found.
+            </div>
+          ) : (
+            <div className="tasks-card-list">
+              {deadlineData.map((item, index) => (
+                <div
+                  key={item.due_id || index}
+                  className="tasks-card mb-3"
+                >
+                  <div className="tasks-card-main">
+                    <div className="tasks-card-project">
+                      {item.project_id || item.project} – {item.task_id || item.task}
+                    </div>
+                    <div className="tasks-card-desc">
+                      Reason: {item.reason || item.label || "-"}
+                    </div>
+                    <div className="tasks-card-deadline">
+                      Current deadline:{" "}
+                      {item.current_deadline
+                        ? new Date(item.current_deadline).toLocaleDateString()
+                        : "N/A"}
+                    </div>
+                  </div>
+                  <div className="tasks-card-right">
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => setSelectedTask(item)}
+                    >
+                      View details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : showExtensionForm ? (
         <div
           className="d-flex justify-content-center align-items-center w-100"
           style={{ minHeight: "80vh" }}
@@ -158,7 +157,7 @@ const DeadlineExtensions = ({
             </div>
           </div>
         </div>
-      ) : (
+        ) : (
         <div className="w-100 d-flex flex-column align-items-center">
           <DueExtensionForm
             due={selectedTask}
@@ -172,7 +171,8 @@ const DeadlineExtensions = ({
             Back
           </button>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
