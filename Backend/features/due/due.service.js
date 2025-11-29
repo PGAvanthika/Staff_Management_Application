@@ -1,12 +1,14 @@
 const sql = require('../../config/db');
 
+// Create a due extension request
 exports.createDueExtension = async (data) => {
   const { emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date } = data;
-  const result = await sql.query(
-    `INSERT INTO dues (emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-    [emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date]
-  );
+
+  const result = await sql`
+    INSERT INTO dues (emp_id, tl_id, project_id, task_id, to_manager, no_of_days, reason, due_date)
+    VALUES (${emp_id}, ${tl_id}, ${project_id}, ${task_id}, ${to_manager}, ${no_of_days}, ${reason}, ${due_date})
+    RETURNING *
+  `;
   return result[0];
 };
 
@@ -19,12 +21,14 @@ exports.getDueExtensionById = async (id) => {
   return result[0];
 };
 
-// Get all due extensions for a specific manager
+// Get all due extensions for a specific manager (assigner)
 exports.getDueExtensionsForManager = async (managerId) => {
-  return sql.query(
-    "SELECT * FROM dues WHERE to_manager = $1 AND status IN ('pending', 'escalated', 'tl_approved')",
-    [managerId]
-  );
+  return await sql`
+    SELECT * FROM dues 
+    WHERE to_manager = ${managerId} 
+      AND status IN ('pending', 'escalated')
+    ORDER BY due_id DESC
+  `;
 };
 
 // Get all due extensions for a specific manager for a given month
@@ -53,16 +57,16 @@ exports.updateDueExtensionStatus = async (dueId, status, managerId) => {
   if (!due || due.to_manager !== managerId) {
     throw new Error('Due extension not found or unauthorized');
   }
-  if (due.status !== 'pending') {
+  if (due.status !== 'pending' && due.status !== 'escalated') {
     throw new Error('This due extension has already been processed.');
   }
 
   if (status === 'approved') {
-    // Calculate new deadline by adding days to current deadline
+    // Manager approval: update due status and extend task deadline
     const result = await sql`
       WITH updated_due AS (
         UPDATE dues 
-        SET status = ${status}
+        SET status = 'approved'
         WHERE due_id = ${dueId}
         RETURNING *
       )
@@ -80,7 +84,7 @@ exports.updateDueExtensionStatus = async (dueId, status, managerId) => {
   } else if (status === 'rejected') {
     const result = await sql`
       UPDATE dues 
-      SET status = ${status}
+      SET status = 'rejected'
       WHERE due_id = ${dueId}
       RETURNING *
     `;
@@ -122,15 +126,63 @@ exports.updateDueExtension = async (id, data) => {
 };
 
 exports.getDueExtensionsForTeamLeader = async (tlId) => {
-  return sql.query("SELECT * FROM dues WHERE tl_id = $1 ORDER BY due_id DESC", [tlId]);
+  return await sql`
+    SELECT * FROM dues 
+    WHERE tl_id = ${tlId}
+    ORDER BY due_id DESC
+  `;
 };
 
 exports.updateDueExtensionStatusByTeamLeader = async (id, status, tlId) => {
-  // Only allow TL to update if the due is assigned to them and is pending
-  const due = await sql.query("SELECT * FROM dues WHERE due_id = $1 AND tl_id = $2 AND status = 'pending'", [id, tlId]);
-  if (!due.length) return null;
+  // Only allow TL to update if the due is assigned to them and is pending/escalated
+  const [due] = await sql`
+    SELECT * FROM dues 
+    WHERE due_id = ${id} AND tl_id = ${tlId} AND status = 'pending'
+  `;
+  if (!due) return null;
 
-  // Update status
-  const result = await sql.query("UPDATE dues SET status = $1 WHERE due_id = $2 RETURNING *", [status, id]);
-  return result[0];
+  if (status === 'escalated') {
+    // Escalate to manager without changing deadline
+    const [updated] = await sql`
+      UPDATE dues 
+      SET status = 'escalated'
+      WHERE due_id = ${id}
+      RETURNING *
+    `;
+    return updated;
+  }
+
+  if (status === 'tl_approved') {
+    // TL is the assigner: finalize approval and extend deadline
+    const result = await sql`
+      WITH updated_due AS (
+        UPDATE dues 
+        SET status = 'approved'
+        WHERE due_id = ${id}
+        RETURNING *
+      )
+      UPDATE tasks t
+      SET deadline = (
+        SELECT deadline + (no_of_days || ' days')::interval
+        FROM updated_due
+        WHERE due_id = ${id}
+      )
+      FROM updated_due d
+      WHERE t.task_id = d.task_id
+      RETURNING t.*, d.*
+    `;
+    return result[0];
+  }
+
+  if (status === 'tl_rejected') {
+    const [updated] = await sql`
+      UPDATE dues 
+      SET status = 'rejected'
+      WHERE due_id = ${id}
+      RETURNING *
+    `;
+    return updated;
+  }
+
+  throw new Error('Invalid status');
 }; 
