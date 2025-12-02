@@ -73,7 +73,7 @@ const DueExtensionForm = ({
 
   useEffect(() => {
     // Fetch all team leaders for dropdown
-    axios.get("http://localhost:3001/api/users/all", { withCredentials: true })
+    axios.get("http://13.49.158.152:3001/api/users/all", { withCredentials: true })
       .then(res => {
         const tls = res.data.filter(u => u.role === "team_leader");
         console.log('Fetched team leaders:', tls); // Debug log
@@ -90,10 +90,10 @@ const DueExtensionForm = ({
       let endpoint = "";
       let statusPayload = status;
       if (user?.role === "team_leader") {
-        endpoint = `http://localhost:3001/api/dues/teamleader/dues/${due.due_id}/status`;
+        endpoint = `http://13.49.158.152:3001/api/dues/teamleader/dues/${due.due_id}/status`;
         statusPayload = status === "approved" ? "tl_approved" : (status === "rejected" ? "tl_rejected" : status);
       } else {
-        endpoint = `http://localhost:3001/api/dues/${due.due_id}/status`;
+        endpoint = `http://13.49.158.152:3001/api/dues/${due.due_id}/status`;
         statusPayload = status;
       }
       const res = await fetch(endpoint, {
@@ -142,7 +142,7 @@ const DueExtensionForm = ({
       due_date: dueDateStr,
     };
     try {
-      const res = await fetch('http://localhost:3001/api/dues', {
+      const res = await fetch('http://13.49.158.152:3001/api/dues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -187,7 +187,7 @@ const DueExtensionForm = ({
       scheduled_time: scheduledTime,
     };
     try {
-      const res = await fetch('http://localhost:3001/api/dues/schedule', {
+      const res = await fetch('http://13.49.158.152:3001/api/dues/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

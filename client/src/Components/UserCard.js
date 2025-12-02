@@ -19,7 +19,7 @@ const UserCard = ({ user, onUserDeleted }) => {
 
   const confirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/api/users/${user.id}`, {
+      await axios.delete(`http://13.49.158.152:3001/api/users/${user.id}`, {
         withCredentials: true, // Send cookies (JWT token) along with the request
       });
       setShowConfirm(false);

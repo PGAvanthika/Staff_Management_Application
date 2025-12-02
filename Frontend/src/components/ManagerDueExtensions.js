@@ -22,7 +22,7 @@ const ManagerDueExtensions = () => {
 
   const fetchDueExtensions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/dues/manager/dues', {
+      const response = await fetch('http://13.49.158.152:3001/api/dues/manager/dues', {
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to fetch');

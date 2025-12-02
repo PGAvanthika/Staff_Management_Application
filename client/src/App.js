@@ -39,7 +39,7 @@ function AuthRedirector() {
   useEffect(() => {
     // Only run on the login page
     if (location.pathname === "/") {
-      fetch("http://localhost:3001/api/auth/validate", {
+      fetch("http://13.49.158.152:3001/api/auth/validate", {
         credentials: "include",
       })
         .then((res) => res.json())

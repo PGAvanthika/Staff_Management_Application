@@ -18,7 +18,7 @@ const ManagerHome = () => {
 
   // Role-based access control
   useEffect(() => {
-    axios.get("http://localhost:3001/api/auth/validate", { withCredentials: true })
+    axios.get("http://13.49.158.152:3001/api/auth/validate", { withCredentials: true })
       .then(res => {
         if (!res.data.user || res.data.user.role !== "Manager") {
           alert("Access denied. Please log in as Manager.");
@@ -33,7 +33,7 @@ const ManagerHome = () => {
 
   const handleLogOut = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/logout', {
+      const response = await fetch('http://13.49.158.152:3001/api/auth/logout', {
         method: 'POST',
         credentials: 'include', 
       });

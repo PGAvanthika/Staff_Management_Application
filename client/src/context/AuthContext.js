@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/validate', {
+      const response = await fetch('http://13.49.158.152:3001/api/auth/validate', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/logout', {
+      const response = await fetch('http://13.49.158.152:3001/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {

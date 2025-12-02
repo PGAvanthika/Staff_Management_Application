@@ -19,7 +19,7 @@ const DeadlineExtensions = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/dues/teamleader/dues", { credentials: "include" })
+    fetch("http://13.49.158.152:3001/api/dues/teamleader/dues", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch deadline extensions");
         return res.json();

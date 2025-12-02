@@ -26,7 +26,7 @@ function TaskAllocation() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/users/all", {
+        const response = await axios.get("http://13.49.158.152:3001/api/users/all", {
           withCredentials: true
         });
         // Filter users to only include team_leader and employee roles
@@ -45,7 +45,7 @@ function TaskAllocation() {
   const handleProjectSubmit = async () => {
     try {
       await axios.post(
-        "http://localhost:3001/api/projects",
+        "http://13.49.158.152:3001/api/projects",
         {
           project_id: projectId,
           project_name: projectName,
@@ -72,7 +72,7 @@ function TaskAllocation() {
   const checkProjectExists = async (projectId) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/projects/${projectId}`,
+        `http://13.49.158.152:3001/api/projects/${projectId}`,
         { withCredentials: true }
       );
       return response.data.exists;
@@ -119,7 +119,7 @@ function TaskAllocation() {
 
       // If project exists, create the task
       await axios.post(
-        "http://localhost:3001/api/tasks",
+        "http://13.49.158.152:3001/api/tasks",
         {
           task_id: formData.task_id,
           project_id: formData.project_id,

@@ -25,7 +25,7 @@ const Tlhome = () => {
   // Role-based access control
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/auth/validate", { withCredentials: true })
+      .get("http://13.49.158.152:3001/api/auth/validate", { withCredentials: true })
       .then((res) => {
         if (!res.data.user || res.data.user.role !== "team_leader") {
           alert("Access denied. Please log in with a Team Leader account.");
@@ -40,7 +40,7 @@ const Tlhome = () => {
 
   const handleLogOut = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/auth/logout", {
+      const response = await fetch("http://13.49.158.152:3001/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });

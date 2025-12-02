@@ -8,7 +8,7 @@ const UserList = () => {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:3001/api/user/all")
+      .get("http://13.49.158.152:3001/api/user/all")
       .then((res) => setUsers(res.data))
       .catch((err) => console.error("Error fetching users:", err));
   };

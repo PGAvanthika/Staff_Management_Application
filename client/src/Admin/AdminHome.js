@@ -15,7 +15,7 @@ const AdminHome = () => {
 
   // Role-based access control
   useEffect(() => {
-    axios.get("http://localhost:3001/api/auth/validate", { withCredentials: true })
+    axios.get("http://13.49.158.152:3001/api/auth/validate", { withCredentials: true })
       .then(res => {
         if (!res.data.user || res.data.user.role !== "Admin") {
           alert("Access denied. Please log in as Admin.");
@@ -31,7 +31,7 @@ const AdminHome = () => {
   // Fetch users from the backend
   const fetchUsers = async (role = "") => {
     try {
-      const response = await axios.get("http://localhost:3001/api/users/all", {
+      const response = await axios.get("http://13.49.158.152:3001/api/users/all", {
         params: { role: role || undefined },
         withCredentials: true,
       });
@@ -107,7 +107,7 @@ const AdminHome = () => {
   // Handle user logout
   const handleLogOut = async () => {
     try {
-      await fetch("http://localhost:3001/api/auth/logout", {
+      await fetch("http://13.49.158.152:3001/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
