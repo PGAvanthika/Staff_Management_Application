@@ -22,14 +22,22 @@ exports.loginUser = async (req, res) => {
     );
 
     // Set cookie with proper domain and path
-    res.cookie("access_token", token, {
+    // In production, omit domain to use current domain (nginx proxy makes it same-origin)
+    // In development, use localhost
+    const cookieOptions = {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
-      sameSite: 'lax',
+      secure: false, // Set to true when using HTTPS
+      sameSite: 'lax', // Works for same-origin requests (nginx proxy)
       path: '/',
-      domain: 'localhost',
       maxAge: 3600000 // 1 hour
-    });
+    };
+    
+    // Only set domain in development
+    if (process.env.NODE_ENV !== 'production') {
+      cookieOptions.domain = 'localhost';
+    }
+    
+    res.cookie("access_token", token, cookieOptions);
 
     // Log successful login
     await authService.logLoginAttempt(user.id, "login", "success");
@@ -62,13 +70,19 @@ exports.logoutUser = async (req, res) => {
   }
 
   // Clear cookie with same settings
-  res.clearCookie("access_token", {
+  const cookieOptions = {
     httpOnly: true,
-    secure: false,
+    secure: false, // Set to true when using HTTPS
     sameSite: 'lax',
-    path: '/',
-    domain: 'localhost'
-  });
+    path: '/'
+  };
+  
+  // Only set domain in development
+  if (process.env.NODE_ENV !== 'production') {
+    cookieOptions.domain = 'localhost';
+  }
+  
+  res.clearCookie("access_token", cookieOptions);
 
   return res.status(200).json({ message: "Logged out successfully" });
 };
