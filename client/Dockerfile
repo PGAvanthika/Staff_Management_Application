@@ -12,11 +12,15 @@ COPY package*.json ./
 RUN npm cache clean --force && \
     npm install --legacy-peer-deps
 
+# Ensure react-scripts is installed (explicit install if needed)
+RUN npm list react-scripts || npm install react-scripts@5.0.1 --legacy-peer-deps --save
+
 # Copy application files
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application using npx to ensure we use the local binary
+# npx will automatically find react-scripts in node_modules/.bin
+RUN npx --yes react-scripts build
 
 # Production stage
 FROM nginx:alpine
