@@ -1,23 +1,9 @@
 const jwt = require("jsonwebtoken");
 
-function parseCookies(cookieHeader) {
-  if (!cookieHeader) return {};
-  
-  const cookies = {};
-  cookieHeader.split(';').forEach(cookie => {
-    const [name, value] = cookie.trim().split('=');
-    cookies[name] = value;
-  });
-  return cookies;
-}
-
 function isLoggedIn(req, res, next) {
   try {
-    // Parse cookies from header
-    const cookies = parseCookies(req.headers.cookie);
-    
-    // Get token from cookies or Authorization header
-    const token = cookies.access_token || 
+    // Get token from cookies (parsed by cookie-parser) or Authorization header
+    const token = req.cookies?.access_token || 
                  (req.headers.authorization && req.headers.authorization.split(" ")[1]);
 
     if (!token) {

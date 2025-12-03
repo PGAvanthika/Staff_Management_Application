@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { addStatusColumn } = require('./features/due/due.migration');
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser()); // Parse cookies from request
 
 // Run migrations
 addStatusColumn().catch(() => {});
