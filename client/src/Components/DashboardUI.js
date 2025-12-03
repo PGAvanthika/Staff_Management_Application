@@ -42,9 +42,9 @@ const DashboardUI = () => {
 
     let url = "";
     if (user.role === "team_leader") {
-      url = "http://13.49.158.152:3001/api/tasks/teamleader";
+      url = "/api/tasks/teamleader";
     } else if (user.role === "employee") {
-      url = "http://13.49.158.152:3001/api/tasks/employee";
+      url = "/api/tasks/employee";
     } else {
       return; // keep static charts for other roles
     }

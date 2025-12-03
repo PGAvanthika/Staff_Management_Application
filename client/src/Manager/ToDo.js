@@ -48,7 +48,7 @@ function ToDo() {
 
   const fetchLists = async () => {
     try {
-      const res = await axios.get("http://13.49.158.152:3001/api/lists", { withCredentials: true });
+      const res = await axios.get("/api/lists", { withCredentials: true });
       setUserLists(res.data);
     } catch (err) {
       setUserLists([]);
@@ -57,7 +57,7 @@ function ToDo() {
 
   const fetchNotes = async () => {
     try {
-      const res = await axios.get("http://13.49.158.152:3001/api/notes", { withCredentials: true });
+      const res = await axios.get("/api/notes", { withCredentials: true });
       // Normalize due_date to yyyy-mm-dd for all notes
       const normalizedNotes = res.data.map(note => {
         let due_date = note.due_date;
@@ -88,7 +88,7 @@ function ToDo() {
   // Add, edit, delete list
   const handleAddList = async () => {
     if (newList.name.trim()) {
-      await axios.post("http://13.49.158.152:3001/api/lists", newList, { withCredentials: true });
+      await axios.post("/api/lists", newList, { withCredentials: true });
       setNewList({ name: "", color: "secondary" });
       setShowAddListModal(false);
       fetchLists();
@@ -103,7 +103,7 @@ function ToDo() {
 
   const handleUpdateList = async () => {
     if (editingList && editList.name.trim()) {
-      await axios.put(`http://13.49.158.152:3001/api/lists/${editingList.id}`, editList, { withCredentials: true });
+      await axios.put(`/api/lists/${editingList.id}`, editList, { withCredentials: true });
       setEditingList(null);
       setEditList({ name: "", color: "secondary" });
       setShowEditListModal(false);
@@ -112,7 +112,7 @@ function ToDo() {
   };
 
   const handleDeleteList = async (id) => {
-    await axios.delete(`http://13.49.158.152:3001/api/lists/${id}`, { withCredentials: true });
+    await axios.delete(`/api/lists/${id}`, { withCredentials: true });
     fetchLists();
   };
 
@@ -141,7 +141,7 @@ function ToDo() {
         user_id: user?.id,
       };
       try {
-        const response = await axios.post("http://13.49.158.152:3001/api/notes", payload, { withCredentials: true });
+        const response = await axios.post("/api/notes", payload, { withCredentials: true });
         setNewNote({ title: "", content: "", list_id: "", due_date: "", due_time: "09:00", duration_minutes: 30, completed: false });
         setShowAddModal(false);
         fetchNotes();
@@ -189,7 +189,7 @@ function ToDo() {
           : newNote.content.split('\n').map(line => line.trim()).filter(Boolean),
         user_id: user?.id || editingNote.user_id, // ensure user_id is present
       };
-      await axios.put(`http://13.49.158.152:3001/api/notes/${editingNote.id}`, payload, { withCredentials: true });
+      await axios.put(`/api/notes/${editingNote.id}`, payload, { withCredentials: true });
       setEditingNote(null);
       setNewNote({ title: "", content: "", list_id: "", due_date: "", due_time: "09:00", duration_minutes: 30, completed: false });
       setShowAddModal(false);
@@ -198,7 +198,7 @@ function ToDo() {
   };
 
   const handleDeleteNote = async (id) => {
-    await axios.delete(`http://13.49.158.152:3001/api/notes/${id}`, { withCredentials: true });
+    await axios.delete(`/api/notes/${id}`, { withCredentials: true });
     fetchNotes();
   };
 

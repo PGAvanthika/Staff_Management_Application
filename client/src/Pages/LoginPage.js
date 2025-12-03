@@ -33,7 +33,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://13.49.158.152:3001/api/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

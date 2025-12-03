@@ -24,7 +24,7 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
-    fetch("http://13.49.158.152:3001/api/tasks/teamleader", { credentials: "include" })
+    fetch("/api/tasks/teamleader", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch tasks");
         return res.json();
@@ -42,7 +42,7 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
 
   const refresh = () => {
     setLoading(true);
-    fetch("http://13.49.158.152:3001/api/tasks/teamleader", { credentials: "include" })
+    fetch("/api/tasks/teamleader", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setTasks(data))
       .finally(() => setLoading(false));
@@ -50,7 +50,7 @@ const TeamLeaderTasks = ({ onRequestDueExtension }) => {
 
   const markCompleted = async (task) => {
     try {
-      const url = `http://13.49.158.152:3001/api/tasks/${task.task_id}`;
+      const url = `/api/tasks/${task.task_id}`;
       const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

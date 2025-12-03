@@ -22,7 +22,7 @@ const UserForm = () => {
   useEffect(() => {
     const validateUser = async () => {
       try {
-        const res = await axios.get("http://13.49.158.152:3001/api/auth/validate", {
+        const res = await axios.get("/api/auth/validate", {
           withCredentials: true,
         });
         if (res.status === 200) {
@@ -60,7 +60,7 @@ const UserForm = () => {
 
   const fetchUserById = async () => {
     try {
-      const res = await axios.get(`http://13.49.158.152:3001/api/users/${id}`, {
+      const res = await axios.get(`/api/users/${id}`, {
         withCredentials: true,
       });
       const user = res.data;
@@ -254,8 +254,8 @@ const UserForm = () => {
 
     try {
       const url = id
-        ? `http://13.49.158.152:3001/api/users/update/${id}`
-        : `http://13.49.158.152:3001/api/users/save`;
+        ? `/api/users/update/${id}`
+        : `/api/users/save`;
 
       const method = id ? axios.put : axios.post;
 

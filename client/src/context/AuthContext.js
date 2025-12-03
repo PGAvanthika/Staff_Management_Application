@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://13.49.158.152:3001/api/auth/validate', {
+      const response = await fetch('/api/auth/validate', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
@@ -24,10 +24,16 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+      } else if (response.status === 401) {
+        // 401 is expected when user is not logged in - handle silently
+        setUser(null);
       } else {
+        // Other errors - still set user to null but don't log
         setUser(null);
       }
     } catch (error) {
+      // Network errors, connection timeouts, or other issues - handle silently
+      // Connection timeouts are expected if backend is not accessible
       setUser(null);
     } finally {
       setLoading(false);
@@ -40,7 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await fetch('http://13.49.158.152:3001/api/auth/logout', {
+      const response = await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {

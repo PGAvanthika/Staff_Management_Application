@@ -39,12 +39,23 @@ function AuthRedirector() {
   useEffect(() => {
     // Only run on the login page
     if (location.pathname === "/") {
-      fetch("http://13.49.158.152:3001/api/auth/validate", {
+      fetch("/api/auth/validate", {
         credentials: "include",
       })
-        .then((res) => res.json())
+        .then((res) => {
+          // Only parse JSON if response is ok
+          if (res.ok) {
+            return res.json();
+          } else if (res.status === 401) {
+            // 401 is expected when not logged in - return null
+            return null;
+          } else {
+            // Other errors - return null
+            return null;
+          }
+        })
         .then((data) => {
-          if (data.user && data.user.role) {
+          if (data && data.user && data.user.role) {
             // Redirect based on role
             switch (data.user.role) {
               case "Admin":
@@ -63,6 +74,10 @@ function AuthRedirector() {
                 break;
             }
           }
+        })
+        .catch((error) => {
+          // Silently handle errors (network errors, timeouts, etc.) - user is just not logged in
+          // Connection timeouts are expected if backend is not accessible
         });
     }
   }, [location, navigate]);

@@ -37,7 +37,7 @@ const EmployeeTasks = () => {
 
   const fetchTasks = () => {
     setLoading(true);
-    fetch("http://13.49.158.152:3001/api/tasks/employee", { credentials: "include" })
+    fetch("/api/tasks/employee", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch tasks");
         return res.json();
@@ -137,7 +137,7 @@ const EmployeeTasks = () => {
 
   const markCompleted = async (task) => {
     try {
-      const url = `http://13.49.158.152:3001/api/tasks/${task.task_id}`;
+      const url = `/api/tasks/${task.task_id}`;
       const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

@@ -5,12 +5,17 @@ const { addStatusColumn } = require('./features/due/due.migration');
 const app = express();
 
 // CORS configuration
-app.use(cors({
-  origin: 'http://localhost:3000', // Frontend URL
+// In production, allow requests from any origin (nginx will handle routing)
+// In development, allow localhost:3000
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // Allow all origins in production (nginx handles security)
+    : 'http://localhost:3000',
   credentials: true, // Allow credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json());
@@ -44,7 +49,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 3001;
+// Listen on 0.0.0.0 to accept connections from Docker network
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
